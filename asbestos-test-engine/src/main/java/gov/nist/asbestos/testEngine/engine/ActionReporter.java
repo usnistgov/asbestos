@@ -9,11 +9,14 @@ import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
-import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class ActionReporter implements TestDef {
     private static Logger log = Logger.getLogger(ActionReporter.class.getName());
@@ -117,7 +120,7 @@ class ActionReporter implements TestDef {
                 }
             }
             } catch (Exception ex) {
-               log.severe("ActionReporter report Exception: " + ex.toString());
+                log.log(Level.SEVERE, "ActionReporter report Exception: " + ex.toString() + ". Check server log for details.", ex);
             }
         }
 

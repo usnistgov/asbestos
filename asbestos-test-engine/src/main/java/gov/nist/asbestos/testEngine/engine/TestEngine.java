@@ -177,7 +177,7 @@ public class TestEngine  implements TestDef {
                 throw sdex;
         }
         catch (Throwable t) {
-            reportTerminalFailure(t);
+            addTerminalFailureToTestReport("TestEngine runTest Error: " + t);
         }
         //returnTestReport();
 
@@ -209,7 +209,7 @@ public class TestEngine  implements TestDef {
             fillInSkips();
             doLintTestReport();
         } catch (Throwable t) {
-            reportTerminalFailure(t);
+            addTerminalFailureToTestReport("TestEngine runEval Error: " + t);
         }
         //returnTestReport();
 
@@ -256,23 +256,17 @@ public class TestEngine  implements TestDef {
 
     public TestReport returnExceptionAsTestReport(Throwable t) {
         testReport = new TestReport();
-        reportTerminalFailure(t);
+        addTerminalFailureToTestReport(t.toString());
+        logTerminalFailure(t);
         logTestReport();
         return testReport;
     }
 
-    private void reportTerminalFailure(Throwable t) {
-        String msg = t.getClass().getSimpleName() + ": " + t.getMessage();
-        if (t.getMessage() == null || t.getMessage().endsWith("Exception")) {
-            msg += " - Check the server log for a stack trace.";
-            log.log(Level.SEVERE, "reportTerminalFailure", t);
-        } else {
-            log.severe(msg);
-        }
-        reportTerminalFailure(msg);
+    private void logTerminalFailure(Throwable t) {
+        log.log(Level.SEVERE, "logTerminalFailure", t);
     }
 
-    private void reportTerminalFailure(String msg) {
+    private void addTerminalFailureToTestReport(String msg) {
         getTestReport().setStatus(TestReport.TestReportStatus.ENTEREDINERROR);
         getTestReport().setResult(TestReport.TestReportResult.FAIL);
 
@@ -383,11 +377,11 @@ public class TestEngine  implements TestDef {
         List<TestScript.SetupActionComponent> scriptSetups = testScript.getSetup().getAction();
         List<TestReport.SetupActionComponent> reportSetups = testReport.getSetup().getAction();
         if (scriptSetups.size() != reportSetups.size()) {
-            String msg = "TestEngine internal Error: Script Setup had " +
+            String msg = "TestEngine doLintTestReport script or report size Error: Script Setup had " +
                     scriptSetups.size() +
                     " elements but Report had " +
                     reportSetups.size();
-            reportTerminalFailure(msg);
+            addTerminalFailureToTestReport(msg);
             log.severe(msg);
         }
 
@@ -399,11 +393,11 @@ public class TestEngine  implements TestDef {
             else
                 reports = new ArrayList<>();
             if (tests.size() != reports.size()) {
-                String msg = "TestEngine internal Error: Script Test " + i + " had " +
+                String msg = "TestEngine doLintTestReport tests or reports size Error: Script Test " + i + " had " +
                         tests.size() +
                         " elements but Report had " +
                         reports.size();
-                reportTerminalFailure(msg);
+                addTerminalFailureToTestReport(msg);
                 log.severe(msg);
             }
         }
@@ -416,7 +410,7 @@ public class TestEngine  implements TestDef {
                     script.size() +
                     " elements but Report had " +
                     report.size();
-            reportTerminalFailure(msg);
+            addTerminalFailureToTestReport(msg);
             log.severe(msg);
         }
     }
@@ -600,7 +594,7 @@ public class TestEngine  implements TestDef {
                     }
                 }
             } catch (Throwable t) {
-                reportTerminalFailure(t);
+                addTerminalFailureToTestReport("TestEngine doLoadFixtures Error: " + t);
             }
 
         }
@@ -755,9 +749,9 @@ public class TestEngine  implements TestDef {
                 runner.setTestEngine(this);
                 runner.run(operation, report, isFollowedByAssert);
             } catch (Throwable t) {
-                String error = String.format("TestEngine#doOperation: %s", t.toString());
+                String error = String.format("TestEngine#doOperation: %s. Check server log for details.", t.toString());
                 log.log(Level.SEVERE, error, t);
-                report.setMessage(error.concat(". Check server log for details."));
+                report.setMessage(error);
                 report.setResult(TestReport.TestReportActionResult.ERROR);
             }
             propagateStatus(testReport);
@@ -804,9 +798,13 @@ public class TestEngine  implements TestDef {
              */
             report.setMessage(nabEx.getMessage());
             report.setResult(TestReport.TestReportActionResult.ERROR);
-            reportTerminalFailure(nabEx.toString());
+            addTerminalFailureToTestReport("TestEngine NotABundleException: " + nabEx.toString());
         } catch (Throwable t) {
-            reportTerminalFailure(t);
+            String error = "doAssert Error: " + t.toString();
+            report.setMessage(error);
+            report.setResult(TestReport.TestReportActionResult.ERROR);
+            logTerminalFailure(t);
+            addTerminalFailureToTestReport(error);
         }
     }
 
@@ -906,24 +904,25 @@ public class TestEngine  implements TestDef {
         Map<String, String> outFixtureNameMap = new HashMap<>();
         Map<String, FixtureComponent> outFixturesForComponent = new HashMap<>();
         for (Parameter parm : componentReference.getFixturesIn()) {
-            String outerName = parm.getCallerName();
+            String callerName = parm.getCallerName();
             String innnerName = parm.getLocalName();
-            fixtureNameMap.put(outerName, innnerName);
-            FixtureComponent fixtureComponent = fixtureMgr.get(outerName);
+            fixtureNameMap.put(callerName, innnerName);
+            FixtureComponent fixtureComponent = fixtureMgr.get(callerName);
             if (fixtureComponent != null && fixtureComponent.getFixtureSub() != null) {
                 // create temporary FixtureComponent containing the translations
                 // and the extracted content
                 fixtureComponent = fixtureComponent.getFixtureSub().getSubFixture(fixtureComponent);
             }
             if (fixtureComponent == null)
-                throw new RuntimeException("Fixture " + outerName + " does not exist");
+                throw new RuntimeException("Fixture " + callerName + " does not exist");
             inFixturesForComponent.put(innnerName, fixtureComponent);
         }
+        /*
         for (Parameter parm : componentReference.getFixturesOut()) {
             String outerName = parm.getCallerName();
             String innnerName = parm.getLocalName();
             outFixtureNameMap.put(outerName, innnerName);
-            FixtureComponent fixtureComponent = fixtureMgr.get(outerName);
+            FixtureComponent fixtureComponent = parent.fixtureMgr.get(outerName);
             if (fixtureComponent != null && fixtureComponent.getFixtureSub() != null) {
                 // create temporary FixtureComponent containing the translations
                 // and the extracted content
@@ -933,6 +932,8 @@ public class TestEngine  implements TestDef {
                 throw new RuntimeException("outFixture " + outerName + " does not exist");
             outFixturesForComponent.put(innnerName, fixtureComponent);
         }
+
+         */
 
         // align variables for module
         Map<String, String> externalVariables = new HashMap<>();
@@ -1056,7 +1057,8 @@ public class TestEngine  implements TestDef {
             if (errorReport == null) {
                 if (fixtureComponent == null)
                     throw new RuntimeException("Script import - " + componentReference.getComponentRef() + " did not produce out Fixture " + innerName);
-                outFixtureMgr.put(outerName, fixtureComponent);
+//                outFixtureMgr.put(outerName, fixtureComponent);
+                fixtureMgr.put(outerName, fixtureComponent);
             }
         }
 
@@ -1307,8 +1309,8 @@ public class TestEngine  implements TestDef {
         ValE fVal = new ValE(engineVal).setMsg("Test");
 
         if (!testScriptElement.hasAction()) {
-            String msg = "Action must contain operation or assert.";
-            reportTerminalFailure(msg);
+            String msg = "TestEngine doTestPart Error. Has no Action.";
+            addTerminalFailureToTestReport(msg);
             log.severe(msg);
             return false;
         }
@@ -1324,8 +1326,8 @@ public class TestEngine  implements TestDef {
                 boolean isExpectFailure = expectFailure != null;
                 TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
                 if (invalidAction(action, actionReportComponent, fVal)) {
-                    String msg = "Action must contain operation or assert.";
-                    reportTerminalFailure(msg);
+                    String msg = "TestEngine invalidAction. Action must contain operation or assert.";
+                    addTerminalFailureToTestReport(msg);
                     log.severe(msg);
                     return false;
                 }
@@ -1811,6 +1813,7 @@ public class TestEngine  implements TestDef {
     }
 
     void reportOperation(ResourceWrapper wrapper, Reporter reporter, TestScript.SetupActionOperationComponent op) {
+        /*
         if (parent != null) {
             new ActionReporter()
                     .setModule(false)
@@ -1824,6 +1827,8 @@ public class TestEngine  implements TestDef {
                             reporter,
                             op);
         }
+
+         */
         new ActionReporter()
                 .setModule(parent != null)
                 .setTestEngine(this)

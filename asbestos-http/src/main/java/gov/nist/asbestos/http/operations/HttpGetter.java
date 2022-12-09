@@ -90,7 +90,7 @@ public class HttpGetter extends HttpBase {
             get(getUri(), getRequestHeaders().getAll());
         } catch (Throwable e) {
             status = 404;
-            String msg = e.getMessage() + "\n" + "HttpGetter#get Error: Check server log for details.";
+            String msg = e.getMessage() + "\n" + "HttpGetter#get Error. Check server log for details.";
             logger.log(Level.SEVERE, msg, e);
             setResponseText(msg);
             setResponse(msg.getBytes());

@@ -14,7 +14,6 @@ import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
 import gov.nist.asbestos.mhd.channel.MhdCanonicalUriCodeInterface;
-import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
 import gov.nist.asbestos.mhd.transforms.MhdTransforms;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
@@ -264,9 +263,9 @@ public class AnalysisReport {
             binaryEval();
             return buildReport();
         } catch (Throwable t) {
-            String error = "AnalysisReport#run Error: " + t;
+            String error = "AnalysisReport#run Error: " + t.toString() + ". Check server log for details.";
             log.log(Level.SEVERE, error, t);
-            generalErrors.add(String.format("%s. Check server log for details.", error));
+            generalErrors.add(error);
             return buildReport();
         }
     }
@@ -312,9 +311,9 @@ public class AnalysisReport {
                 baseObj.setEvent(contextResourceBundle.getEvent(), contextResourceBundle.isRequest());
             }
         } catch (Throwable t) {
-            String error = "AnalysisReport#establishBase Error: " + t;
+            String error = "AnalysisReport#establishBase Error: " + t.toString() + ". Check server log for details." ;
             log.log(Level.SEVERE, error, t);
-            generalErrors.add(String.format("%s. Check server log for details.", error));
+            generalErrors.add(error);
             return buildReport();
         }
         if (!generalErrors.isEmpty())

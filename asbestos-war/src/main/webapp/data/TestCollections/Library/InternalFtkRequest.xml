@@ -41,7 +41,7 @@
         <action>
             <assert>
                 <description value="Status is 200."/>
-                <sourceId value="pdb-bundle"/>
+                <sourceId value="returns-bundle"/>
                 <response value="okay"/>
                 <warningOnly value="false"/>
             </assert>
