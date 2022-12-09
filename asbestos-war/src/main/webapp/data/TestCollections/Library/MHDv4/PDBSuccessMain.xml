@@ -88,7 +88,7 @@
     </variable>
     <variable>
         <name value="pdbBundleProfile"/>
-        <expression value="Bundle.meta.profile"/>
+        <expression value="Bundle.meta.profile[0]"/>
         <sourceId value="pdb-bundle"/>
     </variable>
 

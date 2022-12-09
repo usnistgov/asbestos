@@ -61,6 +61,7 @@ public class TestEngine  implements TestDef {
 
     private boolean failOverride = false;
     private final FixtureMgr fixtureMgr = new FixtureMgr();
+    private final FixtureMgr outFixtureMgr = new FixtureMgr();
     private Val val;
     private ValE engineVal;
     private FhirClient fhirClient = null;
@@ -76,6 +77,7 @@ public class TestEngine  implements TestDef {
 
     private ModularEngine modularEngine = null;
     private Map<String, String> callFixtureMap = new HashMap<>();
+    private Map<String, String> callOutFixtureMap = new HashMap<>();
     private Map<String, String> callVariableMap = new HashMap<>();
     private Map<String, String> externalVariables = new HashMap<>();
     private TestScriptDebugInterface debugger = null;
@@ -901,6 +903,8 @@ public class TestEngine  implements TestDef {
         // align fixtures for module
         Map<String, FixtureComponent> inFixturesForComponent = new HashMap<>();
         Map<String, String> fixtureNameMap = new HashMap<>();
+        Map<String, String> outFixtureNameMap = new HashMap<>();
+        Map<String, FixtureComponent> outFixturesForComponent = new HashMap<>();
         for (Parameter parm : componentReference.getFixturesIn()) {
             String outerName = parm.getCallerName();
             String innnerName = parm.getLocalName();
@@ -915,6 +919,20 @@ public class TestEngine  implements TestDef {
                 throw new RuntimeException("Fixture " + outerName + " does not exist");
             inFixturesForComponent.put(innnerName, fixtureComponent);
         }
+        for (Parameter parm : componentReference.getFixturesOut()) {
+            String outerName = parm.getCallerName();
+            String innnerName = parm.getLocalName();
+            outFixtureNameMap.put(outerName, innnerName);
+            FixtureComponent fixtureComponent = fixtureMgr.get(outerName);
+            if (fixtureComponent != null && fixtureComponent.getFixtureSub() != null) {
+                // create temporary FixtureComponent containing the translations
+                // and the extracted content
+                fixtureComponent = fixtureComponent.getFixtureSub().getSubFixture(fixtureComponent);
+            }
+            if (fixtureComponent == null)
+                throw new RuntimeException("outFixture " + outerName + " does not exist");
+            outFixturesForComponent.put(innnerName, fixtureComponent);
+        }
 
         // align variables for module
         Map<String, String> externalVariables = new HashMap<>();
@@ -924,7 +942,7 @@ public class TestEngine  implements TestDef {
                 .setVal(engineVal)
                 .setOpReport(opReport);
         if (engineVal.hasErrors())
-            log.info("errors");
+            log.warning("engineVal hasErrors is true.");
         for (Parameter parm : componentReference.getVariablesIn()) {
             String outerName = parm.getCallerName();
             String innerName = parm.getLocalName();
@@ -994,6 +1012,8 @@ public class TestEngine  implements TestDef {
                 .setTestCollection(testCollection)
                 .setTestId(testId)
                 .setCallFixtureMap(fixtureNameMap)
+                .setCallOutFixtureMap(outFixtureNameMap)
+                .setOutFixtures(outFixturesForComponent)
                 .setCallVariableMap(variableNameMap)
                 .setModularEngine(modularEngine)
                 ;
@@ -1027,9 +1047,21 @@ public class TestEngine  implements TestDef {
             opReport.setMessage(errorReport.message);
         }
 
-        // Pass module output variables and fixtures back to caller
+        // Pass module fixtures back to caller
         FixtureMgr innerFixtures = testEngine1.fixtureMgr;
-        Map<String, FixtureComponent> outFixturesForComponent = new HashMap<>();
+        for (Parameter parm : componentReference.getFixturesOut()) {
+            String outerName = parm.getCallerName();
+            String innerName = parm.getLocalName();
+            FixtureComponent fixtureComponent = innerFixtures.get(innerName);
+            if (errorReport == null) {
+                if (fixtureComponent == null)
+                    throw new RuntimeException("Script import - " + componentReference.getComponentRef() + " did not produce out Fixture " + innerName);
+                outFixtureMgr.put(outerName, fixtureComponent);
+            }
+        }
+
+//        Map<String, FixtureComponent> outFixturesForComponent = new HashMap<>();
+        /*
         for (Parameter parm : componentReference.getFixturesOut()) {
             if (parm.isVariable()) { // Do not know why fixtureOut and isVariable can be mixed together like this
                 throw new RuntimeException("Script import with output variables not supported");
@@ -1043,6 +1075,8 @@ public class TestEngine  implements TestDef {
                 fixtureMgr.put(outerName, fixtureComponent);
             }
         }
+
+         */
         // Script import with output variables
         // The variable-out scope is only limited to the TestScript which called the module
         // Inject variable-outs into the caller's TestEngine's TestScript as a defaultValue string. This pattern can be repeated as many times as needed.
@@ -1074,6 +1108,16 @@ public class TestEngine  implements TestDef {
         // If module call reported failure then overall script reports failure.
         if (testEngine1.getTestReport().getResult() == TestReport.TestReportResult.FAIL)
             getTestReport().setResult(TestReport.TestReportResult.FAIL);
+    }
+
+    private TestEngine setOutFixtures(Map<String, FixtureComponent> outFixturesForComponent) {
+        this.outFixtureMgr.putAll(outFixturesForComponent);
+        return this;
+    }
+
+    private TestEngine setCallOutFixtureMap(Map<String, String> outFixtureNameMap) {
+        this.callOutFixtureMap = outFixtureNameMap;
+        return this;
     }
 
     private TestEngine withResourceCacheManager(ResourceCacheMgr mgr) {
@@ -1768,16 +1812,6 @@ public class TestEngine  implements TestDef {
 
     void reportOperation(ResourceWrapper wrapper, Reporter reporter, TestScript.SetupActionOperationComponent op) {
         if (parent != null) {
-            if (op.getType().getCode().equals("internalFtkRequest")) { // getFixtureString
-                // This is required for reporting purposes. Some sub-fixtures within the parent TestScript may use the output fixture of this operation, which is not yet available without this step.
-                // Even though this 'missing fixture' is not critical at this point, reporting method likes to dump the entire TestScript state
-                String lastOp = this.fixtureMgr.getLastOp();
-                if (lastOp != null) {
-                    parent.getFixtureMgr().put(lastOp, this.fixtureMgr.get(lastOp));
-                } else {
-                    log.severe("Error: lastOp is null. lastOp should be non-empty when internalFtkRequest (getFixtureString) is used. Check fixture-out parameter mapping.");
-                }
-            }
             new ActionReporter()
                     .setModule(false)
                     .setImAParent(true)

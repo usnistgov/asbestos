@@ -13,6 +13,7 @@ import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -301,11 +302,19 @@ public class OperationRunner {
                 return;
             }
 
+            VariableMgr variableMgr = new VariableMgr(testScript, fixtureMgr)
+                    .setExternalVariables(externalVariables)
+                    .setVal(val)
+                    .setOpReport(operationReport);
             final String ftkInternalCode = "x-internalFtkRequestCode";
-            String ftkInternalRequestCode = null;
+            String ftkInternalRequestCodeValue = null;
             Optional<TestScript.SetupActionOperationRequestHeaderComponent> headerComponent =  op.getRequestHeader().stream()
                     .filter(s -> s.hasField() && s.getField().equals(ftkInternalCode)).findFirst();
             if (headerComponent.isPresent()) {
+                Map<String, String> requestHeader = new HashMap<>();
+                GenericSetupAction.handleRequestHeader(requestHeader, op, variableMgr);
+                ftkInternalRequestCodeValue = requestHeader.get(ftkInternalCode);
+                /*
                String value = headerComponent.get().getValue();
                if (value != null && value.startsWith("${") && value.endsWith("}")) {
                     String variableName = value.replaceFirst(Pattern.quote("${"), "").replaceFirst("}", "");
@@ -313,31 +322,30 @@ public class OperationRunner {
                         ftkInternalRequestCode = externalVariables.get(variableName);
                     }
                 }
+                *
+                 */
             }
-            if (ftkInternalRequestCode == null) {
+            if (ftkInternalRequestCodeValue == null) {
                 reporter.reportError(String.format("%s headerComponent not found.", ftkInternalCode));
                 return;
             }
-            if ("loadFtkFixture".equals(ftkInternalRequestCode)) {
+            if ("loadFtkFixture".equals(ftkInternalRequestCodeValue)) {
             SetupActionSearch setupActionSearch = new SetupActionSearch(actionReference, fixtureMgr, isFollowedByAssert)
                     .setVal(val)
                     .setFhirClient(fhirClient)
                     .setSut(sut)
-                    .setType(String.format("%s.%s.%s.search", type, code, ftkInternalRequestCode))
+                    .setType(String.format("%s.%s.%s.search", type, code, ftkInternalRequestCodeValue))
                     .setTestReport(testReport);
             setupActionSearch
                     .setVal(val)
                     .setVariableMgr(
-                            new VariableMgr(testScript, fixtureMgr)
-                                    .setExternalVariables(externalVariables)
-                                    .setVal(val)
-                                    .setOpReport(operationReport));
+                            variableMgr);
             setupActionSearch.setTestEngine(testEngine);
             setupActionSearch.setTestCollectionId(testCollectionId);
             setupActionSearch.setTestId(testId);
             String internalBasePath = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
                     .concat("/engine/")
-                    .concat(ftkInternalRequestCode)
+                    .concat(ftkInternalRequestCodeValue)
                     .concat("/")
                     .concat(testEngine.getChannelId())
                     .concat("/")
@@ -358,7 +366,7 @@ public class OperationRunner {
                  */
             }
         } else {
-                reporter.reportError("do not understand request code of " + ftkInternalCode +":" + ftkInternalRequestCode);
+                reporter.reportError("do not understand request code of " + ftkInternalCode +":" + ftkInternalRequestCodeValue);
             }
         } else {
             reporter.reportError("do not understand code.code of " + code);
