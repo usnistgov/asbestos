@@ -61,7 +61,6 @@ public class TestEngine  implements TestDef {
 
     private boolean failOverride = false;
     private final FixtureMgr fixtureMgr = new FixtureMgr();
-    private final FixtureMgr outFixtureMgr = new FixtureMgr();
     private Val val;
     private ValE engineVal;
     private FhirClient fhirClient = null;
@@ -81,6 +80,7 @@ public class TestEngine  implements TestDef {
     private Map<String, String> callVariableMap = new HashMap<>();
     private Map<String, String> externalVariables = new HashMap<>();
     private TestScriptDebugInterface debugger = null;
+    private List<Parameter> fixtureOutParams;
 
     /**
      *
@@ -901,8 +901,6 @@ public class TestEngine  implements TestDef {
         // align fixtures for module
         Map<String, FixtureComponent> inFixturesForComponent = new HashMap<>();
         Map<String, String> fixtureNameMap = new HashMap<>();
-        Map<String, String> outFixtureNameMap = new HashMap<>();
-        Map<String, FixtureComponent> outFixturesForComponent = new HashMap<>();
         for (Parameter parm : componentReference.getFixturesIn()) {
             String callerName = parm.getCallerName();
             String innnerName = parm.getLocalName();
@@ -1013,10 +1011,9 @@ public class TestEngine  implements TestDef {
                 .setTestCollection(testCollection)
                 .setTestId(testId)
                 .setCallFixtureMap(fixtureNameMap)
-                .setCallOutFixtureMap(outFixtureNameMap)
-                .setOutFixtures(outFixturesForComponent)
                 .setCallVariableMap(variableNameMap)
                 .setModularEngine(modularEngine)
+                .setFixtureOutParams(componentReference.getFixturesOut())
                 ;
         if (hasDebugger()) {
             testEngine1.setTestScriptDebugState(getDebugger().getState());
@@ -1112,15 +1109,6 @@ public class TestEngine  implements TestDef {
             getTestReport().setResult(TestReport.TestReportResult.FAIL);
     }
 
-    private TestEngine setOutFixtures(Map<String, FixtureComponent> outFixturesForComponent) {
-        this.outFixtureMgr.putAll(outFixturesForComponent);
-        return this;
-    }
-
-    private TestEngine setCallOutFixtureMap(Map<String, String> outFixtureNameMap) {
-        this.callOutFixtureMap = outFixtureNameMap;
-        return this;
-    }
 
     private TestEngine withResourceCacheManager(ResourceCacheMgr mgr) {
         for (File file : mgr.getDefaultCacheDirs()) {
@@ -1131,6 +1119,10 @@ public class TestEngine  implements TestDef {
 
     private ResourceCacheMgr getCacheManager() {
         return fixtureMgr.getFhirClient().getResourceCacheMgr();
+    }
+
+    public void setFixtureOutParams(List<Parameter> fixtureOutParams) {
+        this.fixtureOutParams = fixtureOutParams;
     }
 
     /**
@@ -1812,8 +1804,43 @@ public class TestEngine  implements TestDef {
         return false;
     }
 
-    void reportOperation(ResourceWrapper wrapper, Reporter reporter, TestScript.SetupActionOperationComponent op) {
+    void updateParentFixtureOut(TestScript.SetupActionOperationComponent op) {
+        if (this.parent != null && fixtureOutParams != null) {
+            if (op.getType().getCode().equals("internalFtkRequest")) { // getFixtureString
+                for (Parameter parm : fixtureOutParams) {
+                    String outerName = parm.getCallerName();
+                    String innerName = parm.getLocalName();
+                    ErrorReport errorReport = getErrorMessage(this.getTestReport());
+                    FixtureComponent fixtureComponent = this.fixtureMgr.get(innerName);
+                    if (errorReport == null) {
+                        if (fixtureComponent == null)
+                            throw new RuntimeException("updateFixtureOut: Script import - " + this.getTestDef() /*componentReference.getComponentRef()*/ + " did not produce out Fixture " + innerName);
+                        this.parent.fixtureMgr.put(outerName, fixtureComponent);
+                    } else {
+                        log.severe("errorReport is not null: " + this.testDef);
+                    }
+                }
+            }
+        }
+
         /*
+        if (this.parent != null) {
+            if (op.getType().getCode().equals("internalFtkRequest")) { // getFixtureString
+                // This is required for reporting purposes. Some sub-fixtures within the parent TestScript may use the output fixture of this operation, which is not yet available without this step.
+                // Even though this 'missing fixture' is not critical at this point, reporting method likes to dump the entire TestScript state
+                String lastOp = this.fixtureMgr.getLastOp();
+                if (lastOp != null) {
+                    te.parent.getFixtureMgr().put(lastOp, this.fixtureMgr.get(lastOp));
+                } else {
+                    log.severe("Error: lastOp is null. lastOp should be non-empty when internalFtkRequest (getFixtureString) is used. Check fixture-out parameter mapping.");
+                }
+            }
+        }
+        *
+         */
+    }
+
+    void reportOperation(ResourceWrapper wrapper, Reporter reporter, TestScript.SetupActionOperationComponent op) {
         if (parent != null) {
             new ActionReporter()
                     .setModule(false)
@@ -1828,7 +1855,6 @@ public class TestEngine  implements TestDef {
                             op);
         }
 
-         */
         new ActionReporter()
                 .setModule(parent != null)
                 .setTestEngine(this)

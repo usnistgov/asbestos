@@ -187,22 +187,7 @@ abstract class GenericSetupAction {
             sourceFixture.setCreatedByUIEvent(uiEvent);
         }
 
-        /*
-        FIXME 120922
-        if (testEngine.parent != null) {
-            if (op.getType().getCode().equals("internalFtkRequest")) { // getFixtureString
-                // This is required for reporting purposes. Some sub-fixtures within the parent TestScript may use the output fixture of this operation, which is not yet available without this step.
-                // Even though this 'missing fixture' is not critical at this point, reporting method likes to dump the entire TestScript state
-                String lastOp = this.fixtureMgr.getLastOp();
-                if (lastOp != null) {
-                    testEngine.parent.getFixtureMgr().put(lastOp, this.fixtureMgr.get(lastOp));
-                } else {
-                    log.severe("Error: lastOp is null. lastOp should be non-empty when internalFtkRequest (getFixtureString) is used. Check fixture-out parameter mapping.");
-                }
-            }
-        }
-        *
-         */
+        testEngine.updateParentFixtureOut(op);
         reportOperation(wrapper);
     }
 

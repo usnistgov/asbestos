@@ -31,7 +31,7 @@ public interface MhdCanonicalUriCodeInterface {
     default Map.Entry<CanonicalUriCodeEnum, String> detectBundleProfileType(Bundle bundle) throws Exception {
         try {
             if (bundle.getMeta().getProfile().size() != 1) {
-                throw new Exception("Profile not declared properly in bundle. Expected profile count size is 1.");
+                throw new Exception("Bundle.meta.profile was not declared properly in bundle. Expected profile count size is 1.");
             }
 
             CanonicalType bundleProfile = bundle.getMeta().getProfile().get(0);
@@ -44,7 +44,7 @@ public interface MhdCanonicalUriCodeInterface {
         } catch (Exception e) {
             throw new Exception("Bundle.meta.profile missing? Exception: " + e.toString());
         }
-        throw new Exception("Unrecognized bundle profile.");
+        throw new Exception("Channel did not recognize Bundle.meta.profile.");
     }
 
     Map<CanonicalUriCodeEnum, String> getUriCodesByType(UriCodeTypeEnum codeTypeEnum);
