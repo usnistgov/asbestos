@@ -94,7 +94,7 @@ public class CreateChannelRequest {
     }
 
     private static boolean isMhdVersionValid(String[] mhdVersions) {
-         if (mhdVersions == null) { /* null means nothing is specified, which is valid since mhdVersion is optional */
+         if (mhdVersions == null) { /* null means nothing is specified, which is valid since mhdVersion is optional: Oldest IG will be the default. */
              return true;
          }
          // If a mhdVersion is indeed specified, make sure it is mappable to the enum
