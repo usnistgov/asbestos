@@ -18,13 +18,16 @@ public enum TestCollectionPropertiesEnum {
      */
     Channel,
     /**
-     * Profile or IG Name (text may be something other than the exact IG name). Value may be a comma separated list.
-     * This is mainly used for channel test collection indexing.
+     * Profile or IG Name
+     * Text is only used for channel test collection display indexing purposes.
+     * Value may be a comma separated list.
      */
     FhirIgName,
     /**
      * The actual IG version to use for the $validate operation.
      * Only useful if FhirIgName is a single value.
+     * Or the FhirIgVersion is optionally used with $validate operation, i.e., FhirIgVersion is the version of IG loaded on the validation server.
+     * Can be Null or an empty string.
      */
     FhirIgVersion,
     /**

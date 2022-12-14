@@ -12,7 +12,7 @@ import gov.nist.asbestos.client.resolver.ResolverConfig;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
-import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
+import gov.nist.asbestos.mhd.channel.MhdIgInterface;
 import gov.nist.asbestos.mhd.transactionSupport.AhqrSender;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
@@ -274,7 +274,7 @@ public class MhdTransforms {
     }
 
 
-    public ExtrinsicObjectType createExtrinsicObject(MhdProfileVersionInterface mhdImpl, ResourceWrapper resource, ValE vale, IdBuilder idBuilder, Map<String, byte[]> documentContents, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities) {
+    public ExtrinsicObjectType createExtrinsicObject(MhdIgInterface mhdImpl, ResourceWrapper resource, ValE vale, IdBuilder idBuilder, Map<String, byte[]> documentContents, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(rMgr);
 
@@ -719,7 +719,7 @@ public class MhdTransforms {
         return dm;
     }
 
-    public static BaseResource ssToListResource(MhdProfileVersionInterface mhdImpl, CodeTranslator codeTranslator, File externalCache, AhqrSender sender, ChannelConfig channelConfig) {
+    public static BaseResource ssToListResource(MhdIgInterface mhdImpl, CodeTranslator codeTranslator, File externalCache, AhqrSender sender, ChannelConfig channelConfig) {
         Val val = new Val();
 
         ResourceCacheMgr resourceCacheMgr = new ResourceCacheMgr(externalCache);

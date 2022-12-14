@@ -5,7 +5,7 @@ import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
-import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
+import gov.nist.asbestos.mhd.channel.MhdIgInterface;
 import gov.nist.asbestos.mhd.exceptions.MetadataAttributeTranslationException;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.translation.ContainedIdAllocator;
@@ -35,9 +35,9 @@ public class SubmissionSetToListResource {
     private ResourceCacheMgr resourceCacheMgr = null;
     private ContainedIdAllocator containedIdAllocator = null;
     private FhirClient fhirClient = null;
-    private MhdProfileVersionInterface mhdClass;
+    private MhdIgInterface mhdClass;
 
-    public SubmissionSetToListResource(MhdProfileVersionInterface mhdClass, ContainedIdAllocator containedIdAllocator, ResourceCacheMgr resourceCacheMgr, CodeTranslator codeTranslator, FhirClient fhirClient, Val val) {
+    public SubmissionSetToListResource(MhdIgInterface mhdClass, ContainedIdAllocator containedIdAllocator, ResourceCacheMgr resourceCacheMgr, CodeTranslator codeTranslator, FhirClient fhirClient, Val val) {
         this.val = val;
         this.codeTranslator = codeTranslator;
         this.resourceCacheMgr = resourceCacheMgr;

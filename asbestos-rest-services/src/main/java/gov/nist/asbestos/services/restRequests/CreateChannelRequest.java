@@ -4,7 +4,7 @@ import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.channel.ChannelConfigFactory;
-import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
+import gov.nist.asbestos.mhd.channel.MhdIgImplEnum;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.simCommon.TestSession;
 import org.apache.commons.io.IOUtils;
@@ -13,8 +13,6 @@ import java.util.logging.Logger;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 // 0 - empty
 // 1 - app context
 // 2  "rw" or "accessGuard"
@@ -68,7 +66,7 @@ public class CreateChannelRequest {
             return;
         }
 
-        if (! isMhdVersionValid(channelConfig.getMhdVersions())) {
+        if (! isMhdVersionValid(channelConfig.getTcFhirIgNames())) {
             String error = "Invalid mhdVersion.";
             log.warning(error + ": " +  channelConfig.asChannelId());
             request.resp.setContentType("application/json");
@@ -100,7 +98,7 @@ public class CreateChannelRequest {
          // If a mhdVersion is indeed specified, make sure it is mappable to the enum
          try {
              if (mhdVersions != null  && mhdVersions.length > 0) {
-                 long count = Arrays.stream(mhdVersions).map(e -> MhdVersionEnum.find(e)).count();
+                 long count = Arrays.stream(mhdVersions).map(e -> MhdIgImplEnum.find(e)).count();
                  if (mhdVersions.length == count)
                      return true;
              } else {

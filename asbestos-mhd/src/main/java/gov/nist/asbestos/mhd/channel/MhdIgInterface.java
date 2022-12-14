@@ -16,13 +16,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-public interface MhdProfileVersionInterface {
-    static final Logger privateLogger = Logger.getLogger(MhdProfileVersionInterface.class.getName());
+public interface MhdIgInterface {
+    static final Logger privateLogger = Logger.getLogger(MhdIgInterface.class.getName());
     String getIheReference();
 
     default MhdCanonicalUriCodeInterface getUriCodesClass() {
         try {
-            Class<? extends MhdCanonicalUriCodeInterface> myCodesClass = getMhdVersion().getUriCodesClass();
+            Class<? extends MhdCanonicalUriCodeInterface> myCodesClass = getMhdIgImpl().getUriCodesClass();
             return myCodesClass.getDeclaredConstructor().newInstance();
         } catch (Exception ex) {
             privateLogger.warning("getUriCodesClass Exception: " + ex.toString());
@@ -33,23 +33,23 @@ public interface MhdProfileVersionInterface {
 //    CanonicalUriCodeEnum getDetectedBundleProfile();
 
         default String getDocBase(String ref) {
-        return String.format("%s/%s", getMhdVersion().getMhdDocBase(), ref);
+        return String.format("%s/%s", getMhdIgImpl().getMhdDocBase(), ref);
     }
 
 
     List<Class<?>> getAcceptableResourceTypes();
     RegistryPackageType buildSubmissionSet(MhdTransforms mhdTransforms, ResourceWrapper wrapper, Val val, ValE vale, IdBuilder idBuilder, ChannelConfig channelConfig, CodeTranslator codeTranslator, AssigningAuthorities assigningAuthorities, CanonicalUriCodeEnum canonicalUriCodeEnum);
     String getExtrinsicId(ValE valE, ResourceMgr rMgr, List<Identifier> identifiers);
-    MhdVersionEnum getMhdVersion();
+    MhdIgImplEnum getMhdIgImpl();
 
     default Optional<String> hasSsQueryParam(List<String> paramList) throws Exception {
         if (paramList == null) {
-            throw new Exception(String.format("Search param cannot be empty or null. See %s/ITI-66.html#23664121-query-search-parameters", getMhdVersion().getMhdDocBase()));
+            throw new Exception(String.format("Search param cannot be empty or null. See %s/ITI-66.html#23664121-query-search-parameters", getMhdIgImpl().getMhdDocBase()));
         }
         final String ssCode = CanonicalUriCodeEnum.SUBMISSIONSET.getCode();
         Optional<String> matchParam = paramList.stream().filter(s -> s.contains("code=" + ssCode) || s.contains("code%3d" + ssCode)).findAny();
         if (! matchParam.isPresent()) {
-            throw new Exception(String.format("Search param is empty or null. See %s/ITI-66.html#23664121-query-search-parameters", getMhdVersion().getMhdDocBase()));
+            throw new Exception(String.format("Search param is empty or null. See %s/ITI-66.html#23664121-query-search-parameters", getMhdIgImpl().getMhdDocBase()));
         }
         return matchParam;
     }

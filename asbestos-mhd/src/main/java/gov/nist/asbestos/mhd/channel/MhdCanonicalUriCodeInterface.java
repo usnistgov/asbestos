@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 
 public interface MhdCanonicalUriCodeInterface {
     static final Logger privateLogger = Logger.getLogger(MhdCanonicalUriCodeInterface.class.getName());
-    static final List<MhdVersionEnum> ANY_VERSION = null;
+    static final List<MhdIgImplEnum> ANY_VERSION = null;
 //    String mhdProfileCanonicalUriExceptionStr = "Method must be hidden by implementation through a static method.";
 //    static Map<CanonicalUriCodeEnum, String> getAll() {throw new RuntimeException(mhdProfileCanonicalUriExceptionStr);}
 //    static Map<CanonicalUriCodeEnum, String> getProfiles() {throw new RuntimeException(mhdProfileCanonicalUriExceptionStr);}
@@ -51,15 +51,15 @@ public interface MhdCanonicalUriCodeInterface {
     Map<CanonicalUriCodeEnum, String> getUriCodeMap();
 
 
-    static boolean isCodedAsAListType(List<MhdVersionEnum> mhdVersionEnumList, BaseResource resource, CanonicalUriCodeEnum code) {
+    static boolean isCodedAsAListType(List<MhdIgImplEnum> mhdVersionEnumList, BaseResource resource, CanonicalUriCodeEnum code) {
         if (resource instanceof ListResource) {
             ListResource listResource = (ListResource) resource;
 
             if (mhdVersionEnumList == ANY_VERSION) {
-                mhdVersionEnumList = Arrays.asList(MhdVersionEnum.values());
+                mhdVersionEnumList = Arrays.asList(MhdIgImplEnum.values());
             }
 
-            for (MhdVersionEnum mhdVersionEnum : mhdVersionEnumList) {
+            for (MhdIgImplEnum mhdVersionEnum : mhdVersionEnumList) {
                 Class<? extends MhdCanonicalUriCodeInterface> myUriCodesClass = mhdVersionEnum.getUriCodesClass();
                 try {
                     try {

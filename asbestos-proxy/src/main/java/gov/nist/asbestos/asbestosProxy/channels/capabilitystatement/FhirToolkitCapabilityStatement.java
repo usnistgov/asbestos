@@ -3,10 +3,9 @@ package gov.nist.asbestos.asbestosProxy.channels.capabilitystatement;
 import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.client.log.SimStoreFactory;
 import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
 import gov.nist.asbestos.mhd.channel.MhdCanonicalUriCodeInterface;
-import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
+import gov.nist.asbestos.mhd.channel.MhdIgImplEnum;
 import gov.nist.asbestos.mhd.channel.UriCodeTypeEnum;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
@@ -24,8 +23,6 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.regex.Pattern;
 
 public class FhirToolkitCapabilityStatement {
     public static final String XDS_LIMITED_META_SIM = "default__asbtslimited";
@@ -94,7 +91,7 @@ public class FhirToolkitCapabilityStatement {
             if (baseResource instanceof CapabilityStatement) {
                 CapabilityStatement capabilityStatement = (CapabilityStatement) baseResource;
                 try {
-                    List<CapabilityStatement.SystemInteractionComponent> interactionComponents = getChannelInteractions(channelConfig.getXdsSiteName(), channelConfig.getMhdVersions());
+                    List<CapabilityStatement.SystemInteractionComponent> interactionComponents = getChannelInteractions(channelConfig.getXdsSiteName(), channelConfig.getTcFhirIgNames());
                     CapabilityStatement.CapabilityStatementRestComponent restComponent = new CapabilityStatement.CapabilityStatementRestComponent();
                     restComponent.setMode(CapabilityStatement.RestfulCapabilityMode.SERVER);
                     restComponent.setInteraction(interactionComponents);
@@ -118,7 +115,7 @@ public class FhirToolkitCapabilityStatement {
         }
         List<CapabilityStatement.SystemInteractionComponent> systemInteractionComponents = new ArrayList<>();
         for (String s : mhdVersions) {
-            Class<? extends MhdCanonicalUriCodeInterface> myUriCodesClass = MhdVersionEnum.find(s).getUriCodesClass();
+            Class<? extends MhdCanonicalUriCodeInterface> myUriCodesClass = MhdIgImplEnum.find(s).getUriCodesClass();
             MhdCanonicalUriCodeInterface intf = myUriCodesClass.getDeclaredConstructor().newInstance();
 
             String doc;

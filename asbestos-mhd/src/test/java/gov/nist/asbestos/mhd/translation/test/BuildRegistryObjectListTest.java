@@ -12,8 +12,8 @@ import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
 import gov.nist.asbestos.mhd.channel.MhdCanonicalUriCodeInterface;
 import gov.nist.asbestos.mhd.channel.MhdImplFactory;
-import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
-import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
+import gov.nist.asbestos.mhd.channel.MhdIgInterface;
+import gov.nist.asbestos.mhd.channel.MhdIgImplEnum;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslatorBuilder;
@@ -106,7 +106,7 @@ class BuildRegistryObjectListTest {
 
 //        MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, new NoOpTask());
 
-        MhdProfileVersionInterface mhdVersionSpecificImpl = MhdImplFactory.getImplementation(MhdVersionEnum.MHDv3x );
+        MhdIgInterface mhdVersionSpecificImpl = MhdImplFactory.getImplementation(MhdIgImplEnum.MHDv3x );
 
         Map.Entry<CanonicalUriCodeEnum, String> mhdBundleProfile = null;
         try {

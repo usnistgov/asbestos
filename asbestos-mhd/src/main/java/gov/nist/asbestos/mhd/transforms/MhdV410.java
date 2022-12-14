@@ -5,8 +5,8 @@ import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
-import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
-import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
+import gov.nist.asbestos.mhd.channel.MhdIgInterface;
+import gov.nist.asbestos.mhd.channel.MhdIgImplEnum;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.simapi.validation.Val;
@@ -21,10 +21,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class MhdV410 implements MhdProfileVersionInterface {
+public class MhdV410 implements MhdIgInterface {
     private final String BUNDLE_RESOURCES_DOC_REF = String.format("3.65.4.1.2.1 Bundle Resources. %s",  getDocBase("ITI-65.html#23654121-bundle-resources"));
     private static List<Class<?>> acceptableResourceTypes = Arrays.asList(ListResource.class, DocumentReference.class, Binary.class);
-    private static MhdVersionEnum mhdVersionEnum = MhdVersionEnum.MHDv410;
+    private static MhdIgImplEnum mhdVersionEnum = MhdIgImplEnum.MHDv410;
 
     private static final Logger logger = Logger.getLogger(MhdV410.class.getName());
 
@@ -33,7 +33,7 @@ public class MhdV410 implements MhdProfileVersionInterface {
 
 
     @Override
-    public MhdVersionEnum getMhdVersion() {
+    public MhdIgImplEnum getMhdIgImpl() {
         return mhdVersionEnum;
     }
 

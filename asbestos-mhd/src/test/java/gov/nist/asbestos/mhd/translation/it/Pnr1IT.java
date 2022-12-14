@@ -11,8 +11,8 @@ import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
 import gov.nist.asbestos.mhd.channel.MhdImplFactory;
-import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
-import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
+import gov.nist.asbestos.mhd.channel.MhdIgInterface;
+import gov.nist.asbestos.mhd.channel.MhdIgImplEnum;
 import gov.nist.asbestos.mhd.channel.UriCodeTypeEnum;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
@@ -120,7 +120,7 @@ class Pnr1IT {
 
         MhdTransforms mhdTransforms = new MhdTransforms(rMgr, val, new NoOpTask());
 
-        MhdProfileVersionInterface mhdVersionSpecificImpl = MhdImplFactory.getImplementation(MhdVersionEnum.MHDv3x);
+        MhdIgInterface mhdVersionSpecificImpl = MhdImplFactory.getImplementation(MhdIgImplEnum.MHDv3x);
 
         RegistryObjectListType registryObjectListType = bundleToRegistryObjectList.build(mhdVersionSpecificImpl,  bundle);
 

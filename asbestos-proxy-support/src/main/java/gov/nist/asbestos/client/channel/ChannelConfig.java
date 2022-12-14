@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * Channel data model
+ */
 public class ChannelConfig {
     private String environment;
     private String testSession;
@@ -27,9 +30,9 @@ public class ChannelConfig {
     private boolean writeLocked;
     private boolean logMhdCapabilityStatementRequest;
     /**
-     * When more than mhdVersion is specified, then the canonical profile must be unique. Otherwise, only single mhdVersion should be specified.
+     * When more than test collection FhirIgName is specified, then the canonical profile must be unique. Otherwise, only single FhirIgName should be specified.
      */
-    private String[] mhdVersions;
+    private String[] tcFhirIgNames;
     private transient String scheme;
 
     public String toString() {
@@ -37,7 +40,7 @@ public class ChannelConfig {
                 " of " + actorType + " in " + environment +
                 " with base " + fhirBase +
                 " with xdsSite " + xdsSiteName +
-                " mhdVersion " + Arrays.toString(mhdVersions);
+                " tcFhirIgNames " + Arrays.toString(tcFhirIgNames);
     }
 
     public URI translateEndpointToFhirBase(URI req) throws URISyntaxException {
@@ -174,13 +177,13 @@ public class ChannelConfig {
                 Objects.equals(xdsSiteName, that.xdsSiteName) &&
                 Objects.equals(writeLocked, that.writeLocked) &&
                 Objects.equals(logMhdCapabilityStatementRequest, that.logMhdCapabilityStatementRequest) &&
-                Arrays.equals(mhdVersions, that.mhdVersions);
+                Arrays.equals(tcFhirIgNames, that.tcFhirIgNames);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(environment, testSession, channelName, actorType, channelType, includeValidation, fhirBase, xdsSiteName, writeLocked, logMhdCapabilityStatementRequest)
-                + Arrays.deepHashCode(mhdVersions);
+                + Arrays.deepHashCode(tcFhirIgNames);
     }
 
     public String getXdsSiteName() {
@@ -222,12 +225,12 @@ public class ChannelConfig {
         return channelName;
     }
 
-    public String[] getMhdVersions() {
-        return mhdVersions;
+    public String[] getTcFhirIgNames() {
+        return tcFhirIgNames;
     }
 
-    public void setMhdVersions(String[] mhdVersions) {
-        this.mhdVersions = mhdVersions;
+    public void setTcFhirIgNames(String[] tcFhirIgNames) {
+        this.tcFhirIgNames = tcFhirIgNames;
     }
 
     @JsonIgnore

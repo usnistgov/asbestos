@@ -5,8 +5,8 @@ import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
-import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
-import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
+import gov.nist.asbestos.mhd.channel.MhdIgInterface;
+import gov.nist.asbestos.mhd.channel.MhdIgImplEnum;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.simapi.validation.Val;
@@ -49,10 +49,10 @@ import java.util.logging.Logger;
  *      TODO - Contained option
  *      static String containedMetadataProfile = "http://profiles.ihe.net/ITI/MHD/4.0.1/StructureDefinition/IHE.MHD.UnContained.Comprehensive.ProvideBundle";
  */
-public class MhdV4 implements MhdProfileVersionInterface {
+public class MhdV4 implements MhdIgInterface {
     private final String BUNDLE_RESOURCES_DOC_REF = String.format("3.65.4.1.2.1 Bundle Resources. %s",  getDocBase("ITI-65.html#23654121-bundle-resources"));
     private static List<Class<?>> acceptableResourceTypes = Arrays.asList(ListResource.class, DocumentReference.class, Binary.class);
-    private static MhdVersionEnum mhdVersionEnum = MhdVersionEnum.MHDv4;
+    private static MhdIgImplEnum mhdVersionEnum = MhdIgImplEnum.MHDv4;
 
     private CanonicalUriCodeEnum mhdBundleProfileEnum;
     private static final Logger logger = Logger.getLogger(MhdV4.class.getName());
@@ -72,7 +72,7 @@ public class MhdV4 implements MhdProfileVersionInterface {
 
 
     @Override
-    public MhdVersionEnum getMhdVersion() {
+    public MhdIgImplEnum getMhdIgImpl() {
         return mhdVersionEnum;
     }
 

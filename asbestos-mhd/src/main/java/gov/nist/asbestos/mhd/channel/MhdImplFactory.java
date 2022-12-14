@@ -9,8 +9,8 @@ import java.util.logging.Logger;
 public class MhdImplFactory {
     private static Logger logger = Logger.getLogger(MhdImplFactory.class.getName());
 
-    public static MhdProfileVersionInterface getImplementation(MhdVersionEnum mhdVersionEnum ) {
-        switch (mhdVersionEnum) {
+    public static MhdIgInterface getImplementation(MhdIgImplEnum mhdIgEnum ) {
+        switch (mhdIgEnum) {
             case MHDv3x:
                 return new MhdV3x();
             case MHDv4:
@@ -18,7 +18,7 @@ public class MhdImplFactory {
             case MHDv410:
                 return new MhdV410();
         }
-        logger.warning("Unknown or Null mhdVersionEnum.");
+        logger.warning("Unknown or Null mhdIgEnum.");
         return null;
     }
 }

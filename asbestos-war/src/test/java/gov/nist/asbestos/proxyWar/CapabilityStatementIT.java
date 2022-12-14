@@ -9,14 +9,13 @@ import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.http.operations.HttpPut;
-import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
+import gov.nist.asbestos.mhd.channel.MhdIgImplEnum;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -44,7 +43,7 @@ public class CapabilityStatementIT {
 
 
     private static void deleteAndRecreateMhdTestChannel(String channelName, boolean csloggingEnabled) throws URISyntaxException, IOException {
-        String[] mhdVersions = new String[]{MhdVersionEnum.MHDv410.getVersion()};
+        String[] mhdVersions = new String[]{MhdIgImplEnum.MHDv410.getIgName()};
         // create
         ChannelConfig channelConfig = new ChannelConfig()
                 .setTestSession("default")
@@ -54,7 +53,7 @@ public class CapabilityStatementIT {
                 .setChannelType("mhd")
                 .setXdsSiteName(FhirToolkitCapabilityStatement.XDS_COMPREHENSIVE_META_SIM)
                 .setLogMhdCapabilityStatementRequest(csloggingEnabled);
-                channelConfig.setMhdVersions(mhdVersions);
+                channelConfig.setTcFhirIgNames(mhdVersions);
 
         String channelLocation = "http://localhost:"+ proxyPort + "/asbestos/rw/channel/default__" + channelName;
 

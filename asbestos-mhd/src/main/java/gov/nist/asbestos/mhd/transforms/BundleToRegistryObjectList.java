@@ -10,7 +10,7 @@ import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.SubmittedObject;
 import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
-import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
+import gov.nist.asbestos.mhd.channel.MhdIgInterface;
 import gov.nist.asbestos.mhd.exceptions.TransformException;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
@@ -94,7 +94,7 @@ public class BundleToRegistryObjectList implements IVal {
         return null;
     }
 
-    public RegistryObjectListType build(MhdProfileVersionInterface mhdImpl, Bundle bundle) {
+    public RegistryObjectListType build(MhdIgInterface mhdImpl, Bundle bundle) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(bundle);
         Objects.requireNonNull(rMgr);
@@ -107,7 +107,7 @@ public class BundleToRegistryObjectList implements IVal {
 
 
     // TODO handle List/Folder or signal error
-    public RegistryObjectListType buildRegistryObjectList(MhdProfileVersionInterface mhdVersionSpecificImpl, Val val) {
+    public RegistryObjectListType buildRegistryObjectList(MhdIgInterface mhdVersionSpecificImpl, Val val) {
         Objects.requireNonNull(mhdVersionSpecificImpl);
         Objects.requireNonNull(val);
         Objects.requireNonNull(rMgr);
@@ -332,7 +332,7 @@ public class BundleToRegistryObjectList implements IVal {
     }
 
 
-    private void scanBundleForAcceptability(MhdProfileVersionInterface mhdVersionSpecificImpl, Bundle bundle, ResourceMgr rMgr) {
+    private void scanBundleForAcceptability(MhdIgInterface mhdVersionSpecificImpl, Bundle bundle, ResourceMgr rMgr) {
         Objects.requireNonNull(mhdVersionSpecificImpl);
 
 
@@ -359,7 +359,7 @@ public class BundleToRegistryObjectList implements IVal {
 //        }
     }
 
-    private void evalBundleResources(MhdProfileVersionInterface mhdVersionSpecificImpl, ResourceMgr rMgr) {
+    private void evalBundleResources(MhdIgInterface mhdVersionSpecificImpl, ResourceMgr rMgr) {
         Objects.requireNonNull(mhdVersionSpecificImpl);
 
         for (ResourceWrapper res : rMgr.getBundleResources()) {

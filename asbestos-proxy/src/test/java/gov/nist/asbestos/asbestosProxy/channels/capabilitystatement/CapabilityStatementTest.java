@@ -1,10 +1,8 @@
 package gov.nist.asbestos.asbestosProxy.channels.capabilitystatement;
 
-import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.channel.ChannelConfig;
-import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
-import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
+import gov.nist.asbestos.mhd.channel.MhdIgImplEnum;
 import gov.nist.asbestos.mhd.transforms.MhdV3xCanonicalUriCodes;
 import gov.nist.asbestos.mhd.transforms.MhdV410CanonicalUriCodes;
 import gov.nist.asbestos.mhd.transforms.MhdV4CanonicalUriCodes;
@@ -41,7 +39,7 @@ class CapabilityStatementTest {
     void testMhd3xNoMhdVersCompCapabilityStatement() throws Exception {
         ChannelConfig channelConfig = new ChannelConfig();
         channelConfig.setXdsSiteName(FhirToolkitCapabilityStatement.XDS_COMPREHENSIVE_META_SIM);
-        channelConfig.setMhdVersions(null);
+        channelConfig.setTcFhirIgNames(null);
         channelConfig.setActorType("fhir");
         channelConfig.setChannelType("mhd");
         channelConfig.setChannelName("limited");
@@ -52,9 +50,9 @@ class CapabilityStatementTest {
     @Test
     void testMhd3xCompCapabilityStatement() throws Exception {
         ChannelConfig channelConfig = new ChannelConfig();
-        List<String> mhdVersions = Arrays.asList(MhdVersionEnum.MHDv3x.getVersion());
+        List<String> mhdVersions = Arrays.asList(MhdIgImplEnum.MHDv3x.getIgName());
         channelConfig.setXdsSiteName(FhirToolkitCapabilityStatement.XDS_COMPREHENSIVE_META_SIM);
-        channelConfig.setMhdVersions(mhdVersions.toArray(new String[mhdVersions.size()]));
+        channelConfig.setTcFhirIgNames(mhdVersions.toArray(new String[mhdVersions.size()]));
         channelConfig.setActorType("fhir");
         channelConfig.setChannelType("mhd");
         channelConfig.setChannelName("xds");
@@ -68,9 +66,9 @@ class CapabilityStatementTest {
     @Test
     void testMhd3xMinCapabilityStatement() throws Exception {
         ChannelConfig channelConfig = new ChannelConfig();
-        List<String> mhdVersions = Arrays.asList(MhdVersionEnum.MHDv3x.getVersion());
+        List<String> mhdVersions = Arrays.asList(MhdIgImplEnum.MHDv3x.getIgName());
         channelConfig.setXdsSiteName(FhirToolkitCapabilityStatement.XDS_LIMITED_META_SIM);
-        channelConfig.setMhdVersions(mhdVersions.toArray(new String[mhdVersions.size()]));
+        channelConfig.setTcFhirIgNames(mhdVersions.toArray(new String[mhdVersions.size()]));
         channelConfig.setActorType("fhir");
         channelConfig.setChannelType("mhd");
         channelConfig.setChannelName("limited");
@@ -90,9 +88,9 @@ class CapabilityStatementTest {
     @Test
     void testMhd4MinCapabilityStatement() throws Exception {
         ChannelConfig channelConfig = new ChannelConfig();
-        List<String> mhdVersions = Arrays.asList(MhdVersionEnum.MHDv4.getVersion());
+        List<String> mhdVersions = Arrays.asList(MhdIgImplEnum.MHDv4.getIgName());
         channelConfig.setXdsSiteName(FhirToolkitCapabilityStatement.XDS_LIMITED_META_SIM);
-        channelConfig.setMhdVersions(mhdVersions.toArray(new String[mhdVersions.size()]));
+        channelConfig.setTcFhirIgNames(mhdVersions.toArray(new String[mhdVersions.size()]));
         channelConfig.setActorType("fhir");
         channelConfig.setChannelType("mhd");
         channelConfig.setChannelName("v4limited");
@@ -112,9 +110,9 @@ class CapabilityStatementTest {
     @Test
     void testMhd4CompCapabilityStatement() throws Exception {
         ChannelConfig channelConfig = new ChannelConfig();
-        List<String> mhdVersions = Arrays.asList(MhdVersionEnum.MHDv4.getVersion());
+        List<String> mhdVersions = Arrays.asList(MhdIgImplEnum.MHDv4.getIgName());
         channelConfig.setXdsSiteName(FhirToolkitCapabilityStatement.XDS_COMPREHENSIVE_META_SIM);
-        channelConfig.setMhdVersions(mhdVersions.toArray(new String[mhdVersions.size()]));
+        channelConfig.setTcFhirIgNames(mhdVersions.toArray(new String[mhdVersions.size()]));
         channelConfig.setActorType("fhir");
         channelConfig.setChannelType("mhd");
         channelConfig.setChannelName("v4xds");
@@ -128,9 +126,9 @@ class CapabilityStatementTest {
     @Test
     void testMhd410MinCapabilityStatement() throws Exception {
         ChannelConfig channelConfig = new ChannelConfig();
-        List<String> mhdVersions = Arrays.asList(MhdVersionEnum.MHDv410.getVersion());
+        List<String> mhdVersions = Arrays.asList(MhdIgImplEnum.MHDv410.getIgName());
         channelConfig.setXdsSiteName(FhirToolkitCapabilityStatement.XDS_LIMITED_META_SIM);
-        channelConfig.setMhdVersions(mhdVersions.toArray(new String[mhdVersions.size()]));
+        channelConfig.setTcFhirIgNames(mhdVersions.toArray(new String[mhdVersions.size()]));
         channelConfig.setActorType("fhir");
         channelConfig.setChannelType("mhd");
         channelConfig.setChannelName("v410limited");
@@ -150,9 +148,9 @@ class CapabilityStatementTest {
     @Test
     void testMhd410CompCapabilityStatement() throws Exception {
         ChannelConfig channelConfig = new ChannelConfig();
-        List<String> mhdVersions = Arrays.asList(MhdVersionEnum.MHDv410.getVersion());
+        List<String> mhdVersions = Arrays.asList(MhdIgImplEnum.MHDv410.getIgName());
         channelConfig.setXdsSiteName(FhirToolkitCapabilityStatement.XDS_COMPREHENSIVE_META_SIM);
-        channelConfig.setMhdVersions(mhdVersions.toArray(new String[mhdVersions.size()]));
+        channelConfig.setTcFhirIgNames(mhdVersions.toArray(new String[mhdVersions.size()]));
         channelConfig.setActorType("fhir");
         channelConfig.setChannelType("mhd");
         channelConfig.setChannelName("v410xds");

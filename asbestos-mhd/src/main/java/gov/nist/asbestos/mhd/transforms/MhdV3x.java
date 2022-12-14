@@ -6,8 +6,8 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
-import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
-import gov.nist.asbestos.mhd.channel.MhdVersionEnum;
+import gov.nist.asbestos.mhd.channel.MhdIgInterface;
+import gov.nist.asbestos.mhd.channel.MhdIgImplEnum;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.translation.attribute.ExtrinsicId;
@@ -30,11 +30,11 @@ import java.util.logging.Logger;
 /**
  * V3.x specific implementation
  */
-public class MhdV3x implements MhdProfileVersionInterface {
+public class MhdV3x implements MhdIgInterface {
     private static List<Class<?>> acceptableResourceTypes = Arrays.asList(DocumentManifest.class, DocumentReference.class, Binary.class, ListResource.class /* List not fully supported in V3 mode for now*/);
 
     private static final String IHE_BUNDLE_RESOURCE_REFERENCE_DOCREF = "3.65.4.1.2.1 Bundle Resources";
-    private static MhdVersionEnum mhdVersionEnum = MhdVersionEnum.MHDv3x;
+    private static MhdIgImplEnum mhdVersionEnum = MhdIgImplEnum.MHDv3x;
     CanonicalUriCodeEnum mhdBundleProfileEnum;
     /**
      * Only used to count number of documentManifests in the Bundle.
@@ -56,7 +56,7 @@ public class MhdV3x implements MhdProfileVersionInterface {
 
 
     @Override
-    public MhdVersionEnum getMhdVersion() {
+    public MhdIgImplEnum getMhdIgImpl() {
         return mhdVersionEnum;
     }
 

@@ -12,29 +12,29 @@ import java.util.Objects;
 /**
  * @author skb1
  */
-public enum MhdVersionEnum {
+public enum MhdIgImplEnum {
     MHDv3x("MHDv3.x", MhdV3x.class, MhdV3xCanonicalUriCodes.class, "https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_MHD_Rev3-2_TI_2020-08-28.pdf"), // or https://profiles.ihe.net/ITI/MHD/history.html
     MHDv4("MHDv4", MhdV4.class, MhdV4CanonicalUriCodes.class, "https://profiles.ihe.net/ITI/MHD/4.0.1"),
     MHDv410("MHDv410", MhdV410.class, MhdV410CanonicalUriCodes.class, "https://profiles.ihe.net/ITI/MHD/4.1.0" );
 
-    private String version;
+    private String igName;
     private String mhdDocBase;
-    private Class<? extends MhdProfileVersionInterface> mhdImplClass;
+    private Class<? extends MhdIgInterface> mhdImplClass;
     private Class<? extends MhdCanonicalUriCodeInterface> uriCodesClass;
 
-    MhdVersionEnum(String version,  Class<? extends MhdProfileVersionInterface> mhdImplClass, Class<? extends MhdCanonicalUriCodeInterface> mhdCanonicalUriImplClass, String mhdDocBase) {
-        this.version = version;
+    MhdIgImplEnum(String igName, Class<? extends MhdIgInterface> mhdImplClass, Class<? extends MhdCanonicalUriCodeInterface> mhdCanonicalUriImplClass, String mhdDocBase) {
+        this.igName = igName;
         this.mhdDocBase = mhdDocBase;
         this.mhdImplClass = mhdImplClass;
         this.uriCodesClass = mhdCanonicalUriImplClass;
     }
 
-    static public MhdVersionEnum find(String s) {
+    static public MhdIgImplEnum find(String s) {
         Objects.requireNonNull(s);
-        for (MhdVersionEnum p : values()) {
-            if (s.equals(p.version)) return p;
+        for (MhdIgImplEnum p : values()) {
+            if (s.equals(p.igName)) return p;
             try {
-                if (p == MhdVersionEnum.valueOf(s)) return p;
+                if (p == MhdIgImplEnum.valueOf(s)) return p;
             } catch (IllegalArgumentException e) {
                 // continue;
             }
@@ -44,10 +44,10 @@ public enum MhdVersionEnum {
 
     @Override
     public String toString() {
-        return version;
+        return igName;
     }
 
-    public boolean equals(MhdVersionEnum p) {
+    public boolean equals(MhdIgImplEnum p) {
         return (p.toString().equals(this.toString()));
     }
 
@@ -55,13 +55,13 @@ public enum MhdVersionEnum {
         return (this.toString().equals(s));
     }
 
-    public String getVersion() { return version; }
+    public String getIgName() { return igName; }
 
     public String getMhdDocBase() {
         return mhdDocBase;
     }
 
-    public Class<? extends MhdProfileVersionInterface> getMhdImplClass() {
+    public Class<? extends MhdIgInterface> getMhdImplClass() {
         return mhdImplClass;
     }
 

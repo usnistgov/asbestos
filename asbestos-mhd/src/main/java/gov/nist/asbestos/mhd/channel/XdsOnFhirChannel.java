@@ -80,8 +80,8 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     private AhqrSender sender = null;
     private Binary binary = null;
     private MhdTransforms mhdTransforms;
-    private MhdVersionEnum defaultVersion = MhdVersionEnum.MHDv3x;
-    private MhdProfileVersionInterface mhdImpl;
+    private MhdIgImplEnum defaultVersion = MhdIgImplEnum.MHDv3x;
+    private MhdIgInterface mhdImpl;
     private static final Logger  logger = Logger.getLogger(XdsOnFhirChannel.class.getName());
 
     public XdsOnFhirChannel(ChannelConfig simConfig) {
@@ -182,14 +182,14 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
      *
      * @return
      */
-    private MhdProfileVersionInterface getMhdVersionSpecificImpl(ChannelConfig channelConfig) {
+    private MhdIgInterface getMhdVersionSpecificImpl(ChannelConfig channelConfig) {
         Objects.requireNonNull(channelConfig);
 
-        String[] allowedMhdVersions = channelConfig.getMhdVersions();
+        String[] allowedMhdVersions = channelConfig.getTcFhirIgNames();
 
         if (allowedMhdVersions != null && allowedMhdVersions.length == 1) {
             // Allow only from the Accept list
-            MhdVersionEnum mhdVersion = MhdVersionEnum.find(allowedMhdVersions[0]);
+            MhdIgImplEnum mhdVersion = MhdIgImplEnum.find(allowedMhdVersions[0]);
             return MhdImplFactory.getImplementation(mhdVersion);
 
         } /* else {
@@ -201,9 +201,9 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
             return findMhdImpl(bundle, list.toArray(new String[list.size()]), defaultVersion, val);
         }
         */
-        MhdVersionEnum defaultMhdVersion = MhdVersionEnum.MHDv3x;
-       logger.warning("allowedMhdVersions cannot be null, empty, or more than one version, defaulting to " + defaultMhdVersion.toString());
-       return MhdImplFactory.getImplementation(defaultMhdVersion);
+        MhdIgImplEnum defaultMhdIg = MhdIgImplEnum.MHDv3x;
+       logger.warning("allowedMhdVersions cannot be null, empty, or more than one version, defaulting to " + defaultMhdIg.toString());
+       return MhdImplFactory.getImplementation(defaultMhdIg);
     }
 
     /*

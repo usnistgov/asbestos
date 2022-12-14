@@ -6,7 +6,7 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.mhd.channel.CanonicalUriCodeEnum;
 import gov.nist.asbestos.mhd.channel.MhdCanonicalUriCodeInterface;
-import gov.nist.asbestos.mhd.channel.MhdProfileVersionInterface;
+import gov.nist.asbestos.mhd.channel.MhdIgInterface;
 import gov.nist.asbestos.mhd.transactionSupport.AssigningAuthorities;
 import gov.nist.asbestos.mhd.transactionSupport.CodeTranslator;
 import gov.nist.asbestos.mhd.util.Utils;
@@ -25,13 +25,13 @@ import java.util.logging.Logger;
 
 public class MhdV4Common {
     private final String SUBMISSION_SET_PROFILE_DOCREF_SUFFIX =  "StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html#profile";
-    private MhdProfileVersionInterface mhdImpl;
+    private MhdIgInterface mhdImpl;
     private MhdTransforms mhdTransforms;
     private CanonicalUriCodeEnum canonicalUriCodeEnum;
     private static Logger logger = Logger.getLogger(MhdV4Common.class.getName());
 
 
-    public MhdV4Common(MhdProfileVersionInterface mhdImpl, MhdTransforms mhdTransforms, CanonicalUriCodeEnum canonicalUriCodeEnum) {
+    public MhdV4Common(MhdIgInterface mhdImpl, MhdTransforms mhdTransforms, CanonicalUriCodeEnum canonicalUriCodeEnum) {
         this.mhdImpl = mhdImpl;
         this.mhdTransforms = mhdTransforms;
         this.canonicalUriCodeEnum = canonicalUriCodeEnum;
@@ -49,7 +49,7 @@ public class MhdV4Common {
 //            Class<? extends MhdCanonicalUriCodeInterface> myCodesClass = mhdImpl.getMhdVersion().getUriCodesClass();
 //            if (myCodesClass != null) {
 //                MhdCanonicalUriCodeInterface codesImpl = myCodesClass.getDeclaredConstructor().newInstance();
-                if (MhdCanonicalUriCodeInterface.isCodedAsAListType(Arrays.asList(mhdImpl.getMhdVersion()), resource, CanonicalUriCodeEnum.SUBMISSIONSET)) {
+                if (MhdCanonicalUriCodeInterface.isCodedAsAListType(Arrays.asList(mhdImpl.getMhdIgImpl()), resource, CanonicalUriCodeEnum.SUBMISSIONSET)) {
                     return createSubmissionSet(idBuilder, wrapper, val, vale, channelConfig, codeTranslator, assigningAuthorities);
                 }
 //            }
