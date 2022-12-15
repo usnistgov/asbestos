@@ -30,7 +30,7 @@ public class ChannelConfig {
     private boolean writeLocked;
     private boolean logMhdCapabilityStatementRequest;
     /**
-     * When more than test collection FhirIgName is specified, then the canonical profile must be unique. Otherwise, only single FhirIgName should be specified.
+     * When more than channel config FhirIgName is specified, then the canonical profile must be unique. Otherwise, only single ccFhirIgName should be specified.
      * Used for indexing test collections or interoperability test validation.
      */
     private String[] ccFhirIgName;
