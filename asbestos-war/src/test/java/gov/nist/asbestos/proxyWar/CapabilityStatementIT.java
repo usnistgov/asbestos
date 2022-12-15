@@ -53,7 +53,7 @@ public class CapabilityStatementIT {
                 .setChannelType("mhd")
                 .setXdsSiteName(FhirToolkitCapabilityStatement.XDS_COMPREHENSIVE_META_SIM)
                 .setLogMhdCapabilityStatementRequest(csloggingEnabled);
-                channelConfig.setTcFhirIgNames(mhdVersions);
+                channelConfig.setCcFhirIgName(mhdVersions);
 
         String channelLocation = "http://localhost:"+ proxyPort + "/asbestos/rw/channel/default__" + channelName;
 

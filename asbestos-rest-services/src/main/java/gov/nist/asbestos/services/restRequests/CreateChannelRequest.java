@@ -66,7 +66,7 @@ public class CreateChannelRequest {
             return;
         }
 
-        if (! isMhdVersionValid(channelConfig.getTcFhirIgNames())) {
+        if (! isMhdVersionValid(channelConfig.getCcFhirIgName())) {
             String error = "Invalid mhdVersion.";
             log.warning(error + ": " +  channelConfig.asChannelId());
             request.resp.setContentType("application/json");

@@ -185,7 +185,7 @@ public class XdsOnFhirChannel extends BaseChannel /*implements IBaseChannel*/ {
     private MhdIgInterface getMhdVersionSpecificImpl(ChannelConfig channelConfig) {
         Objects.requireNonNull(channelConfig);
 
-        String[] allowedMhdVersions = channelConfig.getTcFhirIgNames();
+        String[] allowedMhdVersions = channelConfig.getCcFhirIgName();
 
         if (allowedMhdVersions != null && allowedMhdVersions.length == 1) {
             // Allow only from the Accept list

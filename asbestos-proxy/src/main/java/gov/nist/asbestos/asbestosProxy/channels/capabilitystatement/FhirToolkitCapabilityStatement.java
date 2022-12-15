@@ -91,7 +91,7 @@ public class FhirToolkitCapabilityStatement {
             if (baseResource instanceof CapabilityStatement) {
                 CapabilityStatement capabilityStatement = (CapabilityStatement) baseResource;
                 try {
-                    List<CapabilityStatement.SystemInteractionComponent> interactionComponents = getChannelInteractions(channelConfig.getXdsSiteName(), channelConfig.getTcFhirIgNames());
+                    List<CapabilityStatement.SystemInteractionComponent> interactionComponents = getChannelInteractions(channelConfig.getXdsSiteName(), channelConfig.getCcFhirIgName());
                     CapabilityStatement.CapabilityStatementRestComponent restComponent = new CapabilityStatement.CapabilityStatementRestComponent();
                     restComponent.setMode(CapabilityStatement.RestfulCapabilityMode.SERVER);
                     restComponent.setInteraction(interactionComponents);

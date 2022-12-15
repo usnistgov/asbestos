@@ -31,8 +31,9 @@ public class ChannelConfig {
     private boolean logMhdCapabilityStatementRequest;
     /**
      * When more than test collection FhirIgName is specified, then the canonical profile must be unique. Otherwise, only single FhirIgName should be specified.
+     * Used for indexing test collections or interoperability test validation.
      */
-    private String[] tcFhirIgNames;
+    private String[] ccFhirIgName;
     private transient String scheme;
 
     public String toString() {
@@ -40,7 +41,7 @@ public class ChannelConfig {
                 " of " + actorType + " in " + environment +
                 " with base " + fhirBase +
                 " with xdsSite " + xdsSiteName +
-                " tcFhirIgNames " + Arrays.toString(tcFhirIgNames);
+                " ccFhirIgName(s) " + Arrays.toString(ccFhirIgName);
     }
 
     public URI translateEndpointToFhirBase(URI req) throws URISyntaxException {
@@ -177,13 +178,13 @@ public class ChannelConfig {
                 Objects.equals(xdsSiteName, that.xdsSiteName) &&
                 Objects.equals(writeLocked, that.writeLocked) &&
                 Objects.equals(logMhdCapabilityStatementRequest, that.logMhdCapabilityStatementRequest) &&
-                Arrays.equals(tcFhirIgNames, that.tcFhirIgNames);
+                Arrays.equals(ccFhirIgName, that.ccFhirIgName);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(environment, testSession, channelName, actorType, channelType, includeValidation, fhirBase, xdsSiteName, writeLocked, logMhdCapabilityStatementRequest)
-                + Arrays.deepHashCode(tcFhirIgNames);
+                + Arrays.deepHashCode(ccFhirIgName);
     }
 
     public String getXdsSiteName() {
@@ -225,12 +226,12 @@ public class ChannelConfig {
         return channelName;
     }
 
-    public String[] getTcFhirIgNames() {
-        return tcFhirIgNames;
+    public String[] getCcFhirIgName() {
+        return ccFhirIgName;
     }
 
-    public void setTcFhirIgNames(String[] tcFhirIgNames) {
-        this.tcFhirIgNames = tcFhirIgNames;
+    public void setCcFhirIgName(String[] ccFhirIgName) {
+        this.ccFhirIgName = ccFhirIgName;
     }
 
     @JsonIgnore

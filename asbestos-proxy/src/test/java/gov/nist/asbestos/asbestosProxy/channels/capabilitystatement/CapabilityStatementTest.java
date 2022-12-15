@@ -39,7 +39,7 @@ class CapabilityStatementTest {
     void testMhd3xNoMhdVersCompCapabilityStatement() throws Exception {
         ChannelConfig channelConfig = new ChannelConfig();
         channelConfig.setXdsSiteName(FhirToolkitCapabilityStatement.XDS_COMPREHENSIVE_META_SIM);
-        channelConfig.setTcFhirIgNames(null);
+        channelConfig.setCcFhirIgName(null);
         channelConfig.setActorType("fhir");
         channelConfig.setChannelType("mhd");
         channelConfig.setChannelName("limited");
@@ -52,7 +52,7 @@ class CapabilityStatementTest {
         ChannelConfig channelConfig = new ChannelConfig();
         List<String> mhdVersions = Arrays.asList(MhdIgImplEnum.MHDv3x.getIgName());
         channelConfig.setXdsSiteName(FhirToolkitCapabilityStatement.XDS_COMPREHENSIVE_META_SIM);
-        channelConfig.setTcFhirIgNames(mhdVersions.toArray(new String[mhdVersions.size()]));
+        channelConfig.setCcFhirIgName(mhdVersions.toArray(new String[mhdVersions.size()]));
         channelConfig.setActorType("fhir");
         channelConfig.setChannelType("mhd");
         channelConfig.setChannelName("xds");
@@ -68,7 +68,7 @@ class CapabilityStatementTest {
         ChannelConfig channelConfig = new ChannelConfig();
         List<String> mhdVersions = Arrays.asList(MhdIgImplEnum.MHDv3x.getIgName());
         channelConfig.setXdsSiteName(FhirToolkitCapabilityStatement.XDS_LIMITED_META_SIM);
-        channelConfig.setTcFhirIgNames(mhdVersions.toArray(new String[mhdVersions.size()]));
+        channelConfig.setCcFhirIgName(mhdVersions.toArray(new String[mhdVersions.size()]));
         channelConfig.setActorType("fhir");
         channelConfig.setChannelType("mhd");
         channelConfig.setChannelName("limited");
@@ -90,7 +90,7 @@ class CapabilityStatementTest {
         ChannelConfig channelConfig = new ChannelConfig();
         List<String> mhdVersions = Arrays.asList(MhdIgImplEnum.MHDv4.getIgName());
         channelConfig.setXdsSiteName(FhirToolkitCapabilityStatement.XDS_LIMITED_META_SIM);
-        channelConfig.setTcFhirIgNames(mhdVersions.toArray(new String[mhdVersions.size()]));
+        channelConfig.setCcFhirIgName(mhdVersions.toArray(new String[mhdVersions.size()]));
         channelConfig.setActorType("fhir");
         channelConfig.setChannelType("mhd");
         channelConfig.setChannelName("v4limited");
@@ -112,7 +112,7 @@ class CapabilityStatementTest {
         ChannelConfig channelConfig = new ChannelConfig();
         List<String> mhdVersions = Arrays.asList(MhdIgImplEnum.MHDv4.getIgName());
         channelConfig.setXdsSiteName(FhirToolkitCapabilityStatement.XDS_COMPREHENSIVE_META_SIM);
-        channelConfig.setTcFhirIgNames(mhdVersions.toArray(new String[mhdVersions.size()]));
+        channelConfig.setCcFhirIgName(mhdVersions.toArray(new String[mhdVersions.size()]));
         channelConfig.setActorType("fhir");
         channelConfig.setChannelType("mhd");
         channelConfig.setChannelName("v4xds");
@@ -128,7 +128,7 @@ class CapabilityStatementTest {
         ChannelConfig channelConfig = new ChannelConfig();
         List<String> mhdVersions = Arrays.asList(MhdIgImplEnum.MHDv410.getIgName());
         channelConfig.setXdsSiteName(FhirToolkitCapabilityStatement.XDS_LIMITED_META_SIM);
-        channelConfig.setTcFhirIgNames(mhdVersions.toArray(new String[mhdVersions.size()]));
+        channelConfig.setCcFhirIgName(mhdVersions.toArray(new String[mhdVersions.size()]));
         channelConfig.setActorType("fhir");
         channelConfig.setChannelType("mhd");
         channelConfig.setChannelName("v410limited");
@@ -150,7 +150,7 @@ class CapabilityStatementTest {
         ChannelConfig channelConfig = new ChannelConfig();
         List<String> mhdVersions = Arrays.asList(MhdIgImplEnum.MHDv410.getIgName());
         channelConfig.setXdsSiteName(FhirToolkitCapabilityStatement.XDS_COMPREHENSIVE_META_SIM);
-        channelConfig.setTcFhirIgNames(mhdVersions.toArray(new String[mhdVersions.size()]));
+        channelConfig.setCcFhirIgName(mhdVersions.toArray(new String[mhdVersions.size()]));
         channelConfig.setActorType("fhir");
         channelConfig.setChannelType("mhd");
         channelConfig.setChannelName("v410xds");
