@@ -10,6 +10,7 @@ import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.channel.BaseChannel;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.channel.ChannelConfigFactory;
+import gov.nist.asbestos.client.channel.FtkChannelTypeEnum;
 import gov.nist.asbestos.client.channel.IBaseChannel;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.Event;
@@ -59,13 +60,13 @@ import java.util.stream.IntStream;
 
 public class ProxyServlet extends HttpServlet {
     private static File externalCache = null;
-    private Map<String, IChannelBuilder> proxyMap = new HashMap<>();
+    private Map<FtkChannelTypeEnum, IChannelBuilder> proxyMap = new HashMap<>();
     private static Logger log = Logger.getLogger(ProxyServlet.class.getName());
 
     public ProxyServlet() {
         super();
-        proxyMap.put("fhir", new PassthroughChannelBuilder());
-        proxyMap.put("mhd", new XdsOnFhirChannelBuilder());
+        proxyMap.put(FtkChannelTypeEnum.fhir, new PassthroughChannelBuilder());
+        proxyMap.put(FtkChannelTypeEnum.mhd, new XdsOnFhirChannelBuilder());
     }
 
     @Override
@@ -181,7 +182,7 @@ public class ProxyServlet extends HttpServlet {
 
             // these should be redundant given what is done in parseUri()
             ChannelConfig channelConfig = simStore.getChannelConfig();
-            String channelType = channelConfig.getChannelType();
+            FtkChannelTypeEnum channelType = channelConfig.getChannelType();
             if (channelType == null)
                 throw new Error("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
             IChannelBuilder channelBuilder = proxyMap.get(channelType);
@@ -292,10 +293,10 @@ public class ProxyServlet extends HttpServlet {
 
         Verb verb = Verb.GET;
         SimStore simStore = getSimStore(req, resp, uri, verb);
-        String channelType = simStore.getChannelConfig().getChannelType();
+        FtkChannelTypeEnum channelType = simStore.getChannelConfig().getChannelType();
 
         // Only the MHD capability statement
-        if ("mhd".equals(channelType)) {
+        if (FtkChannelTypeEnum.mhd.equals(channelType)) {
             try {
                 Optional<URI> proxyBaseURI = getProxyBase(uri);
                  if (proxyBaseURI.isPresent()) {
@@ -327,7 +328,7 @@ public class ProxyServlet extends HttpServlet {
             if (hostport == null || hostport.equals(""))
                 hostport = "localhost:8080";
 
-            String channelType = channelConfig.getChannelType();
+            FtkChannelTypeEnum channelType = channelConfig.getChannelType();
             if (channelType == null)
                 throw new Exception("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
 
@@ -378,7 +379,7 @@ public class ProxyServlet extends HttpServlet {
 
         try {
 
-            String channelType = simStore.getChannelConfig().getChannelType();
+            FtkChannelTypeEnum channelType = simStore.getChannelConfig().getChannelType();
             if (channelType == null)
                 throw new Exception("Sim " + simStore.getChannelId() + " does not define a Channel Type.");
             IChannelBuilder channelBuilder = proxyMap.get(channelType);

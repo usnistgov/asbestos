@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import gov.nist.asbestos.asbestosProxy.channel.ChannelControl;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.channel.FtkChannelTypeEnum;
 import gov.nist.asbestos.client.resolver.Ref;
 import java.util.logging.Logger;
 
@@ -55,7 +56,7 @@ public class GetNativeUrlRequest {
             return;
         }
 
-        if ("fhir".equals(channelConfig.getChannelType())) {
+        if (FtkChannelTypeEnum.fhir.equals(channelConfig.getChannelType())) {
             Ref ref = new Ref(urlIn);
             ref = ref.rebase(channelConfig.getFhirBase());
             request.resp.setContentType("text/plain");

@@ -325,7 +325,7 @@ public class SimStore {
     }
 
     public static Pattern isValidCharsPattern() {
-        return Pattern.compile("^([a-zA-Z0-9_]+)$");
+        return Pattern.compile("([a-zA-Z0-9]+[_]{0,1})+");
     }
 
     public static Pattern isReservedNamesPattern(String[] additionalNames) {

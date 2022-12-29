@@ -127,12 +127,6 @@
     "TR_9":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p1", "verbatimPhraseToFocus": "contains one entry for each entry in the request"}]
   },
 
-  "docBase" : {
-    "MHDv3.x": "https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_MHD_Rev3-2_TI_2020-08-28.pdf",
-    "MHDv4": "https://profiles.ihe.net/ITI/MHD/4.0.1",
-    "MHDv410": "https://profiles.ihe.net/ITI/MHD/4.1.0"
-  },
-
   "references": {
     "mhdv4Comprehensive": {
       "SubmissionSetTypeList": {

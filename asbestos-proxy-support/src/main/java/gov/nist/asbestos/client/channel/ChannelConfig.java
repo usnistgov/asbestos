@@ -23,7 +23,7 @@ public class ChannelConfig {
     private String testSession;
     private String channelName;   // simple id (no testSesssion__ prefix)
     private String actorType;
-    private String channelType;
+    private FtkChannelTypeEnum channelType;
     private boolean includeValidation;
     private String fhirBase = null;   // points to fhir server is channel type if FHIR
     private String xdsSiteName;       // point to XDS server if channel type is MHD
@@ -135,11 +135,11 @@ public class ChannelConfig {
         return this;
     }
 
-    public String getChannelType() {
+    public FtkChannelTypeEnum getChannelType() {
         return channelType;
     }
 
-    public ChannelConfig setChannelType(String channelType) {
+    public ChannelConfig setChannelType(FtkChannelTypeEnum channelType) {
         this.channelType = channelType;
         return this;
     }

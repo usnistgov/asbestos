@@ -24,7 +24,7 @@ import static gov.nist.asbestos.client.Base.Returns.returnPlainTextResponse;
 public class ReplaceChannelRequest extends CreateChannelRequest {
     private static Logger log = Logger.getLogger(CreateChannelRequest.class.getName());
 
-    public ReplaceChannelRequest(Request request) {
+    public ReplaceChannelRequest(Request request) throws IOException {
         super(request);
         request.setType(this.getClass().getSimpleName());
     }
@@ -45,8 +45,6 @@ public class ReplaceChannelRequest extends CreateChannelRequest {
 
         try {
             channelConfigAsPerTheUri = ChannelControl.channelConfigFromChannelId(request.externalCache, channelId);
-
-            rawRequest = IOUtils.toString(request.req.getInputStream(), Charset.defaultCharset());   // json
             log.fine("REPLACE Channel " + rawRequest);
             ChannelConfig channelConfigAsPerBody = ChannelConfigFactory.convert(rawRequest);
 

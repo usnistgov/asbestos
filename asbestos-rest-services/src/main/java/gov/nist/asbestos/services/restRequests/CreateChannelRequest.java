@@ -1,6 +1,7 @@
 package gov.nist.asbestos.services.restRequests;
 
 import gov.nist.asbestos.client.Base.Request;
+import gov.nist.asbestos.client.channel.FtkChannelTypeEnum;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.channel.ChannelConfigFactory;
@@ -8,6 +9,9 @@ import gov.nist.asbestos.mhd.channel.MhdIgImplEnum;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.simCommon.TestSession;
 import org.apache.commons.io.IOUtils;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 import java.io.IOException;
@@ -36,44 +40,17 @@ public class CreateChannelRequest {
         return false;
     }
 
-    public CreateChannelRequest(Request request) {
+    public CreateChannelRequest(Request request) throws IOException {
         request.setType(this.getClass().getSimpleName());
         this.request = request;
+        this.rawRequest = IOUtils.toString(request.req.getInputStream(), Charset.defaultCharset());   // json
     }
 
     public void run() throws IOException {
         request.announce("CreateChannel");
-        if (rawRequest == null) {
-            rawRequest = IOUtils.toString(request.req.getInputStream(), Charset.defaultCharset());   // json
-            log.fine(()->"CREATE Channel " + rawRequest);
-        }
-        ChannelConfig channelConfig = ChannelConfigFactory.convert(rawRequest);
-
-        if ("fhir".equalsIgnoreCase(channelConfig.getChannelType()) && channelConfig.isLogMhdCapabilityStatementRequest()) {
-            channelConfig.setLogMhdCapabilityStatementRequest(false);
-        }
-
-
-        boolean isInvalidChannelName = ! SimStore.isValidCharsPattern().matcher(channelConfig.asChannelId()).matches()
-                || SimStore.isReservedNamesPattern(null).matcher(channelConfig.getChannelName()).matches();
-
-        if (isInvalidChannelName) {
-            String error = "Invalid channel name. Check if name contains an illegal character or is a reserved name.";
-            log.warning(error + ": " +  channelConfig.asChannelId());
-            request.resp.setContentType("application/json");
-            request.resp.getOutputStream().print(error);
-            request.setStatus((request.resp.SC_BAD_REQUEST));
-            return;
-        }
-
-        if (! isMhdVersionValid(channelConfig.getCcFhirIgName())) {
-            String error = "Invalid mhdVersion.";
-            log.warning(error + ": " +  channelConfig.asChannelId());
-            request.resp.setContentType("application/json");
-            request.resp.getOutputStream().print(error);
-            request.setStatus((request.resp.SC_BAD_REQUEST));
-            return;
-        }
+        log.fine(()->"CREATE Channel " + rawRequest);
+        ChannelConfig channelConfig = verifyChannelConfig(ChannelConfigFactory.convert(rawRequest));
+        if (channelConfig == null) return;
 
         SimStore simStore = new SimStore(request.externalCache,
                 new SimId(new TestSession(channelConfig.getTestSession()),
@@ -91,20 +68,65 @@ public class CreateChannelRequest {
         request.setStatus((simStore.isNewlyCreated() ? request.resp.SC_CREATED : request.resp.SC_OK));
     }
 
-    private static boolean isMhdVersionValid(String[] mhdVersions) {
-         if (mhdVersions == null) { /* null means nothing is specified, which is valid since mhdVersion is optional: Oldest IG will be the default. */
+    @Nullable
+    private ChannelConfig verifyChannelConfig(ChannelConfig channelConfig) throws IOException {
+
+        if (FtkChannelTypeEnum.fhir.equals(channelConfig.getChannelType()) && channelConfig.isLogMhdCapabilityStatementRequest()) {
+            channelConfig.setLogMhdCapabilityStatementRequest(false);
+        }
+
+        boolean isInvalidChannelName = ! SimStore.isValidCharsPattern().matcher(channelConfig.asChannelId()).matches()
+                || SimStore.isReservedNamesPattern(null).matcher(channelConfig.getChannelName()).matches();
+
+        if (isInvalidChannelName) {
+            String warningMessage = "Invalid channel name. Check if name contains an illegal character or is a reserved name.";
+            log.warning(warningMessage + ": " +  channelConfig.asChannelId());
+            request.resp.setContentType("application/json");
+            request.resp.getOutputStream().print(warningMessage);
+            request.setStatus((request.resp.SC_BAD_REQUEST));
+            return null;
+        }
+
+        if (! isFhirIgNameValid(channelConfig)) {
+            String warningMessage = "Invalid fhirIgName property in " + channelConfig.asChannelId();
+            log.warning(warningMessage);
+            request.resp.setContentType("application/json");
+            request.resp.getOutputStream().print(warningMessage);
+            request.setStatus((request.resp.SC_BAD_REQUEST));
+            return null;
+        }
+        return channelConfig;
+    }
+
+    private static boolean isFhirIgNameValid(ChannelConfig channelConfig) {
+        String[] fhirIgNames = channelConfig.getCcFhirIgName();
+         if (fhirIgNames == null) { /* null means nothing is specified, which is valid since this is optional: Oldest IG may be the default according to the channel type. */
              return true;
          }
-         // If a mhdVersion is indeed specified, make sure it is mappable to the enum
+         // If an fhirIgName was indeed specified, make sure it is mappable to an implementation enum
          try {
-             if (mhdVersions != null  && mhdVersions.length > 0) {
-                 long count = Arrays.stream(mhdVersions).map(e -> MhdIgImplEnum.find(e)).count();
-                 if (mhdVersions.length == count)
+             if (fhirIgNames != null  && fhirIgNames.length > 0) {
+                 Function<String,Enum> f = null;
+                 final FtkChannelTypeEnum channelType = channelConfig.getChannelType();
+                 switch (channelType) {
+                     case mhd:
+                        f =  MhdIgImplEnum::find; break;
+//                     case "imr":
+//                        f =  ImrIgImplEnum::find; break;
+                     default:
+                         log.warning(String.format("Do not understand '%s' channelType.", channelType));
+                         return false;
+                 }
+                 if (f == null)
+                     throw new Exception(String.format("isFhirIgName error: Null function for '%s' channelType.", channelType));
+                 long count = Arrays.stream(fhirIgNames).map(f).count();
+                 if (fhirIgNames.length == count)
                      return true;
              } else {
                  return true; // 0 length is OK
              }
          } catch (Exception ex) {
+             log.severe("isFhirIgNameValid exception: " + ex.toString());
             return false;
          }
          return false;
