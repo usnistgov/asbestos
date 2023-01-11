@@ -48,11 +48,12 @@ pdbAssertions: [
     },
     actions: {
         async loadChannelTypeIgTestCollections({commit}) {
-            const url = 'channelTypeTestCollection'
+            const url = 'channelTypeIgTestCollection'
             try {
                 ENGINE.get(url)
                     .then(response => {
                         commit('setFtkChannelTypeIgTestCollections', response.data)
+                        console.info(JSON.stringify(response.data))
                     })
                     .catch(function (error) {
                         commit('setError', url + ': ' + error)

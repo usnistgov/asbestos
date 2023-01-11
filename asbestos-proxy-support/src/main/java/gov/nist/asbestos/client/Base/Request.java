@@ -148,7 +148,7 @@ public class Request {
     }
 
     private String getRequestType() {
-        return null == getType() ? "UnknownRequestType." : getType();
+        return null == getType() ? "UnknownRequestType or request handler is not registered with the HTTP-verb method in TestEngineServlet." : getType();
     }
 
     public void badRequest() {
