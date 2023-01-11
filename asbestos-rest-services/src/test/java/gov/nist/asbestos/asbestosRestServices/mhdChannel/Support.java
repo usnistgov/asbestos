@@ -2,6 +2,7 @@ package gov.nist.asbestos.asbestosRestServices.mhdChannel;
 
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.channel.ChannelConfigFactory;
+import gov.nist.asbestos.client.channel.FtkChannelTypeEnum;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
 
@@ -40,7 +41,7 @@ public class Support {
                 .setChannelName(channelId)
                 .setEnvironment("default")
                 .setActorType("fhir")
-                .setChannelType("passthrough")
+                .setChannelType(FtkChannelTypeEnum.fhir)
                 .setFhirBase("http://localhost:7080/fhir");
     }
 

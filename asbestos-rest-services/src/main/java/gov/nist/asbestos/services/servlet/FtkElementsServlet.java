@@ -1,5 +1,6 @@
 package gov.nist.asbestos.services.servlet;
 
+import gov.nist.asbestos.client.channel.FtkChannelTypeEnum;
 import gov.nist.asbestos.services.restRequests.*;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.log.SimStore;
@@ -43,7 +44,7 @@ public class FtkElementsServlet extends HttpServlet {
                     .setEnvironment("default")
                     .setTestSession("default")
                     .setChannelName("default")
-                    .setChannelType("fhir")
+                    .setChannelType(FtkChannelTypeEnum.fhir)
                     .setActorType("fhir")
                     .setFhirBase(hapiFhirBase);
             simStore.create(cconfig);

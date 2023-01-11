@@ -1,6 +1,7 @@
 package gov.nist.asbestos.proxyWar;
 
 import gov.nist.asbestos.client.Base.EC;
+import gov.nist.asbestos.client.channel.FtkChannelTypeEnum;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.client.channel.ChannelConfig;
@@ -80,7 +81,7 @@ class ModuleIT {
                 .setChannelName(channelId)
                 .setEnvironment("default")
                 .setActorType("fhir")
-                .setChannelType("fhir")
+                .setChannelType(FtkChannelTypeEnum.fhir)
                 .setFhirBase("http://localhost:" + fhirPort + "/fhir");
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpPost poster = new HttpPost();

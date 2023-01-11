@@ -1,5 +1,7 @@
 package gov.nist.asbestos.mhd.channel;
 
+import gov.nist.asbestos.client.channel.FtkChannelTypeEnum;
+import gov.nist.asbestos.client.channel.IgNameConstants;
 import gov.nist.asbestos.mhd.transforms.MhdV3x;
 import gov.nist.asbestos.mhd.transforms.MhdV3xCanonicalUriCodes;
 import gov.nist.asbestos.mhd.transforms.MhdV4;
@@ -13,18 +15,16 @@ import java.util.Objects;
  * @author skb1
  */
 public enum MhdIgImplEnum {
-    MHDv3x("MHDv3.x", MhdV3x.class, MhdV3xCanonicalUriCodes.class, "https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_MHD_Rev3-2_TI_2020-08-28.pdf"), // or https://profiles.ihe.net/ITI/MHD/history.html
-    MHDv4("MHDv4", MhdV4.class, MhdV4CanonicalUriCodes.class, "https://profiles.ihe.net/ITI/MHD/4.0.1"),
-    MHDv410("MHDv410", MhdV410.class, MhdV410CanonicalUriCodes.class, "https://profiles.ihe.net/ITI/MHD/4.1.0" );
+    MHDv3x(IgNameConstants.MHDV_3_X, MhdV3x.class, MhdV3xCanonicalUriCodes.class ),
+    MHDv4(IgNameConstants.MHDV_4, MhdV4.class, MhdV4CanonicalUriCodes.class ),
+    MHDv410(IgNameConstants.MHDV_410, MhdV410.class, MhdV410CanonicalUriCodes.class );
 
-    private String igName;
-    private String mhdDocBase;
+    private IgNameConstants igName;
     private Class<? extends MhdIgInterface> mhdImplClass;
     private Class<? extends MhdCanonicalUriCodeInterface> uriCodesClass;
 
-    MhdIgImplEnum(String igName, Class<? extends MhdIgInterface> mhdImplClass, Class<? extends MhdCanonicalUriCodeInterface> mhdCanonicalUriImplClass, String mhdDocBase) {
+    MhdIgImplEnum(IgNameConstants igName, Class<? extends MhdIgInterface> mhdImplClass, Class<? extends MhdCanonicalUriCodeInterface> mhdCanonicalUriImplClass) {
         this.igName = igName;
-        this.mhdDocBase = mhdDocBase;
         this.mhdImplClass = mhdImplClass;
         this.uriCodesClass = mhdCanonicalUriImplClass;
     }
@@ -32,7 +32,7 @@ public enum MhdIgImplEnum {
     static public MhdIgImplEnum find(String s) {
         Objects.requireNonNull(s);
         for (MhdIgImplEnum p : values()) {
-            if (s.equals(p.igName)) return p;
+            if (s.equals(p.igName.toString())) return p;
             try {
                 if (p == MhdIgImplEnum.valueOf(s)) return p;
             } catch (IllegalArgumentException e) {
@@ -44,7 +44,7 @@ public enum MhdIgImplEnum {
 
     @Override
     public String toString() {
-        return igName;
+        return igName.getIgName();
     }
 
     public boolean equals(MhdIgImplEnum p) {
@@ -55,11 +55,8 @@ public enum MhdIgImplEnum {
         return (this.toString().equals(s));
     }
 
-    public String getIgName() { return igName; }
+    public IgNameConstants getIgName() { return igName; }
 
-    public String getMhdDocBase() {
-        return mhdDocBase;
-    }
 
     public Class<? extends MhdIgInterface> getMhdImplClass() {
         return mhdImplClass;
@@ -68,4 +65,6 @@ public enum MhdIgImplEnum {
     public Class<? extends MhdCanonicalUriCodeInterface> getUriCodesClass() {
         return uriCodesClass;
     }
+
+
 }

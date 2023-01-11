@@ -182,6 +182,7 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
                 this.testProxy()
                 this.testHapi()
                 this.testXdsToolkit()
+                this.setChannelTypeIgTestCollections()
             },
             testEngineBase() {
                 return UtilFunctions.getTestEngineBase()
@@ -201,6 +202,9 @@ kinds of channels: FHIR - data passed without modification and MHD - translation
             testHapi() {
                 this.$store.dispatch('hapiHeartbeat')
             },
+            setChannelTypeIgTestCollections() {
+                this.$store.dispatch('loadChannelTypeIgTestCollections')
+            }
         },
         computed: {
             isProxyResponding() {

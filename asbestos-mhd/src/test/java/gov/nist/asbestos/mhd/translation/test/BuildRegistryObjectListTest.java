@@ -2,6 +2,7 @@ package gov.nist.asbestos.mhd.translation.test;
 
 import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.channel.FtkChannelTypeEnum;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.ITask;
@@ -72,7 +73,7 @@ class BuildRegistryObjectListTest {
     void beforeEach() {
         ChannelConfig channelConfig = new ChannelConfig()
                 .setChannelName("test")
-                .setChannelType("mhd")
+                .setChannelType(FtkChannelTypeEnum.mhd)
                 .setActorType("fhir")
                 .setEnvironment("default")
                 .setFhirBase("http://localhost:7080/fhir")

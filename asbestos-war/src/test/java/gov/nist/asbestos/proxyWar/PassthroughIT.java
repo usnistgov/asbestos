@@ -3,6 +3,7 @@ package gov.nist.asbestos.proxyWar;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import gov.nist.asbestos.client.channel.FtkChannelTypeEnum;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
@@ -103,7 +104,7 @@ class PassthroughIT {
                 .setChannelName(channelId)
                 .setEnvironment("default")
                 .setActorType("fhir")
-                .setChannelType("fhir")
+                .setChannelType(FtkChannelTypeEnum.fhir)
                 .setFhirBase("http://localhost:" + fhirPort + "/fhir");
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpPost poster = new HttpPost();

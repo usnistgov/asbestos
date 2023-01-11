@@ -27,14 +27,14 @@ pdbAssertions: [
 ]
 */
 
-            ftkChannelCapabilities: [],
+            channelTypeIgTestCollection: [],
 
             doReloadObjArray: function(state, tcObjs) {
-                if (state.ftkChannelCapabilities.length > 0) {
-                    state.ftkChannelCapabilities.splice(0, state.ftkChannelCapabilities.length)
+                if (state.channelTypeIgTestCollection.length > 0) {
+                    state.channelTypeIgTestCollection.splice(0, state.channelTypeIgTestCollection.length)
                 }
                 for (let r of tcObjs) {
-                    state.ftkChannelCapabilities.push(r)
+                    state.channelTypeIgTestCollection.push(r)
                 }
             },
 
@@ -42,19 +42,17 @@ pdbAssertions: [
         }
     },
     mutations: {
-        setFtkChannelCapabilities(state, chObjArray) {
+        setFtkChannelTypeIgTestCollections(state, chObjArray) {
             state.doReloadObjArray(state,  chObjArray)
         },
     },
     actions: {
-        async loadChannelCapabilities({commit, state}) {
-            const url = 'collections'
+        async loadChannelTypeIgTestCollections({commit}) {
+            const url = 'channelTypeTestCollection'
             try {
                 ENGINE.get(url)
                     .then(response => {
-                        commit('testCollectionsLoaded')  // startup heartbeat for test engine
-                        commit('setClientTestCollectionObjs', response.data.filter(e => !e.hidden && !e.server).sort(state.sortTestCollection))
-                        commit('setServerTestCollectionObjs', response.data.filter(e => !e.hidden && e.server).sort(state.sortTestCollection))
+                        commit('setFtkChannelTypeIgTestCollections', response.data)
                     })
                     .catch(function (error) {
                         commit('setError', url + ': ' + error)

@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import gov.nist.asbestos.asbestosProxy.channels.capabilitystatement.FhirToolkitCapabilityStatement;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.channel.ChannelConfigFactory;
+import gov.nist.asbestos.client.channel.FtkChannelTypeEnum;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
@@ -43,14 +44,14 @@ public class CapabilityStatementIT {
 
 
     private static void deleteAndRecreateMhdTestChannel(String channelName, boolean csloggingEnabled) throws URISyntaxException, IOException {
-        String[] mhdVersions = new String[]{MhdIgImplEnum.MHDv410.getIgName()};
+        String[] mhdVersions = new String[]{MhdIgImplEnum.MHDv410.getIgName().toString()};
         // create
         ChannelConfig channelConfig = new ChannelConfig()
                 .setTestSession("default")
                 .setChannelName(channelName)
                 .setEnvironment("default")
                 .setActorType("fhir")
-                .setChannelType("mhd")
+                .setChannelType(FtkChannelTypeEnum.mhd)
                 .setXdsSiteName(FhirToolkitCapabilityStatement.XDS_COMPREHENSIVE_META_SIM)
                 .setLogMhdCapabilityStatementRequest(csloggingEnabled);
                 channelConfig.setCcFhirIgName(mhdVersions);

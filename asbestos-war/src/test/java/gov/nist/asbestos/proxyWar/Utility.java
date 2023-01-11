@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import gov.nist.asbestos.analysis.Report;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ParserBase;
+import gov.nist.asbestos.client.channel.FtkChannelTypeEnum;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.UIEvent;
@@ -56,7 +57,7 @@ public class Utility {
                 .setChannelName(channelName)
                 .setEnvironment("default")
                 .setActorType("fhir")
-                .setChannelType("fhir")
+                .setChannelType(FtkChannelTypeEnum.fhir)
                 .setFhirBase("http://localhost:" + fhirPort + "/fhir");
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpPost poster = new HttpPost();

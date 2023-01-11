@@ -3,6 +3,7 @@ package gov.nist.asbestos.proxyWar;
 import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.channel.ChannelConfigFactory;
+import gov.nist.asbestos.client.channel.FtkChannelTypeEnum;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
@@ -38,7 +39,7 @@ class GzipIT {
                 .setChannelName("forgzipit")
                 .setEnvironment("default")
                 .setActorType("fhir")
-                .setChannelType("fhir") // in many places, this is incorrectly coded as "passthrough". ProxyServlet will not be able find a ChannelBuilder for the 'passthrough' type.
+                .setChannelType(FtkChannelTypeEnum.fhir) // in many places, this is incorrectly coded as "passthrough". ProxyServlet will not be able find a ChannelBuilder for the 'passthrough' type.
                 .setFhirBase(ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.HAPI_FHIR_BASE)
                 );
 

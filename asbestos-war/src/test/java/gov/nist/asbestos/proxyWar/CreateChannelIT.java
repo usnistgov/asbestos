@@ -2,6 +2,7 @@ package gov.nist.asbestos.proxyWar;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import gov.nist.asbestos.client.channel.FtkChannelTypeEnum;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpGetter;
 import gov.nist.asbestos.http.operations.HttpPost;
@@ -45,7 +46,7 @@ class CreateChannelIT {
                 .setChannelName("test")
                 .setEnvironment("default")
                 .setActorType("fhir")
-                .setChannelType("passthrough")
+                .setChannelType(FtkChannelTypeEnum.fhir)
                 .setFhirBase("http://localhost:" + fhirPort + "/fhir");
         HttpPost poster = new HttpPost();
         poster.postJson(new URI("http://localhost:" + proxyPort + "/asbestos/rw/channel/create"), ChannelConfigFactory.convert(channelConfig));
@@ -116,7 +117,7 @@ class CreateChannelIT {
                 .setChannelName("test")
                 .setEnvironment("default")
                 .setActorType("fhir")
-                .setChannelType("passthrough")
+                .setChannelType(FtkChannelTypeEnum.fhir )
                 .setFhirBase("http://localhost:"+ fhirPort + "/fhir");
 
         String channelLocation = "http://localhost:"+ proxyPort + "/asbestos/rw/channel/default__test";
@@ -153,7 +154,7 @@ class CreateChannelIT {
                 .setChannelName("test1")
                 .setEnvironment("default")
                 .setActorType("fhir")
-                .setChannelType("passthrough")
+                .setChannelType(FtkChannelTypeEnum.fhir)
                 .setFhirBase("http://localhost:7080/fhir"));
 
         String channelConfig2 = ChannelConfigFactory.convert(new ChannelConfig()
@@ -161,7 +162,7 @@ class CreateChannelIT {
                 .setChannelName("test2")
                 .setEnvironment("default")
                 .setActorType("fhir")
-                .setChannelType("passthrough")
+                .setChannelType(FtkChannelTypeEnum.fhir)
                 .setFhirBase("http://localhost:7080/fhir"));
 
         HttpDelete deleter;

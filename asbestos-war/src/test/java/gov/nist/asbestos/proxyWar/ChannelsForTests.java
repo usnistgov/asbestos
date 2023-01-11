@@ -1,5 +1,6 @@
 package gov.nist.asbestos.proxyWar;
 
+import gov.nist.asbestos.client.channel.FtkChannelTypeEnum;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.operations.HttpDelete;
 import gov.nist.asbestos.http.operations.HttpPost;
@@ -21,7 +22,7 @@ public class ChannelsForTests {
                 .setChannelName(channelId)
                 .setEnvironment("default")
                 .setActorType("fhir")
-                .setChannelType("fhir")
+                .setChannelType(FtkChannelTypeEnum.fhir)
                 .setFhirBase(fhirBase.toString());
         String json = ChannelConfigFactory.convert(channelConfig);
         HttpPost poster = new HttpPost();

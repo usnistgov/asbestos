@@ -1,6 +1,7 @@
 package gov.nist.asbestos.mhd.channel;
 
 import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.channel.FtkChannelTypeEnum;
 import gov.nist.asbestos.client.resolver.IdBuilder;
 import gov.nist.asbestos.client.resolver.ResourceMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
@@ -12,6 +13,7 @@ import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.RegistryPackageType;
 import org.hl7.fhir.r4.model.Identifier;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -32,8 +34,21 @@ public interface MhdIgInterface {
 
 //    CanonicalUriCodeEnum getDetectedBundleProfile();
 
-        default String getDocBase(String ref) {
-        return String.format("%s/%s", getMhdIgImpl().getMhdDocBase(), ref);
+    default String getDocBase() {
+        return getDocBase(null);
+    }
+    default String getDocBase(String ref) {
+        Optional<String> x = Arrays.stream( FtkChannelTypeEnum.values())
+                .map(s -> s.getMhdDocBase(getMhdIgImpl().getIgName()))
+                .findFirst();
+        if (x.isPresent()) {
+            if (ref != null) {
+                return String.format("%s/%s", x.get(), ref);
+            } else {
+                return x.get();
+            }
+        }
+        return "DocBaseNotFound";
     }
 
 
@@ -44,12 +59,12 @@ public interface MhdIgInterface {
 
     default Optional<String> hasSsQueryParam(List<String> paramList) throws Exception {
         if (paramList == null) {
-            throw new Exception(String.format("Search param cannot be empty or null. See %s/ITI-66.html#23664121-query-search-parameters", getMhdIgImpl().getMhdDocBase()));
+            throw new Exception(String.format("Search param cannot be empty or null. See %s/ITI-66.html#23664121-query-search-parameters", getDocBase()));
         }
         final String ssCode = CanonicalUriCodeEnum.SUBMISSIONSET.getCode();
         Optional<String> matchParam = paramList.stream().filter(s -> s.contains("code=" + ssCode) || s.contains("code%3d" + ssCode)).findAny();
         if (! matchParam.isPresent()) {
-            throw new Exception(String.format("Search param is empty or null. See %s/ITI-66.html#23664121-query-search-parameters", getMhdIgImpl().getMhdDocBase()));
+            throw new Exception(String.format("Search param is empty or null. See %s/ITI-66.html#23664121-query-search-parameters", getDocBase()));
         }
         return matchParam;
     }

@@ -11,6 +11,7 @@ import gov.nist.asbestos.simapi.simCommon.TestSession;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
@@ -75,7 +76,8 @@ public class CreateChannelRequest {
             channelConfig.setLogMhdCapabilityStatementRequest(false);
         }
 
-        boolean isInvalidChannelName = ! SimStore.isValidCharsPattern().matcher(channelConfig.asChannelId()).matches()
+        boolean isInvalidChannelName = ! SimStore.isValidCharsPattern().matcher(channelConfig.getTestSession()).matches()
+                || ! SimStore.isValidCharsPattern().matcher(channelConfig.getChannelName()).matches()
                 || SimStore.isReservedNamesPattern(null).matcher(channelConfig.getChannelName()).matches();
 
         if (isInvalidChannelName) {
@@ -103,24 +105,16 @@ public class CreateChannelRequest {
          if (fhirIgNames == null) { /* null means nothing is specified, which is valid since this is optional: Oldest IG may be the default according to the channel type. */
              return true;
          }
-         // If an fhirIgName was indeed specified, make sure it is mappable to an implementation enum
+         // If a fhirIgName was indeed specified, make sure it is mappable to an implementation enum
          try {
              if (fhirIgNames != null  && fhirIgNames.length > 0) {
                  Function<String,Enum> f = null;
                  final FtkChannelTypeEnum channelType = channelConfig.getChannelType();
-                 switch (channelType) {
-                     case mhd:
-                        f =  MhdIgImplEnum::find; break;
-//                     case "imr":
-//                        f =  ImrIgImplEnum::find; break;
-                     default:
-                         log.warning(String.format("Do not understand '%s' channelType.", channelType));
-                         return false;
-                 }
-                 if (f == null)
-                     throw new Exception(String.format("isFhirIgName error: Null function for '%s' channelType.", channelType));
-                 long count = Arrays.stream(fhirIgNames).map(f).count();
-                 if (fhirIgNames.length == count)
+                 Optional<String> igName = channelType.getChannelTypeIgTestCollection().getIgTestCollections().stream()
+                         .map(s -> s.getIgName().toString())
+                         .filter(s -> Arrays.asList(fhirIgNames).contains(s))
+                         .findAny();
+                 if (igName.isPresent())
                      return true;
              } else {
                  return true; // 0 length is OK
