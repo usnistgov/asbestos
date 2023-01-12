@@ -61,7 +61,7 @@ public class CreateChannelRequest {
                         true));
 
         simStore.create(channelConfig);
-        log.info("Channel " + simStore.getChannelId().toString() + " created (type " + simStore.getActorType() + ")" );
+        log.info("Channel " + simStore.getChannelId().toString() + " created (actorType " + simStore.getActorType() + ")" );
 
         request.resp.setContentType("application/json");
         request.resp.getOutputStream().print(rawRequest);

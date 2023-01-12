@@ -89,8 +89,8 @@
         <label class="grid-name">Channel Type</label>
         <div v-if="isEditMode" class="grid-item">
           <select v-model="channel.channelType">
-            <option v-for="ct in $store.state.channel.channelTypes" :key="ct">
-              {{ct}}
+            <option v-for="ct in $store.state.channel.channelTypeIgTestCollection" :key="ct.channelType">
+              {{ct.channelType}}
             </option>
           </select>
         </div>
@@ -126,24 +126,22 @@
           </div>
         </div>
 
-        <label class="grid-name">MHD Version Support Option</label>
-        <div v-if="isEditMode" class="grid-item" >
-          <select size="1"  v-model="channelMhdVersionSupport">
+        <label class="grid-name">FHIR IG Version Support</label>
+        <div v-if="isEditMode " class="grid-item" >
+          <select size="1"  v-model="channelIgVersionSupport">
             <option :key="eKey"
-                    :value="e"
-                    v-for="(e,eKey) in $store.state.channel.mhdVersions">
-              {{ e }}
+                    :value="e.igName"
+                    v-for="(e,eKey) in this.getChannelTypeIgTestCollectionArray(this.channel.channelType)">
+              {{ e.igName}}
             </option>
           </select>
-          Only used with Channel Type mhd
-<!--            No selection is required if PDB Profile Canonical URI is unique and differentiable. I.e., if no Options are selected, channel validation is based on the PDB bundle profile. All test collections are displayed if no Options are selected. If Option(s) are selected, test collections are filtered based on Option selection.-->
         </div>
         <div v-else>
-            <template v-if="Array.isArray(channel.mhdVersions) && channel.mhdVersions.length > 0">
-              {{channel.mhdVersions.join(", ")}}
+            <template v-if="Array.isArray(channel.ccFhirIgName) && channel.ccFhirIgName.length > 0">
+              {{channel.ccFhirIgName.join(", ")}}
             </template>
           <template v-else>
-            Use default (MHDv3.x)
+            Use oldest IG - Default
           </template>
         </div>
 
@@ -211,6 +209,7 @@ Vue.use(ButtonPlugin)
 Vue.use(ToastPlugin)
 import SignIn from "../SignIn";
 import testSessionMixin from "../../mixins/testSessionMixin";
+import channelMixin from "../../mixins/channelMixin";
 
 export default {
   data () {
@@ -261,17 +260,24 @@ export default {
     isHttpsMode() {
       return UtilFunctions.isHttpsMode()
     },
-    channelMhdVersionSupport: {
+    /*
+    channelIgArray: {
+      get() {
+        return this.getChannelTypeIgTestCollectionArray(this.channel.channelType)
+      }
+    },
+    */
+    channelIgVersionSupport: {
       set(val)
       {
         if (val === '' || val === undefined)
           return
-       this.channel.mhdVersions = [val]
+       this.channel.ccFhirIgName = [val]
       },
       get()
       {
-        if (this.channel.mhdVersions !== undefined && Array.isArray(this.channel.mhdVersions) && this.channel.mhdVersions.length > 0) {
-          return this.channel.mhdVersions[0]
+        if (this.channel.ccFhirIgName !== undefined && Array.isArray(this.channel.ccFhirIgName) && this.channel.ccFhirIgName.length > 0) {
+          return this.channel.ccFhirIgName[0]
         } else {
             return ''
         }
@@ -553,7 +559,7 @@ export default {
       }
     }
   },
-  mixins: [testSessionMixin],
+  mixins: [testSessionMixin, channelMixin],
   store: store,
   name: "ChannelEdit"
 }

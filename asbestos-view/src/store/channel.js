@@ -46,18 +46,30 @@ pdbAssertions: [
             state.doReloadObjArray(state,  chObjArray)
         },
     },
+    getters: {
+        isCtIgTcLoaded: state => {
+            return state.channelTypeIgTestCollection.length > 0
+        },
+        getChannelIgTestCollectionArray: (state) => (channelType) => {
+            // const channelType = this.$store.state.base.channel.channelType
+            const o = state.channelTypeIgTestCollection.find(i => i.channelType === channelType)
+            if (o !== undefined && o !== null) {
+                return o.igTestCollections
+            }
+        },
+    },
     actions: {
         async loadChannelTypeIgTestCollections({commit}) {
             const url = 'channelTypeIgTestCollection'
             try {
-                ENGINE.get(url)
+              await ENGINE.get(url)
                     .then(response => {
                         commit('setFtkChannelTypeIgTestCollections', response.data)
-                        console.info(JSON.stringify(response.data))
+                       // console.info(JSON.stringify(response.data))
                     })
                     .catch(function (error) {
                         commit('setError', url + ': ' + error)
-                        console.error(`${error} for ${url}`)
+                        // console.debug(`${error} for ${url}`)
                     })
 
             } catch (error) {

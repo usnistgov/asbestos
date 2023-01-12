@@ -125,12 +125,12 @@ export default {
       }
     },
     clientCollections() {
-      const mhdVersions = this.$store.state.base.channel.mhdVersions
-      return this.$store.getters.clientTestCollectionNames(mhdVersions)
+      const igVersions = this.$store.state.base.channel.ccFhirIgName
+      return this.$store.getters.clientTestCollectionNames(igVersions)
     },
     serverCollections() {
-      const mhdVersions = this.$store.state.base.channel.mhdVersions
-      return this.$store.getters.serverTestCollectionNames(mhdVersions)
+      const igVersions = this.$store.state.base.channel.ccFhirIgName
+      return this.$store.getters.serverTestCollectionNames(igVersions)
     },
     session() {
       return this.$store.state.base.channel.testSession

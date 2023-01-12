@@ -9,6 +9,6 @@ export function newChannel () {
         xdsSiteName: '',
         writeLocked: false,
         logMhdCapabilityStatementRequest: false,
-        mhdVersions: [],
+        ccFhirIgName: [],
     }
 }

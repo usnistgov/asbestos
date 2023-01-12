@@ -138,7 +138,7 @@ export const baseStore = {
     actions: {
         // Generally used to initialize FTK by the default Home Page
         // requestedSessionId: only used when accessing FTK directly through a URL that has a specific test session
-        async initSessionsStore({commit}, requestedSessionId) {
+        async initSessionsStore({commit,dispatch}, requestedSessionId) {
             let url
             try {
                 url = `rw/testSession`
@@ -185,6 +185,8 @@ export const baseStore = {
                     });
                     commit('installChannelIds', ids.sort());
                 }))
+
+                aggregatePromises.push(dispatch('loadChannelTypeIgTestCollections'))
 
                 Promise.all(aggregatePromises)
                     .then(() => {

@@ -229,7 +229,7 @@
                 // const specRef = rawTable[referenceProperty]
                 const specRef = this.referenceTable(refMap)[referenceProperty]
                     if ('link' in specRef) {
-                        return [this.mhdVersionSpecificLink(specRef.link)]
+                        return [this.igVersionSpecificLink(specRef.link)]
                     } else if (Object.keys(specRef).length === 0
                         /* "Element": {} property type is an Empty object, a dynamically populated table property at runtime */
                         && 'context' in refMap) {
@@ -237,54 +237,69 @@
                         const rawTable = this.getRawTable(refMap)
                         if ('baseLink' in  rawTable) {
                             const baseLink = rawTable.baseLink
-                            return [this.mhdVersionSpecificLink(baseLink.concat(refMap.context))]
+                            return [this.igVersionSpecificLink(baseLink.concat(refMap.context))]
                         } else {
                             console.warn('context link nor baseLink is not available for ' + JSON.stringify(refMap) + ' referenceProperty ' + JSON.stringify(referenceProperty))
                         }
                     }
                     return []
             },
-            mhdVersionSpecificLink(linkUrl) {
+            igVersionSpecificLink(linkUrl) {
                 // use this.$store.state.testRunner.currentTestCollectionName
                 const currentMhdUrlBase = 'https://profiles.ihe.net/ITI/MHD'
                 if (linkUrl.startsWith(currentMhdUrlBase)) {
-                    let tcMhdVersion = this.getTcMhdVersion()
-                    if (tcMhdVersion !== undefined) {
+                    let tcIgVersion = this.getTcIgVersion()
+                    if (tcIgVersion !== undefined) {
                         // console.debug(tcObj[0].mhdVersion)
-                        const mhdVersionSpecificDocBase = this.$store.state.testRunner.testAssertions.docBase[tcMhdVersion]
+                        const igVersionSpecificDocBase = this.$store.state.testRunner.testAssertions.docBase[tcIgVersion]
                         const fixedDocLink = '.pdf'
-                        if (! mhdVersionSpecificDocBase.endsWith(fixedDocLink)) {
+                        if (! igVersionSpecificDocBase.endsWith(fixedDocLink)) {
                             // console.debug(mhdVersionSpecificDocBase)
                             const re = new RegExp(`^${currentMhdUrlBase}`, 'i') // ^start line, {pattern}
                             if (linkUrl.match(re) !== null) {
-                                return linkUrl.replace(re, mhdVersionSpecificDocBase)
+                                return linkUrl.replace(re, igVersionSpecificDocBase)
                             }
                         } else {
-                            return mhdVersionSpecificDocBase
+                            return igVersionSpecificDocBase
                         }
                     }
                 }
                 return linkUrl
             },
-            getTcMhdVersion() {
+            getTcIgVersion() {
                 const currentTcName = this.$store.state.testRunner.currentTestCollectionName
                 let tcCollectionObjs = null
                 try {
                     // Are assertions being run from Inspector?
+                    for (const e of this.$store.state.channel.channelTypeIgTestCollection) {
+                        if ('igTestCollections' in e) {
+                            let arr = e.igTestCollections
+                            let o = arr.find(igTc => ('tcName' in igTc) ? (igTc.tcName === currentTcName ? true : false) : false)
+                            if (o !== undefined && o !== null) {
+                                if ('igName' in o) {
+                                    return o.igName
+                                }
+
+                            }
+                        }
+                    }
+                    /*
                     const pdbValTcIndex = this.$store.state.channel.pdbAssertions.indexOf(currentTcName)
                     if (pdbValTcIndex > -1) {
                         return this.$store.state.channel.mhdVersions[pdbValTcIndex]
                     } else {
-                        // Conformance test area: client or server?
-                        if (this.$store.state.testRunner.isClientTest) {
-                            tcCollectionObjs = this.$store.state.testRunner.clientTestCollectionObjs
-                        } else {
-                            tcCollectionObjs = this.$store.state.testRunner.serverTestCollectionObjs
-                        }
-                        return tcCollectionObjs.filter(e => e.name === currentTcName)[0].mhdVersion
+
+                     */
+                    // Conformance test area: client or server?
+                    if (this.$store.state.testRunner.isClientTest) {
+                        tcCollectionObjs = this.$store.state.testRunner.clientTestCollectionObjs
+                    } else {
+                        tcCollectionObjs = this.$store.state.testRunner.serverTestCollectionObjs
                     }
+                    return tcCollectionObjs.filter(e => e.name === currentTcName)[0].fhirIgName
+                    // }
                 } catch (e) {
-                    console.error('getTcMhdVersion error ' + e)
+                    console.error('getTcIgVersion error ' + e)
                 }
                 console.error('Undefined tcMhdVersion')
                 return undefined

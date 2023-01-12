@@ -107,13 +107,13 @@
                          'selected': displayValidations,
                          'not-selected': !displayValidations,
                          }" @click="doPdbVal">
-                         PDB Validations
+                         Validation TestCollection
                         </span>
-                        <select size="1" v-model="bundleEvalMhdVersion">
+                        <select size="1" v-model="bundleEvalIgVersion">
                             <option :key="eKey"
-                                    :value="$store.state.channel.pdbAssertions[eKey]"
-                                    v-for="(e,eKey) in $store.state.channel.mhdVersions">
-                                {{ e }}
+                                    :value="e.tcName"
+                                    v-for="(e,eKey) in getChannelTypeIgTestCollectionArray($store.state.base.channel.channelType)">
+                                {{ e.igName }}
                             </option>
                         </select>
                     </template>
@@ -176,6 +176,7 @@
     import eventMixin from '../../mixins/eventMixin';
     import errorHandlerMixin from '../../mixins/errorHandlerMixin';
     import EvalDetails from "../testRunner/EvalDetails";
+    import channelMixin from "../../mixins/channelMixin";
 
     export default {
         data() {
@@ -189,7 +190,7 @@
                 inspectType: (this.modalMode===undefined)?'request':this.modalMode,
                 allEnabled: false,
                 isLoading: false,
-                defaultMhdVersion: 'MHDv3.x',
+                // defaultMhdVersion: 'MHDv3.x',
                 pdbValMhdAssertion: '',
                 currentEventSummary: []
             }
@@ -342,14 +343,14 @@
             },
             doPdbVal() {
                 if (!this.isPdbValDisabled) {
-                    // console.log(this.bundleEvalMhdVersion)
+                    // console.log(this.bundleEvalIgVersion)
                     if (this.modalMode === undefined || this.modalMode==='') {
-                        this.$store.commit('setTestCollectionName', this.bundleEvalMhdVersion)
+                        this.$store.commit('setTestCollectionName', this.bundleEvalIgVersion)
                         this.$store.dispatch('runSingleEventEval',
                             {
                                 testId: 'bundle_eval',
                                 eventId: this.eventId,
-                                testCollectionName: this.bundleEvalMhdVersion
+                                testCollectionName: this.bundleEvalIgVersion
                             }).then(() => {
                             this.$store.dispatch('loadTestScripts', ['bundle_eval']).then(() => {
                                 this.displayRequest = false;
@@ -363,6 +364,7 @@
 
                 }
             },
+
         },
         computed: {
             eventStatus() {
@@ -462,7 +464,7 @@
                 const url = FHIRTOOLKITBASEURL + '/log/' + this.sessionId + '/' + this.channelName + '/' + summary.resourceType + '/' + this.eventId + '?textMode=raw'
                 return url
             },
-            bundleEvalMhdVersion: {
+            bundleEvalIgVersion: {
                 set(val) {
                       if (val === '' || val === undefined)
                           return;
@@ -510,7 +512,7 @@
         props: [
             'eventId', 'sessionId', 'channelName', 'noNav', 'reqresp', 'modalMode',
         ],
-        mixins: [eventMixin, errorHandlerMixin],
+        mixins: [eventMixin, errorHandlerMixin, channelMixin],
         components: {
             LogNav,
             LogAnalysisReport,

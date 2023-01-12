@@ -1,13 +1,23 @@
 package gov.nist.asbestos.services.restRequests;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.channel.ChannelTypeIgTestCollection;
 import gov.nist.asbestos.client.channel.FtkChannelTypeEnum;
+import gov.nist.asbestos.client.channel.IgNameConstants;
 import gov.nist.asbestos.mhd.channel.MhdIgImplEnum;
 import gov.nist.asbestos.testcollection.TestCollectionPropertiesEnum;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,7 +51,15 @@ public class GetFtkChannelTypeIgTestCollectionRequest {
         List<ChannelTypeIgTestCollection>  channelTypeIgTestCollections =
         Arrays.stream(FtkChannelTypeEnum.values()).map(s -> s.getChannelTypeIgTestCollection()).collect(Collectors.toList());
 
-        String json = new Gson().toJson(channelTypeIgTestCollections);
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(IgNameConstants.class, new JsonSerializer<IgNameConstants>() {
+                    @Override
+                    public JsonElement serialize(IgNameConstants igNameConstants, Type type, JsonSerializationContext jsonSerializationContext) {
+                        return new JsonPrimitive(igNameConstants.getIgName());
+                    }
+                })
+                .create();
+        String json = gson.toJson(channelTypeIgTestCollections);
         request.resp.setContentType("application/json");
         request.resp.getOutputStream().print(json);
         request.ok();
