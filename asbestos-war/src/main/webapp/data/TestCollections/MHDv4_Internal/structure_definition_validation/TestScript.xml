@@ -20,10 +20,10 @@
     <name value="MHDv4StructureDefinitionValidation"/>
     <description value="Validation server is the channel Id, which is composed of testSession and channelName, joined by two underscore characters. For example, testSession__channelName. This channel Id will be resolved to a FHIR base address through an internal operation module call."/>
 
-    <variable>
-        <name value="validationServerChannelId"/>
-        <defaultValue value="default__default"/>
-    </variable>
+<!--    <variable>-->
+<!--        <name value="validationServerChannelId"/>-->
+<!--        <defaultValue value="default__default"/>-->
+<!--    </variable>-->
     <variable>
         <name value="validationServerFhirBase"/>
         <expression value="Bundle.entry[0].resource.data.decode('base64')"/>
@@ -52,7 +52,8 @@
                         <valueString value="'getFtkChannelFhirBase'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'?channelId=${validationServerChannelId}'"/>
+<!--                        <valueString value="'?channelId=${validationServerChannelId}'"/>-->
+                        <valueString value="'?channelId=#{TestCollection.properties:FhirValidationChannelId}'"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="'1'"/>

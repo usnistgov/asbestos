@@ -18,6 +18,9 @@
         <extension url="urn:variable-in">
             <valueString value="expectedFailAssertionIdList"/>
         </extension>
+        <extension url="urn:variable-in">
+            <valueString value="correctBundleMetaProfile"/>
+        </extension>
     </modifierExtension>
 
     <id value="PDBFailsMain"/>
@@ -68,6 +71,12 @@
         <expression value="${patientIdentifier}.system.value + '|' + ${patientIdentifier}.value.value"/>
         <sourceId value="patient_bundle"/>
     </variable>
+    <variable>
+        <name value="pdbBundleProfile"/>
+        <expression value="iif('${correctBundleMetaProfile}'.length() > 0, '${correctBundleMetaProfile}', Bundle.meta.profile[0])"/>
+        <sourceId value="pdb-bundle"/>
+    </variable>
+
 
     <setup>
         <modifierExtension url="urn:noErrors"/>
@@ -133,6 +142,7 @@
             </operation>
         </action>
     </test>
+    <!-- TODO insert structuredefinition validation here -->
     <test>
         <description value="PDB Validations."/>
         <action>

@@ -18,6 +18,9 @@
         <extension url="urn:variable-in">
             <valueString value="expectedFailAssertionIdList"/>
         </extension>
+        <extension url="urn:variable-in">
+            <valueString value="correctBundleMetaProfile"/>
+        </extension>
     </modifierExtension>
 
     <id value="MHDPDBFailsAggregate"/>
@@ -35,10 +38,6 @@
     <variable>
         <name value="scriptMHDv410"/>
         <defaultValue value="../MHDv4/PDBFailsMain.xml"/>
-    </variable>
-    <variable>
-        <name value="bundleMetaProfile"/>
-        <defaultValue value="''"/>
     </variable>
 
     <test>
@@ -69,7 +68,7 @@
                         <valueString value="expectedFailAssertionIdList"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="bundleMetaProfile"/>
+                        <valueString value="correctBundleMetaProfile"/>
                     </extension>
                 </modifierExtension>
             </operation>

@@ -44,7 +44,7 @@ public interface MhdCanonicalUriCodeInterface {
         } catch (Exception e) {
             throw new Exception("Bundle.meta.profile missing? Exception: " + e.toString());
         }
-        throw new Exception("Channel did not recognize Bundle.meta.profile.");
+        throw new Exception("Channel did not recognize Bundle.meta.profile, check channel configuration FHIR IG version support.");
     }
 
     Map<CanonicalUriCodeEnum, String> getUriCodesByType(UriCodeTypeEnum codeTypeEnum);
