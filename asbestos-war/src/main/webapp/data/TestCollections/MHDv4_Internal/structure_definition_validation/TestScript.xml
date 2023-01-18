@@ -22,8 +22,8 @@
 
     <variable>
         <name value="validationServerFhirBase"/>
-        <expression value="'test'"/>
-<!--        <expression value="Bundle.entry[0].resource.data.decode('base64')"/>-->
+<!--        <expression value="'test'"/>-->
+        <expression value="Bundle.entry[0].resource.data.ftkDecode('base64')"/>
         <sourceId value="validationParamsDataBundle"/>
     </variable>
     <variable>

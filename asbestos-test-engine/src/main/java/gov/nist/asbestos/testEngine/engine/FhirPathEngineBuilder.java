@@ -6,9 +6,34 @@ import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
 
+import java.util.Base64;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class FhirPathEngineBuilder {
+    private static Logger logger = Logger.getLogger(FhirPathEngineBuilder.class.getName());
+
+    static class FtkStringFunctions {
+        /**
+         * base64 string decode function is not available in FHIRPath 2.0.0, hence this utility class is needed.
+         *
+         * https://build.fhir.org/ig/HL7/FHIRPath/#additional-string-functions
+         * FHIRPath Continuous Build (v2.1.0)
+         */
+        static class FtkDecode {
+            private static final String FUNCTION_ID = ".ftkDecode('base64')";
+            static boolean isFtkDecodeFunction(String s) {
+               return s.endsWith(FUNCTION_ID);
+            }
+            static String ftkDecode(String s) {
+                return new String(Base64.getDecoder().decode(s));
+            }
+
+            public static String expressionBeforeDecode(String expression) {
+                return expression.substring(0, expression.indexOf(FUNCTION_ID));
+            }
+        }
+    }
 
     static FHIRPathEngine build() {
         return new FHIRPathEngine(new HapiWorkerContext(ParserBase.getFhirContext(), new PrePopulatedValidationSupport(ParserBase.getFhirContext())));
@@ -63,6 +88,21 @@ public class FhirPathEngineBuilder {
     public static String evalForString(BaseResource resource, String expression) {
         if (resource == null)
             return "";
+
+        if (FtkStringFunctions.FtkDecode.isFtkDecodeFunction(expression)) {
+            String expressionBeforeDecode = FtkStringFunctions.FtkDecode.expressionBeforeDecode(expression);
+            List<Base> results = build().evaluate(resource, expressionBeforeDecode);
+            if (results.isEmpty())
+                return null;
+            if (results.size() != 1) {
+               logger.warning("ftkDecodeFunction unexpected result size: " + results.size());
+               return null;
+            }
+            Base result = results.get(0);
+            String s = getStringValue(result);
+            return FtkStringFunctions.FtkDecode.ftkDecode(s);
+        }
+
         List<Base> results = build().evaluate(resource, expression);
         if (results.isEmpty())
             return null;
