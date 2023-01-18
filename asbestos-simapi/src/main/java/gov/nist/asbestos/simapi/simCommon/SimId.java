@@ -4,7 +4,12 @@ package gov.nist.asbestos.simapi.simCommon;
 import gov.nist.asbestos.simapi.tk.actors.ActorType;
 import gov.nist.asbestos.simapi.tk.siteManagement.SiteSpec;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -169,7 +174,37 @@ public class SimId {
     public boolean isTestSession(TestSession testSession) {
         return testSession != null && testSession.equals(this.testSession);
     }
-    public boolean isValid() { return (!isEmpty(testSession.getValue())) && (!isEmpty(getId())); }
+
+    public static Pattern isValidCharsPattern() {
+        return Pattern.compile("([a-zA-Z0-9]+[_]{0,1})+");
+    }
+
+    public static Pattern isReservedNamesPattern(String[] additionalNames) {
+        final String regexStringWordBeginPrefix = "(\\b";
+        final String regexStringWordEndSuffix = "\\b)";
+        final String regexOr = "|";
+
+        String defaultReserved[] = {"new", "copy"};
+
+        List<String> theList = new ArrayList<>();
+        theList.addAll(Arrays.asList(defaultReserved));
+        if (additionalNames != null && additionalNames.length > 0) {
+            theList.addAll(Arrays.asList(additionalNames));
+        }
+
+        String theRegex = theList.stream().map(s -> regexStringWordBeginPrefix + s + regexStringWordEndSuffix).collect(Collectors.joining(regexOr));
+
+        return Pattern.compile(theRegex, Pattern.CASE_INSENSITIVE);
+    }
+
+    public boolean isValid() {
+        boolean isValid =  isValidCharsPattern().matcher(getTestSession().getValue()).matches()
+                &&  isValidCharsPattern().matcher(getId()).matches()
+                && ! isReservedNamesPattern(null).matcher(getId()).matches();
+
+        return isValid;
+    }
+
     public void setValid(boolean x) { }
     private boolean isEmpty(String x) { return x == null || x.trim().equals(""); }
 

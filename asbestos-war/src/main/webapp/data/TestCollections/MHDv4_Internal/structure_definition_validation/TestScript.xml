@@ -20,13 +20,10 @@
     <name value="MHDv4StructureDefinitionValidation"/>
     <description value="Validation server is the channel Id, which is composed of testSession and channelName, joined by two underscore characters. For example, testSession__channelName. This channel Id will be resolved to a FHIR base address through an internal operation module call."/>
 
-<!--    <variable>-->
-<!--        <name value="validationServerChannelId"/>-->
-<!--        <defaultValue value="default__default"/>-->
-<!--    </variable>-->
     <variable>
         <name value="validationServerFhirBase"/>
-        <expression value="Bundle.entry[0].resource.data.decode('base64')"/>
+        <expression value="'test'"/>
+<!--        <expression value="Bundle.entry[0].resource.data.decode('base64')"/>-->
         <sourceId value="validationParamsDataBundle"/>
     </variable>
     <variable>
@@ -52,8 +49,7 @@
                         <valueString value="'getFtkChannelFhirBase'"/>
                     </extension>
                     <extension url="urn:variable-in">
-<!--                        <valueString value="'?channelId=${validationServerChannelId}'"/>-->
-                        <valueString value="'?channelId=#{TestCollection.properties:FhirValidationChannelId}'"/>
+                        <valueString value="'?FhirValidationChannelId=#{TestCollection.properties:FhirValidationChannelId}'"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="'1'"/>
@@ -63,6 +59,27 @@
                     </extension>
                 </modifierExtension>
             </operation>
+        </action>
+        <action>
+                <assert>
+                    <description value="Is resource type a Binary?"/>
+                    <expression value="Bundle.entry[0].resource.type().name = 'Binary'"/>
+                    <warningOnly value="false"/>
+                </assert>
+        </action>
+        <action>
+                <assert>
+                    <description value="Is content type correct?"/>
+                    <expression value="Bundle.entry[0].resource.contentType = 'text/plain'"/>
+                    <warningOnly value="false"/>
+                </assert>
+        </action>
+        <action>
+                <assert>
+                    <description value="Binary data element exists?"/>
+                    <expression value="Bundle.entry[0].resource.where($this is Binary).data.exists()"/>
+                    <warningOnly value="false"/>
+                </assert>
         </action>
     </setup>
     <test>
@@ -90,7 +107,6 @@
                     <extension url="urn:variable-in">
                         <valueString value="igVersion"/>
                     </extension>
-
                 </modifierExtension>
             </operation>
         </action>

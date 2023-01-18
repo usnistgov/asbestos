@@ -76,9 +76,9 @@ public class CreateChannelRequest {
             channelConfig.setLogMhdCapabilityStatementRequest(false);
         }
 
-        boolean isInvalidChannelName = ! SimStore.isValidCharsPattern().matcher(channelConfig.getTestSession()).matches()
-                || ! SimStore.isValidCharsPattern().matcher(channelConfig.getChannelName()).matches()
-                || SimStore.isReservedNamesPattern(null).matcher(channelConfig.getChannelName()).matches();
+        boolean isInvalidChannelName = ! SimId.isValidCharsPattern().matcher(channelConfig.getTestSession()).matches()
+                || ! SimId.isValidCharsPattern().matcher(channelConfig.getChannelName()).matches()
+                || SimId.isReservedNamesPattern(null).matcher(channelConfig.getChannelName()).matches();
 
         if (isInvalidChannelName) {
             String warningMessage = "Invalid channel name. Check if name contains an illegal character or is a reserved name.";

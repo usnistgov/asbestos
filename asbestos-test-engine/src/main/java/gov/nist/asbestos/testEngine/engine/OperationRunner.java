@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.regex.Pattern;
+import java.util.logging.Logger;
 
 public class OperationRunner {
     private String label;
@@ -35,6 +35,7 @@ public class OperationRunner {
     private String testId = null;
     private TestEngine testEngine = null;
     private ActionReference actionReference = null;
+    private static Logger logger = Logger.getLogger(OperationRunner.class.getName());
 
     OperationRunner(ActionReference actionReference, FixtureMgr fixtureMgr, Map<String, String> externalVariables) {
         Objects.requireNonNull(fixtureMgr);
@@ -329,47 +330,63 @@ public class OperationRunner {
                 reporter.reportError(String.format("%s headerComponent not found.", ftkInternalCode));
                 return;
             }
-            if ("loadFtkFixture".equals(ftkInternalRequestCodeValue)) {
-            SetupActionSearch setupActionSearch = new SetupActionSearch(actionReference, fixtureMgr, isFollowedByAssert)
-                    .setVal(val)
-                    .setFhirClient(fhirClient)
-                    .setSut(sut)
-                    .setType(String.format("%s.%s.%s.search", type, code, ftkInternalRequestCodeValue))
-                    .setTestReport(testReport);
-            setupActionSearch
-                    .setVal(val)
-                    .setVariableMgr(
-                            variableMgr);
-            setupActionSearch.setTestEngine(testEngine);
-            setupActionSearch.setTestCollectionId(testCollectionId);
-            setupActionSearch.setTestId(testId);
-            String internalBasePath = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
-                    .concat("/engine/")
-                    .concat(ftkInternalRequestCodeValue)
-                    .concat("/")
-                    .concat(testEngine.getChannelId())
-                    .concat("/")
-                    .concat(testCollectionId)
-                    .concat("/")
-                    .concat(testId);
-            setupActionSearch.setInternalBasePath(internalBasePath);
-            ResourceWrapper responseWrapper = setupActionSearch.run(op, operationReport);
-            if (responseWrapper != null) {
-                FixtureLabels labels = new FixtureLabels(new ActionReporter(), op, null)
-                        .referenceWrapper(responseWrapper);
-                 /*
-                    Because there is no event registered for this code,
-                    the call to Reporter.operationDescription(operationReport, "**Request/Response** " + labels.getReference());
-                    results in
-                    "Request/Response null"
-                    where 'null' is a link to something like: https://fhirtoolkit.test:8082/session/default/channel/limited/collection/MHDv4_DocumentRecipient_minimal/test/null
-                 */
+            FtkInternalRequestCode requestCode = FtkInternalRequestCode.find(ftkInternalRequestCodeValue);
+            if (requestCode == null) {
+                String error = "FtkInternalRequestCode cannot be null.";
+                logger.severe(error);
+                reporter.reportError(error);
+                return;
             }
-        } else {
-                reporter.reportError("do not understand request code of " + ftkInternalCode +":" + ftkInternalRequestCodeValue);
+            switch (requestCode) {
+                case LOAD_FTK_FIXTURE:
+                    loadFtkFixture(op, operationReport, isFollowedByAssert, code, variableMgr, ftkInternalRequestCodeValue);
+                    break;
+                case GET_FTK_CHANNEL_FHIR_BASE:
+                    loadFtkFixture(op, operationReport, isFollowedByAssert, code, variableMgr, ftkInternalRequestCodeValue);
+                    break;
+                default:
+                    reporter.reportError("do not understand request code of " + ftkInternalCode + ":" + ftkInternalRequestCodeValue);
             }
         } else {
             reporter.reportError("do not understand code.code of " + code);
+        }
+    }
+
+    private void loadFtkFixture(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport, boolean isFollowedByAssert, String code, VariableMgr variableMgr, String ftkInternalRequestCodeValue) {
+        SetupActionSearch setupActionSearch = new SetupActionSearch(actionReference, fixtureMgr, isFollowedByAssert)
+                .setVal(val)
+                .setFhirClient(fhirClient)
+                .setSut(sut)
+                .setType(String.format("%s.%s.%s.search", type, code, ftkInternalRequestCodeValue))
+                .setTestReport(testReport);
+        setupActionSearch
+                .setVal(val)
+                .setVariableMgr(
+                        variableMgr);
+        setupActionSearch.setTestEngine(testEngine);
+        setupActionSearch.setTestCollectionId(testCollectionId);
+        setupActionSearch.setTestId(testId);
+        String internalBasePath = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
+                .concat("/engine/")
+                .concat(ftkInternalRequestCodeValue)
+                .concat("/")
+                .concat(testEngine.getChannelId())
+                .concat("/")
+                .concat(testCollectionId)
+                .concat("/")
+                .concat(testId);
+        setupActionSearch.setInternalBasePath(internalBasePath);
+        ResourceWrapper responseWrapper = setupActionSearch.run(op, operationReport);
+        if (responseWrapper != null) {
+            FixtureLabels labels = new FixtureLabels(new ActionReporter(), op, null)
+                    .referenceWrapper(responseWrapper);
+             /*
+                Because there is no event registered for this code,
+                the call to Reporter.operationDescription(operationReport, "**Request/Response** " + labels.getReference());
+                results in
+                "Request/Response null"
+                where 'null' is a link to something like: https://fhirtoolkit.test:8082/session/default/channel/limited/collection/MHDv4_DocumentRecipient_minimal/test/null
+             */
         }
     }
 

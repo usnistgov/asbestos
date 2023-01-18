@@ -324,27 +324,6 @@ public class SimStore {
         return newlyCreated;
     }
 
-    public static Pattern isValidCharsPattern() {
-        return Pattern.compile("([a-zA-Z0-9]+[_]{0,1})+");
-    }
-
-    public static Pattern isReservedNamesPattern(String[] additionalNames) {
-        final String regexStringWordBeginPrefix = "(\\b";
-        final String regexStringWordEndSuffix = "\\b)";
-        final String regexOr = "|";
-
-        String defaultReserved[] = {"new", "copy"};
-
-        List<String> theList = new ArrayList<>();
-        theList.addAll(Arrays.asList(defaultReserved));
-        if (additionalNames != null && additionalNames.length > 0) {
-            theList.addAll(Arrays.asList(additionalNames));
-        }
-
-        String theRegex = theList.stream().map(s -> regexStringWordBeginPrefix + s + regexStringWordEndSuffix).collect(Collectors.joining(regexOr));
-
-        return Pattern.compile(theRegex, Pattern.CASE_INSENSITIVE);
-    }
 
 
 }

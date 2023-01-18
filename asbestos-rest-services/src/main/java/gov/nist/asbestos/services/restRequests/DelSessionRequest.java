@@ -4,6 +4,7 @@ import gov.nist.asbestos.client.Base.Dirs;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.log.SimStore;
+import gov.nist.asbestos.simapi.simCommon.SimId;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,7 +31,7 @@ public class DelSessionRequest {
     public static boolean isRequest(Request request) {
         if (request.uriParts.size() == 5) {
             String testSessionName = request.uriParts.get(4);
-            return "testSession".equalsIgnoreCase(request.uriParts.get(3)) && SimStore.isValidCharsPattern().matcher(testSessionName).matches();
+            return "testSession".equalsIgnoreCase(request.uriParts.get(3)) && SimId.isValidCharsPattern().matcher(testSessionName).matches();
         }
         return false;
     }

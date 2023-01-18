@@ -9,6 +9,7 @@ import gov.nist.asbestos.services.fixture.FixturePlaceholderParamEnum;
 import gov.nist.asbestos.services.fixture.FixturePlaceholderReplacer;
 import gov.nist.asbestos.services.fixture.SimpleFixturePlaceholderReplacer;
 import gov.nist.asbestos.services.fixture.XmlPlaceholderReplacer;
+import gov.nist.asbestos.testEngine.engine.FtkInternalRequestCode;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
@@ -56,13 +57,13 @@ public class GetFixtureStringRequest {
     public static boolean isRequest(Request request) {
         if (request.uriParts.size() == 7) {
             String uriPart3 = request.uriParts.get(3);
-            return "loadFtkFixture".equals(uriPart3);
+            return FtkInternalRequestCode.LOAD_FTK_FIXTURE.getCode().equals(uriPart3);
         }
         return false;
     }
 
     public void run() throws IOException {
-        request.announce("loadFtkFixture");
+        request.announce(FtkInternalRequestCode.LOAD_FTK_FIXTURE.getCode());
 
         // Read fixtureId File
         Map<String, String> paramsMap = request.getParametersMap();

@@ -5,6 +5,7 @@ import gov.nist.asbestos.client.Base.Dirs;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.log.SimStore;
+import gov.nist.asbestos.simapi.simCommon.SimId;
 import org.apache.commons.io.IOUtils;
 import java.util.logging.Logger;
 
@@ -83,8 +84,8 @@ public class AddSessionRequest {
     }
 
     private boolean isInvalidName(String uncheckedName) throws IOException {
-        return  ! SimStore.isValidCharsPattern().matcher(uncheckedName).matches()
-                || SimStore.isReservedNamesPattern(RESERVED_NAMES).matcher(uncheckedName).matches();
+        return  ! SimId.isValidCharsPattern().matcher(uncheckedName).matches()
+                || SimId.isReservedNamesPattern(RESERVED_NAMES).matcher(uncheckedName).matches();
 
 
     }

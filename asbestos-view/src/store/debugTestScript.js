@@ -18,7 +18,7 @@ export const debugTestScriptStore = {
             /**
              * Enables the test-script test action assertion evaluation feature.
              */
-            evalMode: false,
+            evalMode: true,
             /* keyProperty{testScriptIndex}=value{breakpointIndex: this is only used for the breakpoint hit index, debugButtonLabel: ''}
              debugButtonLabel exists inside of showDebugButton because there are multiple testscripts and it is necessary to keep showing the Debug button labels for other test scripts.
             If a single button label variable was used then all of the Debug buttons would be become changed to Resume when a breakpoint is hit */
