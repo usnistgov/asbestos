@@ -46,10 +46,10 @@
                         <valueString value="../../Library/InternalFtkRequest.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'getFtkChannelFhirBase'"/>
+                        <valueString value="'ftkFunctionCode'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'?FhirValidationChannelId=#{TestCollection.properties:FhirValidationChannelId}'"/>
+                        <valueString value="'?fn=getFtkChannelProxyBase&amp;FhirValidationChannelId=#{TestCollection.properties:FhirValidationChannelId}'"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="'1'"/>

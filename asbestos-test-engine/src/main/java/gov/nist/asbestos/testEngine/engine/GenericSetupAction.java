@@ -69,7 +69,7 @@ abstract class GenericSetupAction {
 
     abstract Ref buildTargetUrl();
 
-    static void handleRequestHeader(Map<String, String> requestHeader, TestScript.SetupActionOperationComponent op, VariableMgr variableMgr) {
+    static void updateRequestHeader(Map<String, String> requestHeader, TestScript.SetupActionOperationComponent op, VariableMgr variableMgr) {
         List<TestScript.SetupActionOperationRequestHeaderComponent> hdrs = op.getRequestHeader();
         for (TestScript.SetupActionOperationRequestHeaderComponent hdr : hdrs) {
             String value = hdr.getValue();
@@ -113,7 +113,7 @@ abstract class GenericSetupAction {
             resourceToSend = updateResourceToSend(sourceFixture);
         }
         if (op.hasRequestHeader())
-            handleRequestHeader(requestHeader, op, variableMgr);
+            updateRequestHeader(requestHeader, op, variableMgr);
         if (!requestHeader.containsKey("accept-charset"))
             requestHeader.put("accept-charset", "utf-8");
         if (op.hasAccept())

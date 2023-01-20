@@ -102,7 +102,7 @@
                         <valueString value="../InternalFtkRequest.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'loadFtkFixture'"/>
+                        <valueString value="'ftkLoadFixture'"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="getFixtureParams"/>

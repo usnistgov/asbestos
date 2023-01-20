@@ -39,7 +39,7 @@
 						<valueString value="../../Library/InternalFtkRequest.xml"/>
 					</extension>
 					<extension url="urn:variable-in">
-						<valueString value="'loadFtkFixture'"/>
+						<valueString value="'ftkLoadFixture'"/>
 					</extension>
 					<extension url="urn:variable-in">
 						<valueString value="'?fixtureId=patient&amp;baseTestCollection=Test_Patients&amp;resourceType=Patient'"/>

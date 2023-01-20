@@ -4,7 +4,7 @@
             <valueString value="theResource"/>
         </extension>
         <extension url="urn:variable-in">
-            <valueString value="validationServerFhirBase"/>
+            <valueString value="validationServerBase"/>
         </extension>
         <extension url="urn:variable-in">
             <valueString value="resourceType"/>
@@ -22,7 +22,7 @@
     <description value="This TestScript has the following parameters: 1) Validation server is the FHIR base, 2) resourceType is the resource type to validate, 3) queryParameters is ?profile=value, where value is the canonical URL obtained from the IHE FHIR-based IG Message Semantics page, suffixed with an optional version number specified as #n.n.n where n is an integer equal to or greater than 0. If version is omitted, it implies latest version or the version automatically selected by the validation server. When this script is imported as a module, the variables with defaultValues are overridden with the input parameter extensions."/>
 
     <variable>
-        <name value="validationServerFhirBase"/>
+        <name value="validationServerBase"/>
         <defaultValue value="@inspectorModeTsModuleCallValuePlaceholder"/>
     </variable>
     <variable>
@@ -56,16 +56,21 @@
                 <description value="Validation call."/>
                 <label value="validate"/>
                 <type>
-                    <system value="https://hl7.org/fhir/codesystem-testscript-operation-codes.html"/>
+                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
                     <code value="validate"/>
                 </type>
-                <url value="${validationServerFhirBase}/${resourceType}/$validate?profile=${pdbBundleProfile}#${igVersion}"/>
+                <requestHeader>
+                    <field value="x-Url"/>
+                    <value value="${validationServerBase}/${resourceType}/$validate?profile=${pdbBundleProfile}#${igVersion}"/>
+                </requestHeader>
                 <method value="post"/>
                 <sourceId value="theResource"/>
                 <responseId value="validationResponse"/>
             </operation>
         </action>
     </test>
+
+    <!-- TODO: check return for OperationOutcome, was validation successful? -->
 
     <test>
     <description value="Structure definition based resource validation - server default profile (latest IG version)."/>
@@ -87,7 +92,7 @@
                     <system value="https://hl7.org/fhir/codesystem-testscript-operation-codes.html"/>
                     <code value="validate"/>
                 </type>
-                <url value="${validationServerFhirBase}/${resourceType}/$validate?profile=${pdbBundleProfile}"/>
+                <url value="${validationServerBase}/${resourceType}/$validate?profile=${pdbBundleProfile}"/>
                 <method value="post"/>
                 <sourceId value="theResource"/>
                 <responseId value="validationResponse"/>

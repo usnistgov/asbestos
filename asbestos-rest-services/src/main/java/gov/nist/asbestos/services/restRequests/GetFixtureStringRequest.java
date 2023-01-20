@@ -57,13 +57,13 @@ public class GetFixtureStringRequest {
     public static boolean isRequest(Request request) {
         if (request.uriParts.size() == 7) {
             String uriPart3 = request.uriParts.get(3);
-            return FtkInternalRequestCode.LOAD_FTK_FIXTURE.getCode().equals(uriPart3);
+            return FtkInternalRequestCode.FTK_LOAD_FIXTURE.getCode().equals(uriPart3);
         }
         return false;
     }
 
     public void run() throws IOException {
-        request.announce(FtkInternalRequestCode.LOAD_FTK_FIXTURE.getCode());
+        request.announce(FtkInternalRequestCode.FTK_LOAD_FIXTURE.getCode());
 
         // Read fixtureId File
         Map<String, String> paramsMap = request.getParametersMap();

@@ -2,6 +2,7 @@ package gov.nist.asbestos.testEngine.engine;
 
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
+import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
@@ -13,6 +14,7 @@ import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -101,7 +103,7 @@ public class OperationRunner {
             return;
         }
 
-        Coding typeCoding = op.getType();
+        Coding typeCoding = op.getType(); // TODO: check if System is whether NIST FHIR Toolkit or FHIR TestScript
         String code = typeCoding.getCode();
 
         fhirClient.setFormat(op.hasContentType() ? Format.fromContentType(op.getContentType()) : fhirClient.getFormat());
@@ -252,28 +254,119 @@ public class OperationRunner {
                     .setTestId(testId);
             saveToCache.run(op, operationReport);
         } else if ("eventPart".equals(code)) {
-                SetupActionSearch setupActionSearch = new SetupActionSearch(actionReference, fixtureMgr, isFollowedByAssert)
-                        .setVal(val)
-                        .setFhirClient(fhirClient)
-                        .setSut(sut)
-                        .setType(String.format("%s.%s.search", type , code ))
-                        .setTestReport(testReport);
-                setupActionSearch
-                        .setVal(val)
-                        .setVariableMgr(
-                                new VariableMgr(testScript, fixtureMgr)
-                                        .setExternalVariables(externalVariables)
-                                        .setVal(val)
-                                        .setOpReport(operationReport));
-                setupActionSearch.setTestEngine(testEngine);
-                setupActionSearch.setTestCollectionId(testCollectionId);
-                setupActionSearch.setTestId(testId);
-                String internalBasePath = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
-                        .concat("/engine/")
-                        .concat(code)
-                        .concat("/")
-                        .concat(testEngine.getChannelId());
-                setupActionSearch.setInternalBasePath(internalBasePath);
+            handleEventPartRequest(op, operationReport, isFollowedByAssert, code);
+        } else if ("validate".equals(code)) {
+            if (! hasRequestHeader(op, code)) {
+                return;
+            }
+
+            VariableMgr variableMgr = new VariableMgr(testScript, fixtureMgr)
+                    .setExternalVariables(externalVariables)
+                    .setVal(val)
+                    .setOpReport(operationReport);
+            final String xUrlRequestHeader = "x-Url";
+            String xUrlRequestHeaderValue = getHeaderComponentValue(xUrlRequestHeader, op, variableMgr);
+            if (xUrlRequestHeaderValue == null) {
+                String error = String.format("%s headerComponent value not found.", xUrlRequestHeader);
+                logger.warning(error);
+                reporter.reportError(error);
+                return;
+            }
+            try {
+                new URI(xUrlRequestHeaderValue);
+            } catch (URISyntaxException e) {
+                String error = String.format("%s is not a valid URI.", xUrlRequestHeader);
+                logger.warning(error);
+                reporter.reportError(error);
+                return;
+            }
+
+            try {
+                SetupActionTransaction validateAction = new SetupActionTransaction(actionReference, fixtureMgr, isFollowedByAssert) {
+                    @Override
+                    Ref buildTargetUrl() {
+                        return new Ref(xUrlRequestHeaderValue);
+                    }
+                };
+                validateAction.run(op, operationReport);
+            } catch (Exception ex) {
+                logger.warning(ex.toString());
+                reporter.reportError(ex.toString());
+            }
+
+        } else if ("internalFtkRequest".equals(code)) {
+            if (! hasRequestHeader(op, code)) {
+                return;
+            }
+
+            VariableMgr variableMgr = new VariableMgr(testScript, fixtureMgr)
+                    .setExternalVariables(externalVariables)
+                    .setVal(val)
+                    .setOpReport(operationReport);
+            final String ftkInternalCode = "x-internalFtkRequestCode";
+            String ftkInternalRequestCodeValue = getHeaderComponentValue(ftkInternalCode, op, variableMgr);
+            if (ftkInternalRequestCodeValue == null) {
+                reporter.reportError(String.format("%s headerComponent value not found.", ftkInternalCode));
+                return;
+            }
+            FtkInternalRequestCode requestCode = FtkInternalRequestCode.find(ftkInternalRequestCodeValue);
+            if (requestCode == null) {
+                String error = "FtkInternalRequestCode cannot be null.";
+                logger.severe(error);
+                reporter.reportError(error);
+                return;
+            }
+            switch (requestCode) {
+                case FTK_LOAD_FIXTURE:
+                    ftkOperation(op, operationReport, isFollowedByAssert, code, variableMgr, ftkInternalRequestCodeValue);
+                    break;
+                case FTK_FUNCTION_CODE:
+                    ftkOperation(op, operationReport, isFollowedByAssert, code, variableMgr, ftkInternalRequestCodeValue);
+                    break;
+                case FTK_GET_EVENT_PART:
+                    handleEventPartRequest(op, operationReport, isFollowedByAssert, code);
+                    break;
+                default:
+                    reporter.reportError("do not understand request code of " + ftkInternalCode + ":" + ftkInternalRequestCodeValue);
+            }
+        } else {
+            reporter.reportError("do not understand code.code of " + code);
+        }
+    }
+
+    private boolean hasRequestHeader(TestScript.SetupActionOperationComponent op, String code) {
+        if (! op.hasRequestHeader()) {
+            String error = String.format("%s is missing a requestHeader code.", code);
+            logger.warning(error);
+            reporter.reportError(error);
+            return false;
+        }
+        return true;
+    }
+
+    private void handleEventPartRequest(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport, boolean isFollowedByAssert, String code) {
+        SetupActionSearch setupActionSearch = new SetupActionSearch(actionReference, fixtureMgr, isFollowedByAssert)
+                .setVal(val)
+                .setFhirClient(fhirClient)
+                .setSut(sut)
+                .setType(String.format("%s.%s.search", type , code ))
+                .setTestReport(testReport);
+        setupActionSearch
+                .setVal(val)
+                .setVariableMgr(
+                        new VariableMgr(testScript, fixtureMgr)
+                                .setExternalVariables(externalVariables)
+                                .setVal(val)
+                                .setOpReport(operationReport));
+        setupActionSearch.setTestEngine(testEngine);
+        setupActionSearch.setTestCollectionId(testCollectionId);
+        setupActionSearch.setTestId(testId);
+        String internalBasePath = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_TOOLKIT_BASE)
+                .concat("/engine/")
+                .concat(code)
+                .concat("/")
+                .concat(testEngine.getChannelId());
+        setupActionSearch.setInternalBasePath(internalBasePath);
                 /*
                 TODO
                Remove the TestScript variable and use the test's Test.properties DependsOn property instead
@@ -285,74 +378,33 @@ public class OperationRunner {
                 Test.properties:
                 DependsOn=1_Prerequisite_Single_Document_with_Binary
                  */
-                ResourceWrapper responseWrapper = setupActionSearch.run(op, operationReport);
-                if (responseWrapper != null) {
-                    FixtureLabels labels = new FixtureLabels(new ActionReporter(), op, null)
-                            .referenceWrapper(responseWrapper);
-                    /*
-                    Because there is no event registered for this code,
-                    the call to Reporter.operationDescription(operationReport, "**Request/Response** " + labels.getReference());
-                    results in
-                    "Request/Response null"
-                    where 'null' is a link to something like: https://fhirtoolkit.test:8082/session/default/channel/limited/collection/MHDv4_DocumentRecipient_minimal/test/null
-                     */
-                }
-        } else if ("internalFtkRequest".equals(code)) {
-            if (! op.hasRequestHeader()) {
-                reporter.reportError("ftkInternalRequest missing a requestHeader code.");
-                return;
-            }
-
-            VariableMgr variableMgr = new VariableMgr(testScript, fixtureMgr)
-                    .setExternalVariables(externalVariables)
-                    .setVal(val)
-                    .setOpReport(operationReport);
-            final String ftkInternalCode = "x-internalFtkRequestCode";
-            String ftkInternalRequestCodeValue = null;
-            Optional<TestScript.SetupActionOperationRequestHeaderComponent> headerComponent =  op.getRequestHeader().stream()
-                    .filter(s -> s.hasField() && s.getField().equals(ftkInternalCode)).findFirst();
-            if (headerComponent.isPresent()) {
-                Map<String, String> requestHeader = new HashMap<>();
-                GenericSetupAction.handleRequestHeader(requestHeader, op, variableMgr);
-                ftkInternalRequestCodeValue = requestHeader.get(ftkInternalCode);
-                /*
-               String value = headerComponent.get().getValue();
-               if (value != null && value.startsWith("${") && value.endsWith("}")) {
-                    String variableName = value.replaceFirst(Pattern.quote("${"), "").replaceFirst("}", "");
-                    if (externalVariables != null && externalVariables.containsKey(variableName)) {
-                        ftkInternalRequestCode = externalVariables.get(variableName);
-                    }
-                }
-                *
-                 */
-            }
-            if (ftkInternalRequestCodeValue == null) {
-                reporter.reportError(String.format("%s headerComponent not found.", ftkInternalCode));
-                return;
-            }
-            FtkInternalRequestCode requestCode = FtkInternalRequestCode.find(ftkInternalRequestCodeValue);
-            if (requestCode == null) {
-                String error = "FtkInternalRequestCode cannot be null.";
-                logger.severe(error);
-                reporter.reportError(error);
-                return;
-            }
-            switch (requestCode) {
-                case LOAD_FTK_FIXTURE:
-                    loadFtkFixture(op, operationReport, isFollowedByAssert, code, variableMgr, ftkInternalRequestCodeValue);
-                    break;
-                case GET_FTK_CHANNEL_FHIR_BASE:
-                    loadFtkFixture(op, operationReport, isFollowedByAssert, code, variableMgr, ftkInternalRequestCodeValue);
-                    break;
-                default:
-                    reporter.reportError("do not understand request code of " + ftkInternalCode + ":" + ftkInternalRequestCodeValue);
-            }
-        } else {
-            reporter.reportError("do not understand code.code of " + code);
+        ResourceWrapper responseWrapper = setupActionSearch.run(op, operationReport);
+        if (responseWrapper != null) {
+            FixtureLabels labels = new FixtureLabels(new ActionReporter(), op, null)
+                    .referenceWrapper(responseWrapper);
+            /*
+            Because there is no event registered for this code,
+            the call to Reporter.operationDescription(operationReport, "**Request/Response** " + labels.getReference());
+            results in
+            "Request/Response null"
+            where 'null' is a link to something like: https://fhirtoolkit.test:8082/session/default/channel/limited/collection/MHDv4_DocumentRecipient_minimal/test/null
+             */
         }
     }
 
-    private void loadFtkFixture(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport, boolean isFollowedByAssert, String code, VariableMgr variableMgr, String ftkInternalRequestCodeValue) {
+    private String getHeaderComponentValue(String ftkInternalCode, TestScript.SetupActionOperationComponent op, VariableMgr variableMgr) {
+        String ftkInternalRequestCodeValue = null;
+        Optional<TestScript.SetupActionOperationRequestHeaderComponent> headerComponent =  op.getRequestHeader().stream()
+                .filter(s -> s.hasField() && s.getField().equals(ftkInternalCode)).findFirst();
+        if (headerComponent.isPresent()) {
+            Map<String, String> requestHeader = new HashMap<>();
+            GenericSetupAction.updateRequestHeader(requestHeader, op, variableMgr);
+            ftkInternalRequestCodeValue = requestHeader.get(ftkInternalCode);
+        }
+        return ftkInternalRequestCodeValue;
+    }
+
+    private void ftkOperation(TestScript.SetupActionOperationComponent op, TestReport.SetupActionOperationComponent operationReport, boolean isFollowedByAssert, String code, VariableMgr variableMgr, String ftkInternalRequestCodeValue) {
         SetupActionSearch setupActionSearch = new SetupActionSearch(actionReference, fixtureMgr, isFollowedByAssert)
                 .setVal(val)
                 .setFhirClient(fhirClient)

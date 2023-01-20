@@ -4,8 +4,13 @@ package gov.nist.asbestos.testEngine.engine;
 import java.util.Objects;
 
 public enum FtkInternalRequestCode {
-   LOAD_FTK_FIXTURE("loadFtkFixture"),
-   GET_FTK_CHANNEL_FHIR_BASE("getFtkChannelFhirBase");
+   FTK_LOAD_FIXTURE("ftkLoadFixture"),
+   FTK_FUNCTION_CODE("ftkFunctionCode"),
+   FTK_FUNCTION_CODE_FN_PARAM("fn"),
+   FTK_FUNCTION_CODE_FN_GET_CHANNEL_PROXY_BASE("getFtkChannelProxyBase"),
+   FTK_FUNCTION_CODE_FN_GET_CHANNEL_FHIR_BASE("getFtkChannelFhirBase"),
+   FTK_FUNCTION_CODE_CHANNELID_PARAM("FhirValidationChannelId"),
+   FTK_GET_EVENT_PART("eventPart");
 
    private String code;
 
