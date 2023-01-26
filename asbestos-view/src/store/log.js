@@ -263,8 +263,10 @@ export const logStore = {
         async analyseResource({commit}, resourceString) {
             const url= `analysis/text`
             try {
-                const result = await LOG.post(url, {string: resourceString})
-                commit('setAnalysis', result.data)
+                 await LOG.post(url, {string: resourceString}).then((response) => {
+                     // console.info("setting data" + JSON.stringify( response.data ))
+                    commit('setAnalysis', response.data)
+                })
             }   catch (error) {
                 commit('setError', `${error} for LOG/${url}`)
                 console.error(error)

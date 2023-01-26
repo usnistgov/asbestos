@@ -89,9 +89,9 @@ public class ChannelConfig {
             return getProxyURIx(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
     }
 
-    private URI getProxyURIx(ServicePropertiesEnum key) {
-        String proxyStr = ServiceProperties.getInstance().getPropertyOrThrow(key);
-        proxyStr += "/proxy/" + testSession + "__" + channelName;
+    private URI getProxyURIx(ServicePropertiesEnum ftkBaseKey) {
+        String baseStr = ServiceProperties.getInstance().getPropertyOrThrow(ftkBaseKey);
+        String proxyStr = baseStr + "/proxy/" + testSession + "__" + channelName;
         try {
             return new URI(proxyStr);
         } catch (URISyntaxException e) {
@@ -241,5 +241,23 @@ public class ChannelConfig {
 
     public void setScheme(String scheme) {
         this.scheme = scheme;
+    }
+
+    @JsonIgnore
+    public URI getValidationURI() {
+        if ("https".equals(getScheme())) {
+            return getValidationURIx(ServicePropertiesEnum.HTTPS_FHIR_TOOLKIT_BASE);
+        }
+        return getValidationURIx(ServicePropertiesEnum.FHIR_TOOLKIT_BASE);
+    }
+
+    private URI getValidationURIx(ServicePropertiesEnum fhirToolkitBase) {
+        String baseStr = ServiceProperties.getInstance().getPropertyOrThrow(fhirToolkitBase);
+        String uriStr = baseStr + "/validate";
+        try {
+            return new URI(uriStr);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

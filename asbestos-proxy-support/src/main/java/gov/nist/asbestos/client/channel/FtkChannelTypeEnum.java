@@ -6,7 +6,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public enum FtkChannelTypeEnum {
+    /**
+     * Passthrough channel has no transformations and has all test collections implicitly added to it
+     */
     fhir(true, null),
+    /**
+     * MHD channel has transformations because it is paired with a XDS Toolkit backend simulator
+     */
     mhd(false,
             Arrays.asList(
             new IgTestCollection(IgNameConstants.MHDV_3_X, "Internal" ,"https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_MHD_Rev3-2_TI_2020-08-28.pdf"),

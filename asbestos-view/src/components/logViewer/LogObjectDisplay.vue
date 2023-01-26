@@ -17,6 +17,7 @@
       </div>
 
         <div v-if="report.name === 'DocumentManifest' || report.name === 'DocumentReference'">
+            <!-- Defer to validation test collection drop down
             <div>
                 <span v-if="report.isComprehensive"><img src="../../assets/check.png"></span>
                 <span v-else><img src="../../assets/cross.png"></span>
@@ -40,6 +41,8 @@
                         :att-list-name="'Required'"
                         :start-open="true"> </log-error-list>
             </div>
+            end Defer
+            -->
             <div>
                 <span v-if="report.codingErrors.length === 0"><img src="../../assets/check.png"></span>
                 <span v-else><img src="../../assets/cross.png"></span>
@@ -50,6 +53,9 @@
                         :start-open="true"> </log-error-list>
             </div>
         </div>
+        <!-- Defer to validation test collection
+        end Defer
+        -->
         <div>
             <span v-if="report.validationResult.length === 0"><img src="../../assets/check.png"></span>
             <span v-else-if="isError"><img src="../../assets/cross.png"></span>
@@ -100,7 +106,7 @@
         props: [
             'report'
         ],
-        components: { LogErrorList, LogAtts, OperationOutcomeDisplay },
+        components: { LogErrorList, LogAtts , OperationOutcomeDisplay  },
         name: "LogObjectDisplay"
     }
 </script>

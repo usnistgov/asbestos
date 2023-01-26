@@ -318,8 +318,6 @@ public class OperationRunner {
             }
             switch (requestCode) {
                 case FTK_LOAD_FIXTURE:
-                    ftkOperation(op, operationReport, isFollowedByAssert, code, variableMgr, ftkInternalRequestCodeValue);
-                    break;
                 case FTK_FUNCTION_CODE:
                     ftkOperation(op, operationReport, isFollowedByAssert, code, variableMgr, ftkInternalRequestCodeValue);
                     break;

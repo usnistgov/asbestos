@@ -97,7 +97,7 @@
                     </span>
                     <div class="divider"></div>
                     <template v-if="modalMode">
-                        <a :href="modalModeEventLink" target="_blank">PDB Validations<img
+                        <a :href="modalModeEventLink" target="_blank">Validations<img
                                 alt="External link" src="../../assets/ext_link.png" style="vertical-align: top"
                                 title="Open Inspector in a new browser tab"></a>
                     </template>

@@ -62,6 +62,8 @@ public class SimId {
         if (!rawid.contains("__"))
             throw new RuntimeException("buildFromRawId: SimId is testsession__id : " + rawid + " is not valid format");
         String[] parts = rawid.split("__");
+        if (parts.length != 2)
+            throw new RuntimeException("buildFromRawId: SimId must have only 2 parts.");
         String testSession = parts[0];
         String id = parts[1];
         return new SimId(new TestSession(testSession), id);

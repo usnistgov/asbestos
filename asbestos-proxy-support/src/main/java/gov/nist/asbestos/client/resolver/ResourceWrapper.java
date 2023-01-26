@@ -75,7 +75,8 @@ public class ResourceWrapper {
 
     public ResourceWrapper newWithContext() {
         ResourceWrapper newWrapper = new ResourceWrapper();
-        newWrapper.ref = ref.copy();
+        if (ref != null)
+            newWrapper.ref = ref.copy();
         newWrapper.context = context;
         newWrapper.file = file;
         newWrapper.event = event;

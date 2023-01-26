@@ -31,6 +31,12 @@ public enum TestCollectionPropertiesEnum {
      */
     FhirIgVersion,
     /**
+     * If defined, this value overrides the main service.properties fhirValidationServer property.
+     * The fall back property is the fhirValidationServer service property.
+     * The value is a Channel Id.
+     */
+    FhirValidationChannelId,
+    /**
      * This is an internal test collection which should be hidden from the user interface
      * true or false
      */

@@ -37,34 +37,37 @@
             <textarea id="json" v-model="resourceText" cols="80" rows="15" placeholder="Paste Resource XML or JSON here"> </textarea>
 
             <!--   Display area   -->
+            <template v-if="isLoading"><p>Loading...</p></template>
+            <template v-else>
             <div v-if="theUrl" class="request-response" :key="rerenderkey">
-                <log-analyis-report
+                <log-analysis-report
                         :session-id="sessionId"
                         :channel-name="channelName"
                         :the-url="theUrl"
                         :gzip="gzip"
-                        :use-proxy="useProxy"> </log-analyis-report>
+                        :use-proxy="useProxy"> </log-analysis-report>
             </div>
             <div v-else-if="capStmt" class="request-response" :key="reCapStmt">
                 <div class="left">
-                    <log-analyis-report
+                    <log-analysis-report
                             :session-id="sessionId"
                             :channel-name="channelName"
                             :the-url="`${getProxyBase({channelName: channelName, sessionId: sessionId})}/metadata`"
                             :gzip="gzip"
                             :use-proxy="useProxy"
-                            :ignore-bad-refs="true"> </log-analyis-report>
+                            :ignore-bad-refs="true"> </log-analysis-report>
                 </div>
             </div>
             <div v-else-if="inspection" class="request-response">
-                <log-analyis-report> </log-analyis-report>
+                <log-analysis-report> </log-analysis-report>
             </div>
+            </template>
         </div>
     </div>
 </template>
 
 <script>
-    import LogAnalyisReport from "../logViewer/LogAnalysisReport";
+    import LogAnalysisReport from "../logViewer/LogAnalysisReport";
     import {FHIRTOOLKITBASEURL, UtilFunctions} from "../../common/http-common";
     import Vue from "vue"
     import VueSimpleAlert from "vue-simple-alert";
@@ -86,6 +89,7 @@
                 validation: null,
                 inspection: false,
                 resourceText: "",
+                isLoading: false,
             }
         },
         methods : {
@@ -98,10 +102,15 @@
             },
             inspect() {
                 console.log(`running inspect`)
+                this.isLoading = true
                 this.inspection = true
                 this.theUrl = null
                 this.capStmt = false
                 this.$store.dispatch('analyseResource', this.resourceText)
+                    .then( ()=>{this.isLoading = false; })
+                    .catch(()=>{this.isLoading = false; })
+                    .finally(() => {this.isLoading = false;})
+
             },
             run() {   // GET from URL
                 this.theUrl = this.url
@@ -144,7 +153,7 @@
         props: [
             'sessionId', 'channelName'
         ],
-        components: { LogAnalyisReport },
+        components: { LogAnalysisReport },
         name: "Getter"
     }
 </script>

@@ -227,6 +227,11 @@ public class Ref {
         return getParametersAsMap(parms);
     }
 
+    /**
+     * This method does not support multiple keys names
+     * @param parms
+     * @return
+     */
     public static Map<String, String> getParametersAsMap(String parms) {
         Map<String, String> map = new HashMap<>();
 
@@ -557,6 +562,10 @@ public class Ref {
     public boolean isRelative() {
         if (uri == null) return false;
         return !isAbsolute();
+    }
+
+    public boolean isURN() {
+        return (uri.toString().startsWith("urn"));
     }
 
     @Override

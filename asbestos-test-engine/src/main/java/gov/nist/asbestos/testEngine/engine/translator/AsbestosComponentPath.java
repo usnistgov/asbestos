@@ -2,6 +2,8 @@ package gov.nist.asbestos.testEngine.engine.translator;
 
 import gov.nist.asbestos.client.Base.EC;
 import java.util.logging.Logger;
+
+import gov.nist.asbestos.testcollection.COMPONENT_PROP_REFERENCE_PARTS;
 import org.hl7.fhir.r4.model.TestScript;
 
 import java.util.List;
@@ -34,19 +36,20 @@ public class AsbestosComponentPath {
             }
             String codedValuePart = componentExtensionValue.substring(from+BEGIN_ASBESTOS_COMPONENT_VALUE_VARIABLE.length(), to);
             String codeParts[] = codedValuePart.split(COMPONENT_VALUE_CODE_DELIMITER);
-            int codePartsLength = codeParts.length;
-            if (codePartsLength != 3) {
-                log.severe(String.format("codeParts length of %d is not equal to 3.", codePartsLength));
+            int codePartsLength =  codeParts.length;
+            final int expectedCount = COMPONENT_PROP_REFERENCE_PARTS.values().length;
+            if (codePartsLength != expectedCount) {
+                log.severe(String.format("ComponentReference codeParts length of %d is not equal to %d.", codePartsLength, expectedCount));
                 return null;
             }
-            if (EC.TEST_COLLECTION_PROPERTIES.equals(codeParts[1])) {
-                String propKey = codeParts[2];
+            if (EC.TEST_COLLECTION_PROPERTIES.equals(codeParts[COMPONENT_PROP_REFERENCE_PARTS.PropertiesFileName.ordinal()])) {
+                String propKey = codeParts[COMPONENT_PROP_REFERENCE_PARTS.PropertyKey.ordinal()];
                 String propValue = tcProperties.getProperty(propKey);
                 if (propValue == null) {
                     log.severe("Property value not found for key: " + propKey + ". tcProperties size is: " + tcProperties.size());
                     return null;
                 }
-                String varNameToBe = codeParts[0].concat(propValue);
+                String varNameToBe = codeParts[COMPONENT_PROP_REFERENCE_PARTS.VariablePrefix.ordinal()].concat(propValue);
                 Optional<TestScript.TestScriptVariableComponent> optionalVar = variableComponentList.stream().filter(s -> varNameToBe.equals(s.getName())).findFirst();
                 if (optionalVar.isPresent()) {
                     if (optionalVar.get().hasDefaultValue()) {

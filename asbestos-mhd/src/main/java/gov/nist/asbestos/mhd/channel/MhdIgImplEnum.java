@@ -1,6 +1,5 @@
 package gov.nist.asbestos.mhd.channel;
 
-import gov.nist.asbestos.client.channel.FtkChannelTypeEnum;
 import gov.nist.asbestos.client.channel.IgNameConstants;
 import gov.nist.asbestos.mhd.transforms.MhdV3x;
 import gov.nist.asbestos.mhd.transforms.MhdV3xCanonicalUriCodes;

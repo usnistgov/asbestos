@@ -6,8 +6,10 @@
             <span @click.stop="closed = !closed">Inspect</span>
         </div>
         <div v-if="!closed">
-            <!--  report is the Inspection report and not TestReport    -->
+                <!--  report is the Inspection report and not TestReport    -->
             <div v-if="report" class="boxed">
+                <template v-if="isLoading"><p>Loading...</p></template>
+                <template v-else>
                 <div class="vdivider"></div>
                 <div class="main-caption">Inspector</div>
 
@@ -78,13 +80,13 @@
                     </div>
                 </div>
 
-                <template v-if="isLoading"><p>Loading...</p></template>
-                <template v-else>
                     <!--  RELATED     -->
                     <div class="vdivider"></div>
+                    <div v-if="report !== undefined && report.objects !== undefined && report.objects.length > 0">
                     <span class="caption">Related: </span>
                     <span>(referenced by Focus Object)</span>
                     <div class="vdivider"></div>
+                    </div>
                     <div class="grid-container">
                     <span v-for="(resource, resourcei) in report.objects"
                         :key="resource + resourcei">
@@ -185,8 +187,8 @@
                 }
             },
             async loadAnalysis2() {
-                this.isLoading = true
                 if (this.eventId) {
+                    this.isLoading = true
                     //console.log(`loadAnalysis2 for ${this.eventId}`)
                     //console.log(`theUrl=${this.theUrl}`)
                     await this.$store.dispatch('getLogEventAnalysis', {
@@ -195,26 +197,42 @@
                         eventId: this.eventId,
                         requestOrResponse: this.requestOrResponse
                     })
-                        .then( s=>{if (s);  this.isLoading = false;})
-                        .catch(e=>{if (e); this.isLoading = false;})
+                        .then( ()=>{this.isLoading = false; })
+                        .catch(()=>{this.isLoading = false; })
+                    .finally(() => {this.isLoading = false; })
                 }
             },
             async loadAnalysisFromEventContext(url, eventContext, addToHistory) {
+                this.isLoading = true;
               const eventId = eventContext ? eventContext.eventId : null
                 console.log(`loadAnalysisFromEventContext url=${url} eventContext.eventId=${eventId}`)
               if (eventId)
                   await this.loadAnalyisFromEventId(url, eventId, addToHistory)
+                      .then( ()=>{this.isLoading = false; })
+                      .catch(()=>{this.isLoading = false; })
+                      .finally(() => {this.isLoading = false; })
+
               else
                 await this.loadAnalysisForObject(url)
+                    .then( ()=>{this.isLoading = false; })
+                    .catch(()=>{this.isLoading = false; })
+                    .finally(() => {this.isLoading = false; })
+
             },
             async loadAnalyisFromEventId(url, eventId, addToHistory) {
+                this.isLoading = true;
                 console.log(`loadAnalyisFromEventContext for ${eventId} and ${url}`)
                 await this.$store.dispatch('getLogEventAnalysis', {channel: this.channelName, session: this.sessionId, eventId: eventId, requestOrResponse: this.requestOrResponse, url: url})
+                    .then( ()=>{this.isLoading = false; })
+                    .catch(()=>{this.isLoading = false; })
+                    .finally(() => {this.isLoading = false; })
+
                 if (addToHistory)
                     this.historyPush(url, eventId)
                 this.index = this.history.length - 1
             },
             loadAnalysisForObject(resourceUrl) {
+                this.isLoading = true;
                 console.log(`loadAnalysisForObject ${resourceUrl} eventId= ${this.eventId}`)
                 this.$store.dispatch('getLogEventAnalysisForObject', {
                     resourceUrl: resourceUrl,
@@ -222,6 +240,10 @@
                     ignoreBadRefs: this.ignoreBadRefs,
                     eventId: this.eventId
                 })
+                    .then( ()=>{this.isLoading = false; })
+                    .catch(()=>{this.isLoading = false; })
+                    .finally(() => {this.isLoading = false; })
+
                 this.selectedResourceIndex = -1
               if (this.eventId)
                 this.historyPush(resourceUrl, this.eventId);

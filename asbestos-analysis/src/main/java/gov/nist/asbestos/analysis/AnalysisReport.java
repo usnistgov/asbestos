@@ -126,10 +126,10 @@ public class AnalysisReport {
             report.base.codingErrors = codingErrors;
             report.base.atts = atts;
             report.base.binaryUrl = binaryUrl;
-            if (runValidation)
-                report.base.validationResult = runValidation(baseObj.getResource());
-            else
-                report.base.validationResult = new OperationOutcome();
+//            if (runValidation)
+//                report.base.validationResult = runValidation(baseObj.getResource());
+//            else
+            report.base.validationResult = new OperationOutcome();
         }
 
         for (Related rel : related) {
@@ -138,10 +138,10 @@ public class AnalysisReport {
             RelatedReport relatedReport = new RelatedReport(wrapper, rel.howRelated);
             if (resource != null) {
                 relatedReport.comprehensiveErrors = rel.comprehensiveChecked == null ? new ArrayList<>() : rel.comprehensiveChecked.report.missing;
-                relatedReport.comprehensiveErrors.addAll(rel.comprehensiveErrors);
+                relatedReport.comprehensiveErrors.addAll(rel.comprehensiveErrors == null ? new ArrayList<>() : rel.comprehensiveErrors);
                 relatedReport.isComprehensive = relatedReport.comprehensiveErrors.isEmpty(); //rel.comprehensiveErrors != null && rel.comprehensiveErrors.isEmpty();
                 relatedReport.minimalErrors = rel.minimalChecked == null ? new ArrayList<>() : rel.minimalChecked.report.missing;
-                relatedReport.minimalErrors.addAll(rel.minimalErrors);
+                relatedReport.minimalErrors.addAll(rel.minimalErrors == null ? new ArrayList<>() : rel.minimalErrors);
                 relatedReport.isMinimal = relatedReport.minimalErrors.isEmpty();  //rel.minimalErrors!= null && rel.minimalErrors.isEmpty();
                 relatedReport.comprehensiveChecked = rel.comprehensiveChecked == null ? new ArrayList<>() : rel.comprehensiveChecked.report.expected;
                 relatedReport.minimalChecked = rel.minimalChecked == null ? new ArrayList<>() : rel.minimalChecked.report.expected;
@@ -256,8 +256,8 @@ public class AnalysisReport {
             return report;
         try {
             buildRelated();
-            comprehensiveEval();
-            minimalEval();
+//            comprehensiveEval();
+//            minimalEval();
             codingEval();
             buildAtts();
             binaryEval();
@@ -360,6 +360,7 @@ public class AnalysisReport {
         }
     }
 
+    /*
     private void comprehensiveEval() {
         if (baseObj == null)
             return;
@@ -428,6 +429,7 @@ public class AnalysisReport {
 //        }
     }
 
+
     private Checked getMinimumIdReport(TestReport testReport) {
         if (testReport == null) return new Checked("", new MinimumId.Report(), "");
         for (TestReport.TestReportTestComponent testComponent : testReport.getTest()) {
@@ -470,6 +472,8 @@ public class AnalysisReport {
 //            return null; // Resource type does not have an eval TestScript configured in FTK test collections
 //        }
     }
+
+     */
 
     private Ref translateToProxyServerSide(Ref theRef) {
         Objects.requireNonNull(theRef);
@@ -927,7 +931,8 @@ public class AnalysisReport {
             } else {
                 BaseResource request  = entryComponent.getResource();
                 ResourceWrapper wrapper1 = wrapper.newWithContext().setResource(request);
-                wrapper1.getRef().withFocusUrl(entryComponent.getFullUrl());
+                if (wrapper1.getRef() != null)
+                    wrapper1.getRef().withFocusUrl(entryComponent.getFullUrl());
                 addRelated(wrapper1, "In Bundle", false);
             }
         }
@@ -1124,8 +1129,8 @@ public class AnalysisReport {
             buildRelatedBinary(wrapper);
         else if (resource instanceof Patient)
             buildRelatedPatient(wrapper);
-        else if (resource instanceof Bundle)
-            buildRelatedBundle(wrapper);
+//        else if (resource instanceof Bundle)
+//            buildRelatedBundle(wrapper);
         else
             buildRelatedOther(resource);
     }
@@ -1165,7 +1170,7 @@ public class AnalysisReport {
     }
 
     private Related addRelated(ResourceWrapper wrapper, String howRelated, boolean contained) {
-        if (baseRef.equals(wrapper.getRef()))
+        if (baseRef == null || baseRef.equals(wrapper.getRef()))
             return null;
         Related rel = getRelated(wrapper.getRef());
         if (rel != null)
@@ -1178,13 +1183,26 @@ public class AnalysisReport {
     }
 
     private Related load(Ref ref, String howRelated, BaseResource parent) {
+        switch (howRelated) {
+            case "extension":
+            case "request":
+            case "item":
+            case "attachment":
+                return null;
+        }
         if (hasContextBundle()) {
             ResourceWrapper wrapper = findResourceInBundle(getContextBundle(), ref.toString());
             if (wrapper != null) {
                 if (ref.toString().startsWith("urn:uuid:")) {
-                    Ref theRef = contextResourceBundle.getRef().copy();
-                    theRef.addParameter("focusUrl", ref.toString());
-                    wrapper.setRef(theRef);
+                    if (hasContextBundle() && contextResourceBundle.getRef() != null) {
+                        Ref theRef = contextResourceBundle.getRef().copy();
+                        theRef.addParameter("focusUrl", ref.toString());
+                        wrapper.setRef(theRef);
+                    } else {
+                        Ref theRef = new Ref("bundle");
+                        theRef.addParameter("focusUrl", ref.toString());
+                        wrapper.setRef(theRef);
+                    }
                 }
                 return addRelated(wrapper, howRelated, false);
             }
@@ -1224,6 +1242,10 @@ public class AnalysisReport {
                     generalErrors.add("Ref (" + ref + ") is relative and both fhirBase and baseRef are null.");
             }
             ResourceWrapper wrapper;
+            if (ref.isURN()) {
+                generalErrors.add("Cannot load URN " + ref + ".");
+                return null;
+            }
             try {
                 log.info("Read " + ref.asString());
                 wrapper = fhirClient.readResource(ref);
