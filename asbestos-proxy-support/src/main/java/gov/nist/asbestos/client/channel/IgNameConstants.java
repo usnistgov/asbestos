@@ -19,4 +19,12 @@ public enum IgNameConstants {
     public String toString() {
         return igName;
     }
+
+    public static IgNameConstants find(String value) {
+        for (IgNameConstants igNameConstant : IgNameConstants.values()) {
+            if (igNameConstant.igName.equals(value))
+                return igNameConstant;
+        }
+        return null;
+    }
 }

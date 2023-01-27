@@ -2,6 +2,7 @@ package gov.nist.asbestos.services.servlet;
 
 import gov.nist.asbestos.services.restRequests.GetValidationRequest;
 import gov.nist.asbestos.client.Base.Request;
+import gov.nist.asbestos.services.restRequests.ValidateFhirResourceRequest;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
 import java.util.logging.Logger;
 
@@ -39,7 +40,7 @@ public class ValidationServlet  extends HttpServlet {
         Request request = new Request(req, resp, externalCache);
 
         try {
-            if (GetValidationRequest.isRequest(request)) new GetValidationRequest(request).run();
+//            if (GetValidationRequest.isRequest(request)) new GetValidationRequest(request).run();
         } catch (Throwable t) {
             request.serverError(t);
         }
@@ -55,10 +56,11 @@ public class ValidationServlet  extends HttpServlet {
 
         Request request = new Request(req, resp, externalCache);
 
-//        try {
-//
-//        } catch (Throwable t) {
-//            request.serverError(t);
-//        }
+        try {
+
+        if (ValidateFhirResourceRequest.isRequest(request)) new ValidateFhirResourceRequest(request).run();
+        } catch (Throwable t) {
+            request.serverError(t);
+        }
     }
 }

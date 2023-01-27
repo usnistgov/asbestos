@@ -2,11 +2,11 @@ package gov.nist.asbestos.client.resolver;
 
 import ca.uhn.fhir.context.FhirContext;
 
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import org.apache.commons.io.IOUtils;
 
-import java.util.Optional;
 import java.util.logging.Logger;
 
 
@@ -22,7 +22,7 @@ import java.util.Properties;
  */
 public class FileSystemResourceCache implements ResourceCache {
     private static final Logger logger = Logger.getLogger(FileSystemResourceCache.class.getName());
-    private static FhirContext ctx = FhirContext.forR4();
+    private static FhirContext ctx = ParserBase.getFhirContext(); // FhirContext.forR4();
 
     private List<File> cacheDirs = new ArrayList<>();
     private Ref base = new Ref("");

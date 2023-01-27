@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class OperationRunner {
@@ -255,7 +256,7 @@ public class OperationRunner {
             saveToCache.run(op, operationReport);
         } else if ("eventPart".equals(code)) {
             handleEventPartRequest(op, operationReport, isFollowedByAssert, code);
-        } else if ("validate".equals(code)) {
+        } else if ("ftkValidate".equals(code)) {
             if (! hasRequestHeader(op, code)) {
                 return;
             }
@@ -273,7 +274,32 @@ public class OperationRunner {
                 return;
             }
             try {
-                new URI(xUrlRequestHeaderValue);
+                final URI theUri = new URI(xUrlRequestHeaderValue);
+                try {
+                    SetupActionTransaction validateAction = new SetupActionTransaction(actionReference, fixtureMgr, isFollowedByAssert) {
+                        @Override
+                        Ref buildTargetUrl() {
+                            return new Ref(theUri);
+                        }
+
+                    };
+                    fhirClient.sendGzip(false);
+                    fhirClient.requestGzip(false);
+                    fhirClient.setFormat(Format.JSON);
+                    validateAction.setSut(sut);
+                    validateAction.setFhirClient(fhirClient);
+                    validateAction.setVariableMgr(variableMgr);
+                    validateAction.setVal(val);
+                    validateAction.setTestEngine(testEngine);
+                    validateAction.setTestId(testId);
+                    validateAction.setTestCollectionId(testCollectionId);
+                    validateAction.setType(type + ".ftkValidate");
+                    validateAction.run(op, operationReport);
+                } catch (Exception ex) {
+                    logger.log(Level.SEVERE, ex.toString(), ex);
+                    reporter.reportError(ex.toString());
+                }
+
             } catch (URISyntaxException e) {
                 String error = String.format("%s is not a valid URI.", xUrlRequestHeader);
                 logger.warning(error);
@@ -281,18 +307,6 @@ public class OperationRunner {
                 return;
             }
 
-            try {
-                SetupActionTransaction validateAction = new SetupActionTransaction(actionReference, fixtureMgr, isFollowedByAssert) {
-                    @Override
-                    Ref buildTargetUrl() {
-                        return new Ref(xUrlRequestHeaderValue);
-                    }
-                };
-                validateAction.run(op, operationReport);
-            } catch (Exception ex) {
-                logger.warning(ex.toString());
-                reporter.reportError(ex.toString());
-            }
 
         } else if ("internalFtkRequest".equals(code)) {
             if (! hasRequestHeader(op, code)) {

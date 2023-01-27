@@ -197,7 +197,7 @@ abstract class GenericSetupAction {
 
     private final List<String> putPostTypes = new ArrayList<String>(
             Arrays.asList(
-            "update", "updateCreate", "create", "transaction", "mhd-pdb-transaction"
+            "update", "updateCreate", "create", "transaction", "mhd-pdb-transaction", "ftkValidate"
             )
     );
 

@@ -2,6 +2,7 @@ package gov.nist.asbestos.client.Base;
 
 import ca.uhn.fhir.context.FhirContext;
 import gov.nist.asbestos.client.client.Format;
+import org.hl7.fhir.common.hapi.validation.support.NpmPackageValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -19,9 +20,11 @@ import java.util.List;
 public class ParserBase {
     static private FhirContext ourCtx;
 
+    static {
+        ourCtx = FhirContext.forR4();
+    }
+
     public static FhirContext getFhirContext() {
-        if (ourCtx == null)
-            ourCtx = FhirContext.forR4();
         return ourCtx;
     }
 

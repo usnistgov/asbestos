@@ -1,10 +1,15 @@
 package gov.nist.asbestos.client.channel;
 
+import ca.uhn.fhir.validation.FhirValidator;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Use the IgNameConstant to find the FHIR Toolkit Channel Implementation
+ */
 public enum FtkChannelTypeEnum {
     /**
      * Passthrough channel has no transformations and has all test collections implicitly added to it
@@ -15,9 +20,9 @@ public enum FtkChannelTypeEnum {
      */
     mhd(false,
             Arrays.asList(
-            new IgTestCollection(IgNameConstants.MHDV_3_X, "Internal" ,"https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_MHD_Rev3-2_TI_2020-08-28.pdf"),
-            new IgTestCollection(IgNameConstants.MHDV_4, "MHDv4_Internal", "https://profiles.ihe.net/ITI/MHD/4.0.1"),
-            new IgTestCollection(IgNameConstants.MHDV_410, "MHDv410_Internal", "https://profiles.ihe.net/ITI/MHD/4.1.0")
+            new IgTestCollection(IgNameConstants.MHDV_3_X, "Internal" ,"https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_MHD_Rev3-2_TI_2020-08-28.pdf", null /* v3.x FHIR IG not available, IG was PDF based. */),
+            new IgTestCollection(IgNameConstants.MHDV_4, "MHDv4_Internal", "https://profiles.ihe.net/ITI/MHD/4.0.1", IgBasedFhirValidator.getInstance("/npm-fhir-ig-package/ihe.mhd-4.0.2.fhir.tar.gz")),
+            new IgTestCollection(IgNameConstants.MHDV_410, "MHDv410_Internal", "https://profiles.ihe.net/ITI/MHD/4.1.0", null)
             )
     );
 
@@ -55,4 +60,14 @@ public enum FtkChannelTypeEnum {
         return null;
     }
 
+    public static FhirValidator findValidator(IgNameConstants igNameConstant) {
+        for (FtkChannelTypeEnum e : FtkChannelTypeEnum.values()) {
+            for (IgTestCollection igTc : e.getChannelTypeIgTestCollection().getIgTestCollections()){
+               if (igTc.getIgName().equals(igNameConstant) ) {
+                   return igTc.getFhirValidator();
+               }
+            }
+        }
+        return null;
+    }
 }

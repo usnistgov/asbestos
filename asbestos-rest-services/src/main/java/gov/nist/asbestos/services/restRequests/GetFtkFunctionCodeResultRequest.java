@@ -55,7 +55,7 @@ public class GetFtkFunctionCodeResultRequest {
         Map<String, String> paramsMap = request.getParametersMap();
 
         List<Resource> result = new ArrayList<>();
-        String fn = paramsMap.get(FtkInternalRequestCode.FTK_FUNCTION_CODE_FN_PARAM);
+        String fn = paramsMap.get(FtkInternalRequestCode.FTK_FUNCTION_CODE_FN_PARAM.getCode());
         if (fn != null) {
             try {
                 FtkInternalRequestCode fnCode = FtkInternalRequestCode.find(fn);
@@ -97,7 +97,7 @@ public class GetFtkFunctionCodeResultRequest {
         }
 
         String result = null;
-        String channelId = paramsMap.get(FtkInternalRequestCode.FTK_FUNCTION_CODE_CHANNELID_PARAM);
+        String channelId = paramsMap.get(FtkInternalRequestCode.FTK_FUNCTION_CODE_CHANNELID_PARAM.getCode());
         if (VARIABLE_PROP_REFERENCE_PARTS.DefaultToGlobalServiceProperty.getToken().equals(channelId)) {
             result = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_VALIDATION_SERVER);
         } else {

@@ -129,6 +129,9 @@ public class FhirPathEngineBuilder {
     }
 
     private static String getStringValue(Base result) {
+        if (result instanceof Base64BinaryType) {
+            return ((Base64BinaryType) result).getValueAsString();
+        }
         if (result instanceof StringType) {
             return ((StringType) result).getValueAsString();
         }
@@ -147,6 +150,7 @@ public class FhirPathEngineBuilder {
         if (result instanceof DateType) {
             return ((DateType) result).getValueAsString();
         }
+        logger.warning("Default string value warning for class: " + result.getClass());
         String className = result.getClass().getSimpleName();
         if (className.endsWith("Info")) {
             StringBuilder buf = new StringBuilder();

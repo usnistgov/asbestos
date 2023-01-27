@@ -5,11 +5,9 @@ import gov.nist.asbestos.client.channel.FtkChannelTypeEnum;
 import gov.nist.asbestos.client.log.SimStore;
 import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.channel.ChannelConfigFactory;
-import gov.nist.asbestos.mhd.channel.MhdIgImplEnum;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.simCommon.TestSession;
 import org.apache.commons.io.IOUtils;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -69,7 +67,6 @@ public class CreateChannelRequest {
         request.setStatus((simStore.isNewlyCreated() ? request.resp.SC_CREATED : request.resp.SC_OK));
     }
 
-    @Nullable
     private ChannelConfig verifyChannelConfig(ChannelConfig channelConfig) throws IOException {
 
         if (FtkChannelTypeEnum.fhir.equals(channelConfig.getChannelType()) && channelConfig.isLogMhdCapabilityStatementRequest()) {

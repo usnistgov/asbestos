@@ -1,5 +1,8 @@
 package gov.nist.asbestos.client.channel;
 
+import ca.uhn.fhir.validation.FhirValidator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Use of setters is for automatic reflection based usage only.
  */
@@ -7,10 +10,13 @@ public class IgTestCollection {
     IgNameConstants igName;
     String tcName;
     String docBase;
-    IgTestCollection(IgNameConstants igName, String tcName, String docBase)  {
+    private transient FhirValidator fhirValidator;
+
+    IgTestCollection(IgNameConstants igName, String tcName, String docBase, FhirValidator fhirValidator)  {
         this.igName = igName;
         this.tcName = tcName;
         this.docBase = docBase;
+        this.fhirValidator = fhirValidator;
     }
 
     @Override
@@ -45,6 +51,12 @@ public class IgTestCollection {
         return docBase;
     }
 
+    @JsonIgnore
+    public FhirValidator getFhirValidator() {
+        return fhirValidator;
+    }
+
+
     public void setIgName(IgNameConstants igName) {
         this.igName = igName;
     }
@@ -56,4 +68,6 @@ public class IgTestCollection {
     public void setDocBase(String docBase) {
         this.docBase = docBase;
     }
+
+
 }
