@@ -66,6 +66,7 @@ public class ValidateFhirResourceRequest {
 
             final String profile = paramsMap.get("profile");
             final String igName = paramsMap.get("igName");
+            final String logEvent = paramsMap.get("logEvent");
 
 
             IgNameConstants igNameConstant = IgNameConstants.find(igName);
@@ -94,7 +95,9 @@ public class ValidateFhirResourceRequest {
 
             String jsonStr = ParserBase.encode(oo, Format.JSON);
 
-            logChannelEvent(rawRequest, jsonStr);
+            if (Boolean.parseBoolean(logEvent)) {
+                logChannelEvent(request, rawRequest, jsonStr);
+            }
 
             request.resp.setContentType("application/json");
             request.resp.getOutputStream().print(jsonStr);
@@ -104,18 +107,18 @@ public class ValidateFhirResourceRequest {
         }
     }
 
-    private void logChannelEvent(String requestTxt, String responseTxt) {
+    private static void logChannelEvent(Request request, String requestTxt, String responseTxt) {
         try {
             SimId simId = ChannelUrl.getSimId(request.uri);
             if (!simId.isValid()) {
-                String warning = this.getClass().getName() + " Invalid SimId in the request URI: " + request.uri;
+                String warning = ValidateFhirResourceRequest.class.getName() + " Invalid SimId in the request URI: " + request.uri;
                 logger.warning(warning);
                 return;
             }
             SimStore simStore;
             simStore = new SimStore(request.externalCache, simId);
             if (!simStore.exists()) {
-                String warning = this.getClass().getName() + " simStore does no exist: " + request.uri;
+                String warning = ValidateFhirResourceRequest.class.getName() + " simStore does no exist: " + request.uri;
                 logger.warning(warning);
                 return;
             }
