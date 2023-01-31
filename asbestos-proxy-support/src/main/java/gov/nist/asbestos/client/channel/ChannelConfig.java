@@ -253,7 +253,7 @@ public class ChannelConfig {
 
     private URI getValidationURIx(ServicePropertiesEnum fhirToolkitBase) {
         String baseStr = ServiceProperties.getInstance().getPropertyOrThrow(fhirToolkitBase);
-        String uriStr = baseStr + "/ftkValidate";
+        String uriStr = baseStr + "/ftkValidate/" + testSession + "__" + channelName;
         try {
             return new URI(uriStr);
         } catch (URISyntaxException e) {

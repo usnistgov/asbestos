@@ -82,8 +82,14 @@ public class ProxyServlet extends HttpServlet {
 
     }
 
-    private static String[] addEventHeader(HttpServletResponse resp, String hostport, ITask task) {
-        Header header = buildEventHeader(hostport, task);
+
+
+    public static void addEventHeader(HttpServletResponse resp, Header header) {
+        resp.setHeader(header.getName(), header.getValue());
+    }
+
+    public static String[] addEventHeader(HttpServletResponse resp, String hostport, File eventDir, String key) {
+        Header header = buildEventHeader(hostport, eventDir, key);
         resp.setHeader(header.getName(), header.getValue());
         String[] returned = new String[2];
         returned[0] = header.getName();
@@ -93,7 +99,8 @@ public class ProxyServlet extends HttpServlet {
 
 
     public static String[] addEventHeader(HttpBase resp, String hostport, ITask task) {
-        Header header = buildEventHeader(hostport, task);
+        File eventDir = task.getEvent().getEventDir();
+        Header header = buildEventHeader(hostport, eventDir, "x-proxy-event");
         resp.getResponseHeaders().add(header);
         String[] returned = new String[2];
         returned[0] = header.getName();
@@ -101,10 +108,9 @@ public class ProxyServlet extends HttpServlet {
         return returned;
     }
 
-    private static Header buildEventHeader(String hostport, ITask task) {
+    public static Header buildEventHeader(String hostport, File eventDir, String key) {
         if (hostport == null) return null;
-        if (task == null) return null;
-        File eventDir = task.getEvent().getEventDir();
+        if (eventDir == null) return null;
         String[] parts = eventDir.toString().split(Pattern.quote(File.separator));
         int length = parts.length;
         if (length < 6) return null;
@@ -127,10 +133,10 @@ public class ProxyServlet extends HttpServlet {
 //                channelId + "/" +
 //                resource + "/" +
 //                event;
-        return new Header("x-proxy-event", uiEvent.getURI().toString());
+        return new Header(key, uiEvent.getURI().toString());
     }
 
-    private static String getHostPort(Headers inHeaders) throws ServletException {
+    public static String getHostPort(Headers inHeaders) throws ServletException {
         String hostport = inHeaders.getValue("host");
         if (hostport == null || !hostport.contains(":")) {
             //throw new ServletException("host header missing or not formatted as host:port");
@@ -266,7 +272,7 @@ public class ProxyServlet extends HttpServlet {
         }
         Headers inHeaders = Common.getRequestHeaders(req, Verb.POST);
         String hostport = getHostPort(inHeaders);
-        String[] eventHeader = addEventHeader(resp, hostport, task);
+        String[] eventHeader = addEventHeader(resp, hostport, task.getEvent().getEventDir(), "x-proxy-event");
         if (eventHeader != null)
             responseHeaders.add(new Header(eventHeader[0], eventHeader[1]));
         task.putResponseHeader(responseHeaders);

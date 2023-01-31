@@ -76,6 +76,9 @@ public class FixtureLabels {
     private void operationReport(FixtureLabels labels, HttpBase httpBase) {
         Headers responseHeaders = httpBase.getResponseHeaders();
         String eventUrl = responseHeaders.getProxyEvent();
+        if (eventUrl == null) {
+            eventUrl = responseHeaders.getValidationEvent();
+        }
         if (eventUrl != null) {
             String refStrRaw = EventLinkToUILink.get(eventUrl, getMessageDirectionForInspector(httpBase, labels.getTail()));
             labels.referenceLabel = (labels.label == null) ? refStrRaw : "Open in Inspector";

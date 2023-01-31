@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Headers {
+    public static final String X_FTK_VALIDATION_EVENT = "x-ftkValidation-event";
     String verb = null;
     URI pathInfo = null;
     int status = 0;
@@ -214,11 +215,16 @@ public class Headers {
     }
 
     public String getProxyEvent() {
-        Header pe = get("x-proxy-event");
+        return getFtkEvent("x-proxy-event");
+    }
+
+    private String getFtkEvent(String s) {
+        Header pe = get(s);
         if (pe == null)
             return null;
         return pe.getValue();
     }
+
 
     public Header getAccept() {
         Optional<Header> accepts = headers.stream()
@@ -298,4 +304,7 @@ public class Headers {
     }
 
 
+    public String getValidationEvent() {
+        return getFtkEvent(X_FTK_VALIDATION_EVENT);
+    }
 }

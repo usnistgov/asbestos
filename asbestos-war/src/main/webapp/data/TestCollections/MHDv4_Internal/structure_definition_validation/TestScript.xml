@@ -49,7 +49,7 @@
                         <valueString value="'ftkFunctionCode'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'?fn=getFtkValidationBase&amp;FhirValidationChannelId=#{TestCollection.properties:FhirValidationChannelId:DefaultToGlobalServiceProperty}'"/>
+                        <valueString value="'?fn=getFtkValidationBase'"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="'1'"/>

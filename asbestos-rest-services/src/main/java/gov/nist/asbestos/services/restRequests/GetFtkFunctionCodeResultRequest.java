@@ -97,36 +97,35 @@ public class GetFtkFunctionCodeResultRequest {
         }
 
         String result = null;
-        String channelId = paramsMap.get(FtkInternalRequestCode.FTK_FUNCTION_CODE_CHANNELID_PARAM.getCode());
-        if (VARIABLE_PROP_REFERENCE_PARTS.DefaultToGlobalServiceProperty.getToken().equals(channelId)) {
-            result = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_VALIDATION_SERVER);
-        } else {
-            try {
-                SimId simId = SimId.buildFromRawId(channelId);
-                if (!simId.isValid()) {
-                    request.badRequest("Invalid SimId.");
-                    throw new FnException();
-                }
-            } catch (Exception ex) {
-                request.serverError(ex);
+        String channelId = request.uriParts.get(4); //paramsMap.get(FtkInternalRequestCode.FTK_FUNCTION_CODE_CHANNELID_PARAM.getCode());
+//        if (VARIABLE_PROP_REFERENCE_PARTS.DefaultToGlobalServiceProperty.getToken().equals(channelId)) {
+//            channelId = ServiceProperties.getInstance().getPropertyOrThrow(ServicePropertiesEnum.FHIR_VALIDATION_CHANNEL_ID);
+//        }
+        try {
+            SimId simId = SimId.buildFromRawId(channelId);
+            if (!simId.isValid()) {
+                request.badRequest("Invalid SimId.");
                 throw new FnException();
             }
+        } catch (Exception ex) {
+            request.serverError(ex);
+            throw new FnException();
+        }
 
-            ChannelConfig channelConfig;
+        ChannelConfig channelConfig;
 
-            try {
-                channelConfig = ChannelControl.channelConfigFromChannelId(request.externalCache, channelId);
-            } catch (Throwable e) {
-                request.notFound();
-                throw new FnException();
-            }
-            if (fnCode.equals(FtkInternalRequestCode.FTK_FUNCTION_CODE_FN_GET_CHANNEL_FHIR_BASE)) {
-                result = channelConfig.getFhirBase();
-            } else if (fnCode.equals(FtkInternalRequestCode.FTK_FUNCTION_CODE_FN_GET_CHANNEL_BASE)) {
-                result = channelConfig.getProxyURI().toString();
-            } else if (fnCode.equals(FtkInternalRequestCode.FTK_FUNCTION_CODE_FN_GET_VALIDATION_BASE)) {
-                result = channelConfig.getValidationURI().toString();
-            }
+        try {
+            channelConfig = ChannelControl.channelConfigFromChannelId(request.externalCache, channelId);
+        } catch (Throwable e) {
+            request.notFound();
+            throw new FnException();
+        }
+        if (fnCode.equals(FtkInternalRequestCode.FTK_FUNCTION_CODE_FN_GET_CHANNEL_FHIR_BASE)) {
+            result = channelConfig.getFhirBase();
+        } else if (fnCode.equals(FtkInternalRequestCode.FTK_FUNCTION_CODE_FN_GET_CHANNEL_BASE)) {
+            result = channelConfig.getProxyURI().toString();
+        } else if (fnCode.equals(FtkInternalRequestCode.FTK_FUNCTION_CODE_FN_GET_VALIDATION_BASE)) {
+            result = channelConfig.getValidationURI().toString();
         }
 
         if (result == null) {

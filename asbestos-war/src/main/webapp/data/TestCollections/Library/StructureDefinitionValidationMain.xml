@@ -13,7 +13,7 @@
             <valueString value="pdbBundleProfile"/>
         </extension>
         <extension url="urn:variable-in">
-            <valueString value="igVersion"/>
+            <valueString value="igName"/>
         </extension>
     </modifierExtension>
 
@@ -34,7 +34,7 @@
         <defaultValue value="@inspectorModeTsModuleCallValuePlaceholder"/>
     </variable>
     <variable>
-        <name value="igVersion"/>
+        <name value="igName"/>
         <defaultValue value="@inspectorModeTsModuleCallValuePlaceholder"/>
     </variable>
 
@@ -45,7 +45,7 @@
         <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
         <assert>
             <description value="Use specific profile version?"/>
-            <expression value="'${igVersion}'.length() > 0"/>
+            <expression value="'${igName}'.length() > 0"/>
             <operator value="equals"/>
             <value value="true"/>
             <warningOnly value="true"/>
@@ -61,7 +61,7 @@
                 </type>
                 <requestHeader>
                     <field value="x-Url"/>
-                    <value value="${validationServerBase}/${resourceType}/$validate?profile=${pdbBundleProfile}&amp;igName=${igVersion}"/>
+                    <value value="${validationServerBase}/${resourceType}/$validate?profile=${pdbBundleProfile}&amp;igName=${igName}"/>
                 </requestHeader>
                 <method value="post"/>
                 <sourceId value="theResource"/>
@@ -78,7 +78,7 @@
         </action>
     </test>
 
-    <!-- TODO: check return for OperationOutcome, was validation successful? -->
+    <!-- TODO: validate returned response (without a profile parameter) for OperationOutcome, was validation successful? -->
 
     <test>
     <description value="Structure definition based resource validation - server default profile (latest IG version)."/>
@@ -86,7 +86,7 @@
         <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
         <assert>
             <description value="Use server default profile version?"/>
-            <expression value="'${igVersion}'.length() == 0"/>
+            <expression value="'${igName}'.length() == 0"/>
             <operator value="equals"/>
             <value value="true"/>
             <warningOnly value="true"/>

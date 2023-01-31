@@ -294,7 +294,13 @@ public class OperationRunner {
                     validateAction.setTestId(testId);
                     validateAction.setTestCollectionId(testCollectionId);
                     validateAction.setType(type + ".ftkValidate");
-                    validateAction.run(op, operationReport);
+                    ResourceWrapper responseWrapper = validateAction.run(op, operationReport);
+                    if (responseWrapper != null) {
+                        FixtureLabels labels = new FixtureLabels(new ActionReporter(), op, null)
+                                .referenceWrapper(responseWrapper);
+                        Reporter.operationDescription(operationReport, "**Request/Response** " + labels.getReference());
+                    }
+
                 } catch (Exception ex) {
                     logger.log(Level.SEVERE, ex.toString(), ex);
                     reporter.reportError(ex.toString());
