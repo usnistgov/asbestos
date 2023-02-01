@@ -251,7 +251,7 @@
                         <valueString value="docRespBaseAddress"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="${expectedSsListCount}"/>
+                        <valueString value="expectedSsListCount"/>
                     </extension>
                 </modifierExtension>
             </operation>
@@ -279,7 +279,7 @@
                         <valueString value="docRespBaseAddress"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="${expectedDocRefCount}"/>
+                        <valueString value="expectedDocRefCount"/>
                     </extension>
                 </modifierExtension>
             </operation>

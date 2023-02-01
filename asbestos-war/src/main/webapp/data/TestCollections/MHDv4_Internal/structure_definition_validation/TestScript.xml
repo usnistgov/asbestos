@@ -10,7 +10,7 @@
             <valueString value="pdbBundleProfile"/>
         </extension>
         <extension url="urn:variable-in">
-            <valueString value="igVersion"/>
+            <valueString value="igName"/>
         </extension>
 
     </modifierExtension>
@@ -49,7 +49,7 @@
                         <valueString value="'ftkFunctionCode'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'?fn=getFtkValidationBase'"/>
+                        <valueString value="'?' + iif('${igName}'.length()=0,'fn=getFtkChannelBase&amp;FhirValidationChannelId=#{TestCollection.properties:FhirValidationChannelId:DefaultToGlobalServiceProperty}','fn=getFtkValidationBase')"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="'1'"/>
@@ -105,7 +105,7 @@
                         <valueString value="pdbBundleProfile"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="igVersion"/>
+                        <valueString value="igName"/>
                     </extension>
                 </modifierExtension>
             </operation>

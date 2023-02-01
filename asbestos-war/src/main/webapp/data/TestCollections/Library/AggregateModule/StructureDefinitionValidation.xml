@@ -31,7 +31,7 @@ This module should not be used or called by any of the MHDv3.x Test Collection T
     </variable>
     <variable>
         <name value="scriptMHDv410"/>
-        <defaultValue value="../../MHDv410_Internal/structure_definition_validation/TestScript.xml"/>
+        <defaultValue value="../../MHDv4_Internal/structure_definition_validation/TestScript.xml"/>
     </variable>
 
     <test>

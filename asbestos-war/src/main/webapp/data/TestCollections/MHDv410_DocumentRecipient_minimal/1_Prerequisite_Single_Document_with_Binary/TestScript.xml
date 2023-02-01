@@ -1,4 +1,27 @@
 <TestScript xmlns="http://hl7.org/fhir">
+    <name value="TestScript"/>
+    <description value="TestScript with NIST FHIR Toolkit Extensions. Submit Provide Document Bundle to MHD Document Recipient."/>
+
+    <variable>
+        <name value ="isComprehensiveMetadataExpected"/>
+        <defaultValue value="false"/>
+    </variable>
+    <variable>
+        <name value="getFixtureRequestQueryParams"/>
+        <defaultValue value="?fixtureId=pdb&amp;baseTestCollection=MHD_DocumentRecipient_minimal"/>
+    </variable>
+    <variable>
+        <name value="expectedFixtureResponseBundleEntryCount"/>
+        <defaultValue value="3"/>
+    </variable>
+    <variable>
+        <name value="expectedFixtureResponseSsResourceCount"/>
+        <defaultValue value="1"/>
+    </variable>
+    <variable>
+        <name value="expectedFixtureResponseDocRefCount"/>
+        <defaultValue value="1"/>
+    </variable>
 
     <test>
         <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
@@ -10,19 +33,25 @@
                         <valueString value="../../Library/AggregateModule/MHDPDBSuccess.xml"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'false'"/>
+                        <valueString value="isComprehensiveMetadataExpected"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'?fixtureId=pdb&amp;baseTestCollection=MHD_DocumentRecipient_minimal'"/>
+                        <valueString value="getFixtureRequestQueryParams"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'3'"/>
+                        <valueString value="expectedFixtureResponseBundleEntryCount"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'1'"/>
+                        <valueString value="expectedFixtureResponseSsResourceCount"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'1'"/>
+                        <valueString value="expectedFixtureResponseDocRefCount"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <!-- An empty string uses the TestCollection.properties configured channel for external or FTK HAPI FHIR server validation -->
+                        <valueString value="''"/>
+                        <!-- FhirIgName uses the IG package validation -->
+<!--                        <valueString value="'#{TestCollection.properties:FhirIgName}'"/>-->
                     </extension>
                 </modifierExtension>
             </operation>

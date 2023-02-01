@@ -165,6 +165,11 @@ public class Request {
 
     public void serverError() { setStatus(resp.SC_INTERNAL_SERVER_ERROR);}
 
+    public void serverError(String msg) {
+        log.severe(String.format("%s: %s", getRequestType(), msg));
+        setStatus(resp.SC_INTERNAL_SERVER_ERROR);
+    }
+
     public void serverError(Throwable t) {
         log.log(Level.SEVERE, String.format("%s Error Message:  %s", getRequestType(), t.toString()), t);
         setStatus(resp.SC_INTERNAL_SERVER_ERROR);

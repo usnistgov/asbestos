@@ -1389,6 +1389,9 @@ public class TestEngine  implements TestDef {
                     doAssert(typePrefix, assertComponent, actionReport);
                     if (actionReport == null)
                         return false;
+                    if (isConditional && "warning".equals(actionReport.getResult().toCode())) {
+                        log.warning("Conditional extension should not use assert warningOnly='true' in TestScript");
+                    }
                     if ("fail".equals(actionReport.getResult().toCode())) {
                         if (isConditional) {
                             // report error  but do not propagate

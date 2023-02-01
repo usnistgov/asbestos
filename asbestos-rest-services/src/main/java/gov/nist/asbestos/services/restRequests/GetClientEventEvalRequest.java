@@ -14,6 +14,8 @@ package gov.nist.asbestos.services.restRequests;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.simapi.simCommon.SimId;
+
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import java.io.File;
@@ -70,8 +72,7 @@ public class GetClientEventEvalRequest {
         try {
             Files.write(Paths.get(new File(testLogDir, testId + ".json").toString()), myStr.getBytes());
         } catch (IOException e) {
-            e.printStackTrace();
-            request.serverError();
+            request.serverError(e);
             return;
         }
 

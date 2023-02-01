@@ -270,7 +270,7 @@
                         <valueString value="docRespBaseAddress"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="${expectedSsListCount}"/>
+                        <valueString value="expectedSsListCount"/>
                     </extension>
                 </modifierExtension>
             </operation>

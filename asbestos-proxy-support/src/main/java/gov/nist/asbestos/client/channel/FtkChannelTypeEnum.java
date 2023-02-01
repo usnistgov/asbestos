@@ -22,7 +22,7 @@ public enum FtkChannelTypeEnum {
             Arrays.asList(
             new IgTestCollection(IgNameConstants.MHDV_3_X, "Internal" ,"https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_MHD_Rev3-2_TI_2020-08-28.pdf", null /* v3.x FHIR IG not available, IG was PDF based. */),
             new IgTestCollection(IgNameConstants.MHDV_4, "MHDv4_Internal", "https://profiles.ihe.net/ITI/MHD/4.0.1", IgBasedFhirValidator.getInstance("/npm-fhir-ig-package/ihe.mhd-4.0.2.fhir.tar.gz")),
-            new IgTestCollection(IgNameConstants.MHDV_410, "MHDv410_Internal", "https://profiles.ihe.net/ITI/MHD/4.1.0", null)
+            new IgTestCollection(IgNameConstants.MHDV_410, "MHDv410_Internal", "https://profiles.ihe.net/ITI/MHD/4.1.0", IgBasedFhirValidator.getInstance("/npm-fhir-ig-package/ihe.mhd-4.1.0.fhir.tar.gz"))
             )
     );
 

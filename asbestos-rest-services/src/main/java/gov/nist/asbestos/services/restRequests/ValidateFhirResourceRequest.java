@@ -71,8 +71,7 @@ public class ValidateFhirResourceRequest {
 
             IgNameConstants igNameConstant = IgNameConstants.find(igName);
             if (igNameConstant == null) {
-                String error = String.format("%s not found.", igName);
-                logger.severe(error);
+                String error = String.format("%s igName not found.", igName);
                 request.badRequest(error);
                 return;
             }
@@ -80,8 +79,7 @@ public class ValidateFhirResourceRequest {
             FhirValidator fhirValidator = FtkChannelTypeEnum.findValidator(igNameConstant);
             if (fhirValidator == null) {
                 String error = String.format("Null validator for %s.", igNameConstant.getIgName());
-                logger.severe(error);
-                request.serverError();
+                request.serverError(error);
                 return;
             }
 

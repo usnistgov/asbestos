@@ -48,7 +48,7 @@
             <expression value="'${igName}'.length() > 0"/>
             <operator value="equals"/>
             <value value="true"/>
-            <warningOnly value="true"/>
+            <warningOnly value="false"/>
         </assert>
     </action>
         <action>
@@ -89,7 +89,7 @@
     <!-- TODO: validate returned response (without a profile parameter) for OperationOutcome, was validation successful? -->
 
     <test>
-    <description value="Structure definition based resource validation - server default profile (latest IG version)."/>
+    <description value="Structure definition based resource validation - server default IG profile."/>
     <action>
         <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
         <assert>
@@ -97,7 +97,7 @@
             <expression value="'${igName}'.length() = 0"/>
             <operator value="equals"/>
             <value value="true"/>
-            <warningOnly value="true"/>
+            <warningOnly value="false"/>
         </assert>
     </action>
         <action>
@@ -114,14 +114,14 @@
                 </requestHeader>
                 <method value="post"/>
                 <sourceId value="theResource"/>
-                <responseId value="ValidationResponse2"/>
+                <responseId value="validationResponse2"/>
             </operation>
         </action>
         <action>
             <assert>
                 <description value="HTTP 200 response."/>
                 <response value="okay"/>
-                <sourceId value="extValidationResponse2"/>
+                <sourceId value="validationResponse2"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

@@ -203,23 +203,28 @@ public class VariableMgr {
                 return externalVariables.get(variableName);
             } else {
             /*
-            Is this an anonymous variable (coded as a string literal) in a TestScript Module component reference call?
-             If there is no local variable defined, attempt the value as an evaluable expression assigned to an anonymous variable.
-            If the expression yields an empty string, then it is a genuine error that the variable is an unreferenced variable error.
+            If the value is a string literal, then this is an anonymous variable (always coded as a string literal) in a TestScript Module component reference call.
             Anonymous variables are only traceable in the TestReport if the Test is Passes, and shown in the Called Module: report section.
             */
-                TestScript.TestScriptVariableComponent anonymousVariable = new TestScript.TestScriptVariableComponent(new StringType("asbestosAnonVar1"));
-                anonymousVariable.setDefaultValue(variableName);
-                FixtureComponent anonFixture = new FixtureComponent().setFixtureMgr(fixtureMgr).setResourceSimple(new ResourceWrapper(new Bundle()));
-                anonFixture.setId("anon");
-                String anonExpValue = null;
-                try {
-                    anonExpValue = doVariableEval(anonFixture, anonymousVariable.getDefaultValue());
-                } catch (Exception ex) {
-                   reporter.reportError(anonymousVariable.getName() + " Exception: " + ex.toString());
-                }
-                if (anonExpValue != null && !"".equals(anonExpValue)) {
-                   return anonExpValue;
+
+                if (variableName.startsWith("'")) {
+                    TestScript.TestScriptVariableComponent anonymousVariable = new TestScript.TestScriptVariableComponent(new StringType("asbestosAnonVar1"));
+                    anonymousVariable.setDefaultValue(variableName);
+                    FixtureComponent anonFixture = new FixtureComponent().setFixtureMgr(fixtureMgr).setResourceSimple(new ResourceWrapper(new Bundle()));
+                    anonFixture.setId("anon");
+                    String anonExpValue = null;
+                    try {
+                        anonExpValue = doVariableEval(anonFixture, anonymousVariable.getDefaultValue());
+                        if (anonExpValue != null) {
+                            return anonExpValue;
+                        }
+                    } catch (Exception ex) {
+                        String error = String.format("Anonymous variable %s eval exception: %s", anonymousVariable.getName(), ex.toString());
+                        if (errorAsValue)
+                            return error;
+                        reporter.reportError( error);
+                        return null;
+                    }
                 } else {
                     String error = "Variable " + variableName + " is referenced but not defined.";
                     if (errorAsValue)
