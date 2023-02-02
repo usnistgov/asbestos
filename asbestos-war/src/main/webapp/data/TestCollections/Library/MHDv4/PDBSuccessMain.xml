@@ -140,7 +140,7 @@
         </action>
     </test>
     <test>
-        <description value="FHIR IG-based validation."/>
+        <description value="FHIR IG based validation."/>
         <action>
             <operation>
                 <description value="Module usage description"/>
@@ -165,7 +165,7 @@
         </action>
     </test>
     <test>
-        <description value="PDB Validations."/>
+        <description value="PDB Validation."/>
         <action>
             <operation>
                 <description value="Module usage description"/>

@@ -22,6 +22,18 @@
         <name value="expectedFixtureResponseDocRefCount"/>
         <defaultValue value="1"/>
     </variable>
+    <variable>
+        <name value="internalPackageSpecificIgValidation"/>
+        <!-- FhirIgName uses the IG package validation -->
+        <expression value="'#{TestCollection.properties:FhirIgName}'"/>
+        <sourceId value="anonymous"/>
+    </variable>
+    <variable>
+        <name value="channelBasedIgValidation"/>
+        <!-- An empty string uses the TestCollection.properties configured channel for external or FTK HAPI FHIR server validation -->
+        <expression value="''"/>
+        <sourceId value="anonymous"/>
+    </variable>
 
     <test>
         <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
@@ -48,10 +60,7 @@
                         <valueString value="expectedFixtureResponseDocRefCount"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <!-- An empty string uses the TestCollection.properties configured channel for external or FTK HAPI FHIR server validation -->
-                        <valueString value="''"/>
-                        <!-- FhirIgName uses the IG package validation -->
-<!--                        <valueString value="'#{TestCollection.properties:FhirIgName}'"/>-->
+                        <valueString value="internalPackageSpecificIgValidation"/>
                     </extension>
                 </modifierExtension>
             </operation>

@@ -892,7 +892,8 @@ public class TestEngine  implements TestDef {
         /*
             Validate and align request input fixtures and variables
          */
-        ComponentReference componentReference = new ComponentReference(getEC().getTestCollectionProperties(getTestCollection()), testScript.getVariable(),  testDef, Collections.singletonList(extension));
+        final Properties propertiesMap = getEC().getTestCollectionProperties(getTestCollection());
+        ComponentReference componentReference = new ComponentReference(propertiesMap, testScript.getVariable(),  testDef, Collections.singletonList(extension));
 
         TestScript module = componentReference.getComponent();
         // fill in componentReference with local names from module definition
@@ -939,7 +940,8 @@ public class TestEngine  implements TestDef {
         VariableMgr varMgr = new VariableMgr(testScript, fixtureMgr)
                 .setExternalVariables(this.externalVariables)
                 .setVal(engineVal)
-                .setOpReport(opReport);
+                .setOpReport(opReport)
+                .setPropertiesMap(propertiesMap);
         if (engineVal.hasErrors())
             log.warning("engineVal hasErrors is true.");
         for (Parameter parm : componentReference.getVariablesIn()) {
@@ -1853,7 +1855,7 @@ public class TestEngine  implements TestDef {
                     .setTestId(parent.getTestId())
                     .reportOperation(wrapper,
                             parent.getFixtureMgr(),
-                            new VariableMgr(parent.getTestScript(), parent.getFixtureMgr()),
+                            new VariableMgr(parent.getTestScript(), parent.getFixtureMgr()).setExternalVariables(parent.externalVariables),
                             reporter,
                             op);
         }
@@ -1865,7 +1867,7 @@ public class TestEngine  implements TestDef {
                 .setTestId(testId)
                 .reportOperation(wrapper,
                         fixtureMgr,
-                        new VariableMgr(getTestScript(), getFixtureMgr()),
+                        new VariableMgr(getTestScript(), getFixtureMgr()).setExternalVariables(externalVariables),
                         reporter,
                         op);
     }

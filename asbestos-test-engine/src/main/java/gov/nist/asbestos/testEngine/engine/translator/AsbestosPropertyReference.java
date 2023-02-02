@@ -14,6 +14,10 @@ public class AsbestosPropertyReference {
     private final static String END_ASBESTOS_PROPERTY_VALUE_VARIABLE = "}";
     private final static String ASBESTOS_PROPERTY_VALUE_CODE_DELIMITER = ":";
 
+    public static boolean isPropertyReference(String variableName) {
+        return variableName.contains(BEGIN_ASBESTOS_PROPERTY_VALUE_VARIABLE) && variableName.contains(END_ASBESTOS_PROPERTY_VALUE_VARIABLE);
+    }
+
     public static String getValue(final Properties tcProperties, String value) {
         if (value.contains(BEGIN_ASBESTOS_PROPERTY_VALUE_VARIABLE)) {
             int from = value.indexOf(BEGIN_ASBESTOS_PROPERTY_VALUE_VARIABLE);
@@ -54,4 +58,5 @@ public class AsbestosPropertyReference {
                 Pattern.quote(String.format("%s%s%s", BEGIN_ASBESTOS_PROPERTY_VALUE_VARIABLE, codedValuePart, END_ASBESTOS_PROPERTY_VALUE_VARIABLE)),
                 s2);
     }
+
 }

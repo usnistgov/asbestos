@@ -34,6 +34,11 @@
         <name value="responseResourceType"/>
         <defaultValue value="Bundle"/>
     </variable>
+    <variable>
+        <name value="theFtkFunctionCodeQueryParameters"/>
+        <expression value="'?' + iif('${igName}'.length()=0,'fn=getFtkChannelBase&amp;FhirValidationChannelId=#{TestCollection.properties:FhirValidationChannelId:DefaultToGlobalServiceProperty}','fn=getFtkValidationBase')"/>
+        <sourceId value="request"/>
+    </variable>
 
 
     <setup>
@@ -49,7 +54,7 @@
                         <valueString value="'ftkFunctionCode'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="'?' + iif('${igName}'.length()=0,'fn=getFtkChannelBase&amp;FhirValidationChannelId=#{TestCollection.properties:FhirValidationChannelId:DefaultToGlobalServiceProperty}','fn=getFtkValidationBase')"/>
+                        <valueString value="theFtkFunctionCodeQueryParameters"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="'1'"/>
@@ -85,12 +90,20 @@
     <test>
         <description value="Request - Structure definition based resource validation."/>
         <action>
+            <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+            <assert>
+                <description value="Is Request resource type correct?"/>
+                <resource value="Bundle"/>
+                <sourceId value="request"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
             <operation>
                 <description value="Test action operation is analyzed using assertions."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
                         <valueString value="../../Library/AggregateModule/StructureValidation2.xml"/>
-<!--                        <valueString value="../../Library/StructureDefinitionValidationMain.xml"/>-->
                     </extension>
                     <extension url="urn:fixture-in">
                         <valueString value="request"/>
@@ -111,6 +124,44 @@
             </operation>
         </action>
     </test>
+    <test>
+        <description value="Response - Structure definition based resource validation."/>
+        <action>
+            <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+            <assert>
+                <description value="Is Response resource type correct?"/>
+                <resource value="Bundle"/>
+                <sourceId value="response"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <operation>
+                <description value="Test action operation is analyzed using assertions."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/StructureValidation2.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="validationServerFhirBase"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="responseResourceType"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="''"/> <!-- no profile -->
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="igName"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+
 
     <!-- this should be conditional on the responseResourceType, if matches (ex. Bundle), call $validate without a profile -->
 <!--    <test>-->

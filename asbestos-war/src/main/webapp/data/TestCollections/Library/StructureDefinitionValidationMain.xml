@@ -19,7 +19,7 @@
 
     <id value="StructureDefinitionValidationMain"/>
     <name value="StructureDefinitionValidationMain"/>
-    <description value="This TestScript has the following parameters: 1) Validation server is the FHIR base, 2) resourceType is the resource type to validate, 3) queryParameters is ?profile=value, where value is the canonical URL obtained from the IHE FHIR-based IG Message Semantics page, suffixed with an optional version number specified as #n.n.n where n is an integer equal to or greater than 0. If version is omitted, it implies latest version or the version automatically selected by the validation server. When this script is imported as a module, the variables with defaultValues are overridden with the input parameter extensions."/>
+    <description value="This TestScript has the following parameters: The Validation server base parameter is the FHIR base. The resourceType parameter is the resource type to validate. pdbBundleProfile is the canonical URL obtained from the IHE FHIR-based IG Message Semantics page. The igName parameter is the TestCollection.properties igName property value. If igName is an empty FHIR String, the proxy base of the FhirValidationChannelId TestCollection property or the global property is used. The main TestScript declares the igName variable value. When this script is imported as a module, the variables with defaultValues are overridden with the input parameter extensions."/>
 
     <variable>
         <name value="validationServerBase"/>
@@ -70,23 +70,21 @@
         </action>
         <action>
             <assert>
-                <description value="HTTP 200 response."/>
-                <response value="okay"/>
-                <sourceId value="validationResponse"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
                 <description value="Returns OperationOutcome."/>
                 <compareToSourceId value="validationResponse"/>
                 <compareToSourceExpression value="OperationOutcome.count() = 1"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
+        <action>
+            <assert>
+                <description value="HTTP status code is 200."/>
+                <response value="okay"/>
+                <sourceId value="validationResponse"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
     </test>
-
-    <!-- TODO: validate returned response (without a profile parameter) for OperationOutcome, was validation successful? -->
 
     <test>
     <description value="Structure definition based resource validation - server default IG profile."/>
@@ -119,17 +117,17 @@
         </action>
         <action>
             <assert>
-                <description value="HTTP 200 response."/>
-                <response value="okay"/>
-                <sourceId value="validationResponse2"/>
+                <description value="Returns OperationOutcome."/>
+                <compareToSourceId value="validationResponse2"/>
+                <compareToSourceExpression value="OperationOutcome.count() = 1"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
         <action>
             <assert>
-                <description value="Returns OperationOutcome."/>
-                <compareToSourceId value="validationResponse2"/>
-                <compareToSourceExpression value="OperationOutcome.count() = 1"/>
+                <description value="HTTP status code is 200."/>
+                <response value="okay"/>
+                <sourceId value="validationResponse2"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

@@ -7,6 +7,8 @@ package gov.nist.asbestos.services.fixture;
 public enum FixturePlaceholderEnum {
     BundleMetaMinimalProfileElement,
     BundleMetaComprehensiveProfileElement,
+    DocumentReferenceMetaMinimalProfileElement,
     SubmissionSetResourceElement,
-    SubmissionSetRequestUrlElement
+    SubmissionSetRequestUrlElement,
+    SubmissionSetResourceMinimalProfileElement
 }

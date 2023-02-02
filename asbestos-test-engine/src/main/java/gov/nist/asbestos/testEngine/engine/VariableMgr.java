@@ -1,6 +1,5 @@
 package gov.nist.asbestos.testEngine.engine;
 
-import com.google.errorprone.annotations.Var;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
@@ -9,14 +8,20 @@ import gov.nist.asbestos.simapi.tk.stubs.UUIDFactory;
 import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
-import org.hl7.fhir.r4.model.BaseResource;
+import gov.nist.asbestos.testEngine.engine.translator.AsbestosPropertyReference;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class VariableMgr {
     private final TestScript testScript;
@@ -25,6 +30,8 @@ public class VariableMgr {
     //private TestReport.SetupActionOperationComponent opReport;
     private Reporter reporter;
     private Map<String, String> externalVariables = new HashMap<>();  // passed by module call
+    private Properties propertiesMap;
+    private static final Logger logger = Logger.getLogger(VariableMgr.class.getName());
 
     VariableMgr(TestScript testScript, FixtureMgr fixtureMgr) {
         Objects.requireNonNull(testScript);
@@ -132,6 +139,11 @@ public class VariableMgr {
         return null;
     }
 
+    public VariableMgr setPropertiesMap(Properties propertiesMap) {
+        this.propertiesMap = propertiesMap;
+        return this;
+    }
+
     class Variable {
         String name;
         int from;
@@ -182,6 +194,38 @@ public class VariableMgr {
         return reference.substring(0, var.from) + update + reference.substring(var.to+1);
     }
 
+    private class AnonymousVariableEval {
+        public static final String ANONYMOUS = "anonymous";
+
+        boolean isAnonymousVariable(String s) {
+            return s != null && s.startsWith("'");
+        }
+
+        String eval(String s, boolean errorAsValue) {
+            /*
+                    If the value is a string literal, then this is an anonymous variable (always coded as a string literal) in a TestScript Module component reference call.
+                    Anonymous variables are only traceable in the TestReport if the Test is Passes, and shown in the Called Module: report section.
+            */
+            TestScript.TestScriptVariableComponent anonymousVariable = new TestScript.TestScriptVariableComponent(new StringType("asbestosAnonVar1"));
+            anonymousVariable.setDefaultValue(s);
+            FixtureComponent anonFixture = new FixtureComponent().setFixtureMgr(fixtureMgr).setResourceSimple(new ResourceWrapper(new Bundle()));
+            anonFixture.setId(ANONYMOUS);
+            String anonExpValue = null;
+            try {
+                anonExpValue = doVariableEval(anonFixture, anonymousVariable.getDefaultValue());
+                if (anonExpValue != null) {
+                    return anonExpValue;
+                }
+            } catch (Exception ex) {
+                String error = String.format("Anonymous variable %s eval exception: %s", anonymousVariable.getName(), ex.toString());
+                if (errorAsValue)
+                    return error;
+                reporter.reportError( error);
+            }
+        return null;
+        }
+    }
+
     /**
      *
      * @param variableName
@@ -193,40 +237,26 @@ public class VariableMgr {
         TestScript.TestScriptVariableComponent testScriptLocalVariable = getVariable(variableName);
 
         /* If there exists a local variable defined in TestScript, external variable with the same name overrides the local variable value.
-         This is useful in the case where a TestScript can be both executed independently and as a module
+         This is useful in the case when a TestScript can be both executed independently and as a module
          */
-        if (testScriptLocalVariable != null && externalVariables.containsKey(variableName))
-            return externalVariables.get(variableName);
+        if (testScriptLocalVariable != null && externalVariables.containsKey(variableName)) {
+            /* external variable overrides local variable of the same name */
+            String value = externalVariables.get(variableName);
+            return value;
+        }
 
         if (testScriptLocalVariable == null) {
             if (externalVariables.containsKey(variableName)) {
+                /* undefined local variable, external variable reference */
                 return externalVariables.get(variableName);
             } else {
-            /*
-            If the value is a string literal, then this is an anonymous variable (always coded as a string literal) in a TestScript Module component reference call.
-            Anonymous variables are only traceable in the TestReport if the Test is Passes, and shown in the Called Module: report section.
-            */
-
-                if (variableName.startsWith("'")) {
-                    TestScript.TestScriptVariableComponent anonymousVariable = new TestScript.TestScriptVariableComponent(new StringType("asbestosAnonVar1"));
-                    anonymousVariable.setDefaultValue(variableName);
-                    FixtureComponent anonFixture = new FixtureComponent().setFixtureMgr(fixtureMgr).setResourceSimple(new ResourceWrapper(new Bundle()));
-                    anonFixture.setId("anon");
-                    String anonExpValue = null;
-                    try {
-                        anonExpValue = doVariableEval(anonFixture, anonymousVariable.getDefaultValue());
-                        if (anonExpValue != null) {
-                            return anonExpValue;
-                        }
-                    } catch (Exception ex) {
-                        String error = String.format("Anonymous variable %s eval exception: %s", anonymousVariable.getName(), ex.toString());
-                        if (errorAsValue)
-                            return error;
-                        reporter.reportError( error);
-                        return null;
-                    }
+                /* variable name does not exist */
+                AnonymousVariableEval anonymousVariableEval = new AnonymousVariableEval();
+                if (anonymousVariableEval.isAnonymousVariable(variableName)) {
+                    return anonymousVariableEval.eval(variableName, errorAsValue);
                 } else {
-                    String error = "Variable " + variableName + " is referenced but not defined.";
+                    String error = "Variable " + variableName + " is referenced but not defined. Check server log.";
+                    logger.warning(error + " If action (assertion or operation) was successful but variables could not be resolved at the action reporting step, then reporting external variables configuration might be missing. See TestEngine#reportOperation to see how external variables are added to variableMgr.");
                     if (errorAsValue)
                         return error;
                     reporter.reportError(error);
@@ -234,6 +264,8 @@ public class VariableMgr {
                 }
             }
         }
+
+        /* Evaluate local variable */
 
         // special feature to generate unique UUIDs
         if (testScriptLocalVariable.hasSourceId() && "GENERATEUUID".equals(testScriptLocalVariable.getSourceId())) {
@@ -244,6 +276,16 @@ public class VariableMgr {
 
         if (testScriptLocalVariable.hasDefaultValue()) {
             String value =  testScriptLocalVariable.getDefaultValue();
+             /*
+            replace property reference in a local variable
+             */
+            if (AsbestosPropertyReference.isPropertyReference(value)) {
+                if (propertiesMap == null) {
+                    logger.log(Level.CONFIG, "variable defaultValue Asbestos external property file referenced without an object instance.");
+                } else {
+                    value = AsbestosPropertyReference.getValue(propertiesMap, value);
+                }
+            }
             value = updateReference(value);
             return value;
         }
@@ -261,11 +303,13 @@ public class VariableMgr {
 
 
         if (!fixtureMgr.containsKey(sourceId)) {
-            String error = "Variable " + variableName + " references source " + sourceId + " which does not exist";
-            if (errorAsValue)
-                return error;
-            reporter.reportError(error);
-            return null;
+            if (! (testScriptLocalVariable.hasExpression() && AnonymousVariableEval.ANONYMOUS.equals(sourceId))) {
+                String error = "Variable " + variableName + " references source " + sourceId + " which does not exist";
+                if (errorAsValue)
+                    return error;
+                reporter.reportError(error);
+                return null;
+            }
         }
         FixtureComponent fixture = fixtureMgr.get(sourceId);
 
@@ -288,8 +332,27 @@ public class VariableMgr {
             return responseHeaders.getValue(testScriptLocalVariable.getHeaderField());
         } else if (testScriptLocalVariable.hasExpression()) {
             String expression = testScriptLocalVariable.getExpression();
+            /*
+            replace property reference in a local variable
+             */
+            if (AsbestosPropertyReference.isPropertyReference(expression)) {
+                if (propertiesMap == null) {
+                    logger.log(Level.CONFIG, "variable expression Asbestos external property file referenced without an object instance.");
+                } else {
+                    expression = AsbestosPropertyReference.getValue(propertiesMap, expression);
+                }
+            }
+
+            if (fixture == null && AnonymousVariableEval.ANONYMOUS.equals(sourceId )) {
+                AnonymousVariableEval anonymousVariableEval = new AnonymousVariableEval();
+                if (anonymousVariableEval.isAnonymousVariable(expression)) {
+                    return anonymousVariableEval.eval(expression, errorAsValue);
+                }
+            }
+
             // Does this expression yet reference another variable?
             return doVariableEval(fixture, expression);
+
         } else if (testScriptLocalVariable.hasPath()) {
             String error = "Variable " + variableName + " path not supported";
             if (errorAsValue)

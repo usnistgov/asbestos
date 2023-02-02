@@ -84,7 +84,7 @@ public class ValidateFhirResourceRequest {
             }
 
             ValidationOptions validationOptions = new ValidationOptions();
-            if (profile != null) {
+            if (profile != null && !"".equals(profile)) {
                 validationOptions.addProfile(profile);
             }
 
@@ -99,7 +99,12 @@ public class ValidateFhirResourceRequest {
 
             request.resp.setContentType("application/json");
             request.resp.getOutputStream().print(jsonStr);
-            request.ok();
+            long faultCount = oo.getIssue().stream().filter(s -> OperationOutcome.IssueSeverity.FATAL.equals( s.getSeverity()) || OperationOutcome.IssueSeverity.ERROR.equals(s.getSeverity())).count();
+            if (faultCount == 0) {
+                request.ok();
+            } else {
+                request.badRequest();
+            }
         } catch (Exception ex) {
             request.serverError(ex);
         }

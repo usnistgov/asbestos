@@ -39,6 +39,7 @@ public class ComponentReference {
                     fixturesOut.add(p);
                 } else if (url.equals(ExtensionDef.variableIn)) {
                     Parameter p = new Parameter();
+                    // Anonymous variable
                     // When an interpolated variable is used ("#{...}", the final variable name must be defined,
                     // unless it is coded as a string literal ex. "'#{prop}'",
                     // then the final value becomes a string literal.
