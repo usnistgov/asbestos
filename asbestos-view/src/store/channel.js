@@ -65,6 +65,9 @@ pdbAssertions: [
               await ENGINE.get(url)
                     .then(response => {
                         commit('setFtkChannelTypeIgTestCollections', response.data)
+                        /*
+                        [{"channelType":"fhir","igTestCollections":[{"igName":"MHDv3.x","tcName":"Internal","docBase":"https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_MHD_Rev3-2_TI_2020-08-28.pdf"},{"igName":"MHDv4","tcName":"MHDv4_Internal","docBase":"https://profiles.ihe.net/ITI/MHD/4.0.1"},{"igName":"MHDv410","tcName":"MHDv410_Internal","docBase":"https://profiles.ihe.net/ITI/MHD/4.1.0"}]},{"channelType":"mhd","igTestCollections":[{"igName":"MHDv3.x","tcName":"Internal","docBase":"https://www.ihe.net/uploadedFiles/Documents/ITI/IHE_ITI_Suppl_MHD_Rev3-2_TI_2020-08-28.pdf"},{"igName":"MHDv4","tcName":"MHDv4_Internal","docBase":"https://profiles.ihe.net/ITI/MHD/4.0.1"},{"igName":"MHDv410","tcName":"MHDv410_Internal","docBase":"https://profiles.ihe.net/ITI/MHD/4.1.0"}]}]
+                         */
                        // console.info(JSON.stringify(response.data))
                     })
                     .catch(function (error) {

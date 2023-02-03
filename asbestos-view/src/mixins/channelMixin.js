@@ -9,7 +9,7 @@ export default {
             try {
                 // if (!this.$store.getters.isCtIgTcLoaded) {
                 //     let r = await this.$store.dispatch('loadChannelTypeIgTestCollections').then(() => {
-                        console.info('success? ' + this.$store.getters.isCtIgTcLoaded)
+                //         console.info('success? ' + this.$store.getters.isCtIgTcLoaded)
                         // if (this.$store.getters.isCtIgTcLoaded) {
                             let o = this.$store.getters.getChannelIgTestCollectionArray(channelType)
                             // o.forEach(x => {

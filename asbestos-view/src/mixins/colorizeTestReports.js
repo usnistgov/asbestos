@@ -93,7 +93,7 @@ export default {
             return error
         },
         isManualReviewRequired() {
-            if (this.report=== undefined || this.report.action === undefined ) return false
+            if (this.report=== undefined || this.report ===null || this.report.action === undefined || this.report.action === null) return false
             let result = false
             result = this.doesReportHaveBugExtension(this.report)
             return result

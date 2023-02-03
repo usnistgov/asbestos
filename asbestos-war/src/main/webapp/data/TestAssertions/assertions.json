@@ -2,7 +2,7 @@
   "id": "NIST FHIR(r) Toolkit (Asbestos) Assertion References Mapping File",
   "referenceMetadata": {
     "version": "1.0",
-    "lastUpdated": "2022-JAN-18",
+    "lastUpdated": "2023-FEB-03",
     "comments": {
       "purpose": "This JSON is general purpose format, it may be suitable for other specifications. All specifications are captured as of the lastUpdated date. This offline list only serves as a quick reference for the Asbestos Toolkit users. Users should be familiar with the actual specification guidelines. With the help of the community, any future changes in the actual specification text will have to reported through a GitHub Pull Request for a review until advancements in automated StructureDefinition-based references can generate this format. Note: There is no JSON schema for this ReferenceMetata, it can be added in future.",
       "assertionReferences-assertionId": "Use ShortCode(_Integer)+, where ShortCode is the prefix before the assertion TestScript file. Ids are sequentially numbered, at least one _Integer suffix is required. New independent assertion Ids can be inserted in between two existing Ids by appending a _Integer, example SC_1, SC_1_1, SC_2."
@@ -124,7 +124,11 @@
     "TR_7":         [{"fhir": "restApi", "context": "response.lastModified"}],
     "TR_8":         [{"fhir": "restApi", "context": "transactionResponse-operationOutcome",
                       "verbatimPhraseToFocus": "For a failed transaction, the server returns a single OperationOutcome instead of a Bundle"}],
-    "TR_9":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p1", "verbatimPhraseToFocus": "contains one entry for each entry in the request"}]
+    "TR_9":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p1", "verbatimPhraseToFocus": "contains one entry for each entry in the request"}],
+    "mhdIgMayHaveBugs_1": [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
+                          {"mhd": "DocumentReference", "context": "MinMeta_mappingToXds"},
+                          {"mhdIg": "Issues", "context": "bugDocumentReferenceIdentifier_1"}]
+
   },
 
   "references": {
@@ -854,6 +858,36 @@
         "SpecificationText": [{
           "text": "This section lists which metadata attributes an actor shall provide when initiating a Submission Type Transaction."
         }]
+      }
+    },
+    "mhdIg": {
+      "Issues": {
+        "common": {
+          "Source": {
+            "text": "IHE ITI"
+          },
+          "Profile": {
+            "text": "MHDv4",
+            "link": "https://profiles.ihe.net/ITI/MHD/toc.html"
+          },
+          "Transaction": {
+            "text": "ITI-65 Provide Document Bundle",
+            "link": "https://profiles.ihe.net/ITI/MHD/ITI-65.html#2-3-65-provide-document-bundle-iti-65"
+          },
+          "Issue": {
+            "text": "DocumentReference.identifier",
+            "link": "https://profiles.ihe.net/ITI/MHD/StructureDefinition-IHE.MHD.Minimal.DocumentReference-definitions.html#DocumentReference.identifier"
+          }
+        },
+        "context": {
+          "bugDocumentReferenceIdentifier_1": {
+            "SpecificationText": [
+              {
+                "text": "IG reference: https://profiles.ihe.net/ITI/MHD/4.1.0/package.tgz. IG incorrectly constrains DocumentReference.identifier, should be 0 minimum cardinality because according to the PDB ITI-65 Message Semantics, The Document Source shall not provide any entryUUID values."
+              }
+            ]
+          }
+        }
       }
     }
   }

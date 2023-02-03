@@ -191,6 +191,11 @@
         margin-left: 19px;
     }
 
+    .asbtsReferenceBackground {
+       background-color: #f5f5f5;
+        border: 1px solid white;
+    }
+
     .indent {
         text-indent: 50px;
     }

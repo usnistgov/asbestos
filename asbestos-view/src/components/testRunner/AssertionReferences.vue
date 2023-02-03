@@ -1,8 +1,8 @@
 <template>
 <div>
     <p class="asbtsReferenceHeaderLabel" v-if="referenceMap.length > 0">Asbestos Assertion ID <span class="asbestosAssertionId">{{assertionId}}</span> has {{referenceMap.length}} reference(s):</p>
-        <ol>
-        <li v-for="(refMap,rmKeyIndex ) in referenceMap" :key="rmKeyIndex" >
+        <ol class="asbtsReferenceBackground">
+        <li v-for="(refMap,rmKeyIndex ) in referenceMap" :key="rmKeyIndex" class="asbtsReferenceBackground" >
             <div class="system-error" v-if="Object.keys(referenceTable(refMap)).length===0" :key="rmKeyIndex">
                 Error: {{refMap}} Assertion Reference map exists, but the reference table is not defined in the references object literal.
             </div>
@@ -248,20 +248,31 @@
                 // use this.$store.state.testRunner.currentTestCollectionName
                 const currentMhdUrlBase = 'https://profiles.ihe.net/ITI/MHD'
                 if (linkUrl.startsWith(currentMhdUrlBase)) {
-                    let tcIgVersion = this.getTcIgVersion()
-                    if (tcIgVersion !== undefined) {
+                    let fhirIgName = this.getTcIgVersion()
+                    if (fhirIgName !== undefined && fhirIgName !== null && ''!==fhirIgName) {
                         // console.debug(tcObj[0].mhdVersion)
-                        const igVersionSpecificDocBase = this.$store.state.testRunner.testAssertions.docBase[tcIgVersion]
-                        const fixedDocLink = '.pdf'
-                        if (! igVersionSpecificDocBase.endsWith(fixedDocLink)) {
-                            // console.debug(mhdVersionSpecificDocBase)
-                            const re = new RegExp(`^${currentMhdUrlBase}`, 'i') // ^start line, {pattern}
-                            if (linkUrl.match(re) !== null) {
-                                return linkUrl.replace(re, igVersionSpecificDocBase)
+                        // console.log(JSON.stringify(tcObj))
+                        for (const e of this.$store.state.channel.channelTypeIgTestCollection) {
+                            if ('igTestCollections' in e) {
+                                for (const igTc of e.igTestCollections) {
+                                    if (igTc.igName === fhirIgName) {
+                                        const igVersionSpecificDocBase = igTc.docBase //this.$store.state.testRunner.testAssertions.docBase[tcObj]
+                                        const fixedDocLink = '.pdf'
+                                        if (! igVersionSpecificDocBase.endsWith(fixedDocLink)) {
+                                            // console.debug(mhdVersionSpecificDocBase)
+                                            const re = new RegExp(`^${currentMhdUrlBase}`, 'i') // ^start line, {pattern}
+                                            if (linkUrl.match(re) !== null) {
+                                                return linkUrl.replace(re, igVersionSpecificDocBase)
+                                            }
+                                        } else {
+                                            return igVersionSpecificDocBase
+                                        }
+                                    }
+                                }
                             }
-                        } else {
-                            return igVersionSpecificDocBase
                         }
+                    } else {
+                        console.log('igVersionSpecificLink invalid fhirIgName.')
                     }
                 }
                 return linkUrl
@@ -276,10 +287,9 @@
                             let arr = e.igTestCollections
                             let o = arr.find(igTc => ('tcName' in igTc) ? (igTc.tcName === currentTcName ? true : false) : false)
                             if (o !== undefined && o !== null) {
-                                if ('igName' in o) {
-                                    return o.igName
+                                if ('fhirIgName' in o) {
+                                    return o.fhirIgName
                                 }
-
                             }
                         }
                     }

@@ -77,7 +77,7 @@
             </assert>
         </action>
         <action>
-            <assert id="igMayHaveBugs_1">
+            <assert id="mhdIgMayHaveBugs_1">
                 <description value="HTTP status code is 200."/>
                 <response value="okay"/>
                 <sourceId value="validationResponse"/>
