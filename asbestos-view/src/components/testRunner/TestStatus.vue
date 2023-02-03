@@ -43,6 +43,23 @@
                     <img src="../../assets/blank-circle.png" class="align-left">
                 </span>
             </span>
+            <span v-else-if="isManualReviewRequired">
+                <span v-if="isPass">
+                    <img src="../../assets/checked.png" class="align-left" title="No errors.">
+                </span>
+                <span v-else-if="isWarningOperation">
+                    <img src="../../assets/round.png" class="align-left" title="Manually review the OperationOutcome resource for Issues.">
+                </span>
+                <span v-else-if="isFail">
+                    <img src="../../assets/error.png" class="align-left" title="">
+                </span>
+                <span v-else-if="isError">
+                    <img src="../../assets/yellow-error.png" class="align-left" title="Has unexpected error(s).">
+                </span>
+                <span v-else>
+                    <img src="../../assets/blank-circle.png" class="align-left" title="Not run.">x
+                </span>
+            </span>
             <span v-else>
                 <span v-if="isPass">
                     <img src="../../assets/checked.png" class="align-left">

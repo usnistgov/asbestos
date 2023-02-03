@@ -142,6 +142,7 @@
     <test>
         <description value="FHIR IG based validation."/>
         <action>
+            <modifierExtension url="urn:asbestos:test:action:mayHaveBugsWhichRequireManualReview"/>
             <operation>
                 <description value="Module usage description"/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">

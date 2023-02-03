@@ -4,15 +4,41 @@ export default {
         }
     },
     methods: {
-        isReportConditional(report) {
+        hasExtension(report, ext) {
             if (!report) return false;
             if (!report.extension) return false;
             let cond = false;
             report.extension.forEach(ex => {
-                if (ex.url === 'urn:conditional')
+                if (ex.url === ext)
                     cond = true;
             })
             return cond;
+        },
+        hasModifierExtension(actionReport, ext) {
+            // console.debug(ext)
+            /*
+            --
+            {"action":[{"modifierExtension":[{"url":"urn:asbestos:test:action:mayHaveBugsWhichRequireManualReview"}],"operation":{"modifierExtension":[{"url":"urn:moduleId","valueString":"StructureDefinitionValidation"},{"url":"urn:moduleName","valueString":"StructureDefinitionValidation"}],"result":"pass","message":"'igMayHaveBugs_1'"}}]}
+             */
+            if (actionReport === undefined || actionReport === null) return false
+            let result = false
+            // console.log('x' + JSON.stringify(actionReport))
+            actionReport.action.forEach(actionEl => {
+                if ('modifierExtension' in actionEl) {
+                    actionEl.modifierExtension.forEach(o => {
+                        if (o.url !== undefined && o.url === ext) {
+                            result = true
+                        }
+                    })
+                }
+            })
+            return result
+        },
+        isReportConditional(report) {
+            return this.hasExtension(report, 'urn:conditional')
+        },
+        doesReportHaveBugExtension(report) {
+            return this.hasModifierExtension(report, 'urn:asbestos:test:action:mayHaveBugsWhichRequireManualReview')
         },
     },
     computed: {
@@ -65,6 +91,25 @@ export default {
                 if (part && part.result === 'error') error = true
             })
             return error
+        },
+        isManualReviewRequired() {
+            if (this.report=== undefined || this.report.action === undefined ) return false
+            let result = false
+            result = this.doesReportHaveBugExtension(this.report)
+            return result
+        },
+        isWarningOperation() {
+
+            if (this.report=== undefined || this.report=== null) return false
+            let result = false
+            // console.log('x' + JSON.stringify(actionReport))
+            this.report.action.forEach(actionEl => {
+                if ('operation' in actionEl) {
+                    result = actionEl.operation.result === 'warning'
+                }
+            })
+            return result
+
         },
         isFail() {
             if (!this.report) return false

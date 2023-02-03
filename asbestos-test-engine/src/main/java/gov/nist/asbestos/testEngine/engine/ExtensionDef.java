@@ -11,6 +11,8 @@ public class ExtensionDef {
      * coded as a FHIRPath collection string in (a|b...n) format
      */
     public static final String assertionIdList = "urn:asbestos:test:action:assertionIdList";
+    public static final String mayHaveBugs = "urn:asbestos:test:action:mayHaveBugsWhichRequireManualReview";
+
     public static final String conditional = "urn:conditional";
 
     public static final String subFixture = "urn:subFixture";

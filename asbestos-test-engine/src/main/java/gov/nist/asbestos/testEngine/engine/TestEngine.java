@@ -1314,10 +1314,12 @@ public class TestEngine  implements TestDef {
 
             for (int testPartIndex=0; testPartIndex<testScriptElement.getAction().size(); testPartIndex++) {
                 TestScript.TestActionComponent action = testScriptElement.getAction().get(testPartIndex);
-                Extension conditional = getExtension(action.getModifierExtension(), ExtensionDef.ts_conditional);
-                Extension expectFailure = getExtension(action.getModifierExtension(), ExtensionDef.expectFailure);
-                boolean isConditional = conditional != null;
-                boolean isExpectFailure = expectFailure != null;
+                Extension conditionalExtension = getExtension(action.getModifierExtension(), ExtensionDef.ts_conditional);
+                Extension expectFailureExtension = getExtension(action.getModifierExtension(), ExtensionDef.expectFailure);
+                Extension mayHaveBugsExtension = getExtension(action.getModifierExtension(), ExtensionDef.mayHaveBugs);
+                boolean isConditional = conditionalExtension != null;
+                boolean isExpectFailure = expectFailureExtension != null;
+                boolean isMayHaveBugsExtension = mayHaveBugsExtension != null;
                 TestReport.TestActionComponent actionReportComponent = testReportComponent.addAction();
                 if (invalidAction(action, actionReportComponent, fVal)) {
                     String msg = "TestEngine invalidAction. Action must contain operation or assert.";
@@ -1338,11 +1340,15 @@ public class TestEngine  implements TestDef {
                     TestReport.SetupActionOperationComponent reportOp = actionReportComponent.getOperation();
                     doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), reportOp, isFollowedByAssert);
                     TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
-                    if (isExpectFailure && opReport.getResult() == TestReport.TestReportActionResult.FAIL) {
-                        actionReportComponent.addModifierExtension(expectFailure);
+                    if (isMayHaveBugsExtension && opReport.getResult() == TestReport.TestReportActionResult.FAIL) {
+                        actionReportComponent.addModifierExtension(mayHaveBugsExtension);
+                        overrideTestResult(testReport, opReport, TestReport.TestReportActionResult.WARNING);
+                        return true;
+                    } else if (isExpectFailure && opReport.getResult() == TestReport.TestReportActionResult.FAIL) {
+                        actionReportComponent.addModifierExtension(expectFailureExtension);
                         // If the failed assertion ids match the expected assertion id list, the it is a PASS
-                        if (expectFailure.hasExtension()) {
-                            Extension assertionIdList = expectFailure.getExtension().get(0);
+                        if (expectFailureExtension.hasExtension()) {
+                            Extension assertionIdList = expectFailureExtension.getExtension().get(0);
                             if (ExtensionDef.assertionIdList.equals(assertionIdList.getUrl()) && opReport.hasMessage()) {
                                 String assertionIdListValue = assertionIdList.getValue().toString();
                                 if (Parameter.isVariable(assertionIdListValue)) {
@@ -1353,9 +1359,7 @@ public class TestEngine  implements TestDef {
                                     String expression = String.format("%s~(%s)",assertionIdListValue, opReport.getMessage());
                                     boolean result = FhirPathEngineBuilder.evalForBoolean(new TestReport(), expression);
                                     if (result) {
-                                        testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
-                                        testReport.setResult(TestReport.TestReportResult.PASS);
-                                        opReport.setResult(TestReport.TestReportActionResult.PASS);
+                                        overrideTestResult(testReport, opReport, TestReport.TestReportActionResult.PASS);
                                         return true;
                                     }
                                 }
@@ -1417,6 +1421,12 @@ public class TestEngine  implements TestDef {
             }
 
         return true;
+    }
+
+    private void overrideTestResult(TestReport testReport, TestReport.SetupActionOperationComponent opReport, TestReport.TestReportActionResult opResult) {
+        testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+        testReport.setResult(TestReport.TestReportResult.PASS);
+        opReport.setResult(opResult);
     }
 
     private Extension getExtension(List<Extension> extensions, String url) {

@@ -15,6 +15,7 @@ import gov.nist.asbestos.simapi.validation.ValE;
 import oasis.names.tc.ebxml_regrep.xsd.rim._3.*;
 import org.hl7.fhir.r4.model.*;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -199,6 +200,21 @@ public class DocumentEntryToDocumentReference implements IVal {
                         dr.setDate(DateTransform.dtmToDate(value1));
                     } catch (Exception ex) {
                         log.severe("De2Dr setDate Exception: " + ex.toString());
+                    }
+                } else if ("urn:ftk:DocumentReference.meta.profileList".equals(name)) {
+                    try {
+                        Meta m = dr.getMeta();
+                        if (m == null) {
+                            m = new Meta();
+                        }
+                        List<CanonicalType> canonicalTypes = new ArrayList<>();
+                        for (String s : values) {
+                             canonicalTypes.add(new CanonicalType(s));
+                        }
+                        m.setProfile(canonicalTypes);
+                        dr.setMeta(m);
+                    } catch (Exception ex) {
+                        log.severe("De2Dr meta profile Exception: " + ex.toString());
                     }
                 } else if ("creationTime".equals(name)) {
                     try {

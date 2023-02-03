@@ -335,6 +335,13 @@ public class MhdTransforms {
                 addSlot(eo, "urn:ftk:DocumentReference.date", translateDateTime(d));
             }
         }
+        {
+            if (dr.hasMeta() && dr.getMeta().hasProfile()) {
+                 List<CanonicalType> profiles = dr.getMeta().getProfile();
+                 List<String> listOfValues = profiles.stream().map(s -> s.asStringValue()).collect(Collectors.toList());
+                 addSlot(eo, "urn:ftk:DocumentReference.meta.profileList", listOfValues);
+            }
+        }
         if (dr.hasStatus()) {
             vale.addTr(new ValE("availabilityStatus"));
             Enumerations.DocumentReferenceStatus fStatus = dr.getStatus();
