@@ -56,6 +56,11 @@
                             :has-gutter-options="true"
                             :is-disabled="disableDebugger"
                     >
+                        <!--
+                        debug breakpoint
+
+                        {{getParentBreakpointIndex(parentTestIndex,'test',testi)}}
+                        -->
                         <test-details
                                 :script="script.test[testi]"
                                 :report="report && report.test  ? report.test[testi] : null"

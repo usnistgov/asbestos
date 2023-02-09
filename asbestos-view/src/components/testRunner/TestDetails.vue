@@ -57,10 +57,11 @@
             <debuggable-list-item
                     v-for="(action, actioni) in script.action"
                     :key="'Action' + actioni"
-                    :breakpoint-index="getBreakpointIndex(testType, testIndex, actioni)"
+                    :breakpoint-index="getParentBreakpointIndex(parentTestIndex, testType, testIndex, actioni)"
                     :is-import-header="scriptImport(action).result.hasImport"
                     :is-disabled="disableDebugger"
             >
+                <!--                    :breakpoint-index="getBreakpointIndex(testType, testIndex, actioni)"-->
                     <div v-for="(resultObj, resultKey) in scriptImport(action)" :key="resultKey">
                         <div v-if="report && report.action && report.action[actioni] && reportContainsError(report.action[actioni])">
                             <action-details
@@ -71,9 +72,19 @@
                         </div>
                         <div v-else-if="'hasImport' in resultObj && resultObj.hasImport">
                             <!--
+                            debug script
+
                             hasImportZZ{{testType}}
                             {{action}}
                             {{report}}
+                            -->
+                            <!--
+                            debug breakpoint
+
+                            {{parentTestIndex}}
+                            {{testType}}
+                            {{testIndex}}
+                            {{actioni}}
                             -->
                             <component-script
                                :action-script="action"
@@ -86,6 +97,15 @@
                             ></component-script>
                         </div>
                         <div v-else class="has-cursor">
+                            <!--
+                            debug breakpoint
+
+                            {{parentTestIndex}}--
+                            {{testType}}
+                            {{testIndex}}
+                            {{actioni}}
+                            -->
+
                             <action-details
                                :script="action"
                                :report="report && report.action ? report.action[actioni] : null"

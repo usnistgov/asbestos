@@ -49,6 +49,8 @@
             {{theScript}}.
             {{theReport}}.
             -->
+            <!-- debug breakpoint -->
+<!--            <span class="fail">{{parentTestIndex}}</span>-->
             <script-details
                 :script="theScript"
                 :report="theReport"
