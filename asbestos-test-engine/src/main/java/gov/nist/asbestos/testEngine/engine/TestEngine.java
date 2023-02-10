@@ -76,7 +76,6 @@ public class TestEngine  implements TestDef {
 
     private ModularEngine modularEngine = null;
     private Map<String, String> callFixtureMap = new HashMap<>();
-    private Map<String, String> callOutFixtureMap = new HashMap<>();
     private Map<String, String> callVariableMap = new HashMap<>();
     private Map<String, String> externalVariables = new HashMap<>();
     private TestScriptDebugInterface debugger = null;
@@ -1049,17 +1048,7 @@ public class TestEngine  implements TestDef {
 
         // Pass module fixtures back to caller
         FixtureMgr innerFixtures = testEngine1.fixtureMgr;
-        for (Parameter parm : componentReference.getFixturesOut()) {
-            String outerName = parm.getCallerName();
-            String innerName = parm.getLocalName();
-            FixtureComponent fixtureComponent = innerFixtures.get(innerName);
-            if (errorReport == null) {
-                if (fixtureComponent == null)
-                    throw new RuntimeException("Script import - " + componentReference.getComponentRef() + " did not produce out Fixture " + innerName);
-//                outFixtureMgr.put(outerName, fixtureComponent);
-                fixtureMgr.put(outerName, fixtureComponent);
-            }
-        }
+        updateCurrentTestEngineFixtureOut(innerFixtures, componentReference, errorReport);
 
 //        Map<String, FixtureComponent> outFixturesForComponent = new HashMap<>();
         /*
@@ -1110,6 +1099,7 @@ public class TestEngine  implements TestDef {
         if (testEngine1.getTestReport().getResult() == TestReport.TestReportResult.FAIL)
             getTestReport().setResult(TestReport.TestReportResult.FAIL);
     }
+
 
 
     private TestEngine withResourceCacheManager(ResourceCacheMgr mgr) {
@@ -1819,9 +1809,38 @@ public class TestEngine  implements TestDef {
         return false;
     }
 
+    /**
+     *
+     * @param innerFixtures
+     * @param componentReference
+     * @param errorReport
+     */
+    private void updateCurrentTestEngineFixtureOut(FixtureMgr innerFixtures, ComponentReference componentReference, ErrorReport errorReport) {
+        for (Parameter parm : componentReference.getFixturesOut()) {
+            String outerName = parm.getCallerName();
+            String innerName = parm.getLocalName();
+            FixtureComponent fixtureComponent = innerFixtures.get(innerName);
+            if (errorReport == null) {
+                if (fixtureComponent == null)
+                    throw new RuntimeException("Script import - " + componentReference.getComponentRef() + " did not produce out Fixture " + innerName);
+            }
+            if (fixtureComponent != null) {
+                // Allow the case where expected assertion can fail but fixture out is a valid pass-back value
+                fixtureMgr.put(outerName, fixtureComponent);
+            }
+        }
+
+    }
+
+    /**
+     * Pass module fixtures back to caller
+     * @param op
+     */
     void updateParentFixtureOut(TestScript.SetupActionOperationComponent op) {
         if (this.parent != null && fixtureOutParams != null) {
-            if (op.getType().getCode().equals("internalFtkRequest")) { // getFixtureString
+            // Just a safety to avoid blank approach
+//            if ("internalFtkRequest".equals(op.getType().getCode())
+//                    || "ftkValidate".equals(op.getType().getCode())) {
                 for (Parameter parm : fixtureOutParams) {
                     String outerName = parm.getCallerName();
                     String innerName = parm.getLocalName();
@@ -1830,12 +1849,17 @@ public class TestEngine  implements TestDef {
                     if (errorReport == null) {
                         if (fixtureComponent == null)
                             throw new RuntimeException("updateFixtureOut: Script import - " + this.getTestDef() /*componentReference.getComponentRef()*/ + " did not produce out Fixture " + innerName);
+                        if (this.parent.fixtureMgr.containsKey(outerName)) {
+                            log.warning("TestEngine parent already has outName in map: " + outerName);
+                        }
                         this.parent.fixtureMgr.put(outerName, fixtureComponent);
                     } else {
                         log.severe("errorReport is not null: " + this.testDef);
                     }
                 }
-            }
+//            } else {
+//                log.warning("Parent fixture out was not updated for operation code: " + op.getType().getCode());
+//            }
         }
 
         /*

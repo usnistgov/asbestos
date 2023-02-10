@@ -15,6 +15,9 @@
         <extension url="urn:variable-in">
             <valueString value="igName"/>
         </extension>
+        <extension url="urn:fixture-out">
+            <valueString value="validationResponse"/>
+        </extension>
     </modifierExtension>
 
     <id value="StructureDefinitionValidationMain"/>
@@ -77,7 +80,7 @@
             </assert>
         </action>
         <action>
-            <assert id="mhdIgMayHaveBugs_1">
+            <assert>
                 <description value="HTTP status code is 200."/>
                 <response value="okay"/>
                 <sourceId value="validationResponse"/>
@@ -112,13 +115,13 @@
                 </requestHeader>
                 <method value="post"/>
                 <sourceId value="theResource"/>
-                <responseId value="validationResponse2"/>
+                <responseId value="validationResponse"/>
             </operation>
         </action>
         <action>
             <assert>
                 <description value="Returns OperationOutcome."/>
-                <compareToSourceId value="validationResponse2"/>
+                <compareToSourceId value="validationResponse"/>
                 <compareToSourceExpression value="OperationOutcome.count() = 1"/>
                 <warningOnly value="false"/>
             </assert>
@@ -127,7 +130,7 @@
             <assert>
                 <description value="HTTP status code is 200."/>
                 <response value="okay"/>
-                <sourceId value="validationResponse2"/>
+                <sourceId value="validationResponse"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

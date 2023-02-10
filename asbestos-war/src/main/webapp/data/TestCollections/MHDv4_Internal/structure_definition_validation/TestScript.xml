@@ -120,9 +120,21 @@
                     <extension url="urn:variable-in">
                         <valueString value="igName"/>
                     </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="requestValidationResponse"/>
+                    </extension>
                 </modifierExtension>
             </operation>
         </action>
+        <action>
+            <assert id="mhdIgBug_1">
+                <description value="Incorrect IG error on DocumentReference.identifier"/>
+                <compareToSourceId value="requestValidationResponse"/>
+                <compareToSourceExpression value="OperationOutcome.issue.select($this.severity='error' and $this.diagnostics.startsWith('DocumentReference.identifier: minimum required = 1, but only found 0')).allFalse()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+
     </test>
     <test>
         <description value="Response - Structure definition based resource validation."/>
@@ -157,6 +169,10 @@
                     <extension url="urn:variable-in">
                         <valueString value="igName"/>
                     </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="responseValidationResponse"/>
+                    </extension>
+
                 </modifierExtension>
             </operation>
         </action>

@@ -15,6 +15,10 @@
         <extension url="urn:variable-in">
             <valueString value="igVersion"/>
         </extension>
+        <extension url="urn:fixture-out">
+            <valueString value="validationResponse"/>
+        </extension>
+
 
 
     </modifierExtension>
@@ -50,6 +54,10 @@
                     <extension url="urn:variable-in">
                         <valueString value="igVersion"/>
                     </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="validationResponse"/>
+                    </extension>
+
 
                 </modifierExtension>
             </operation>

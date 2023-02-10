@@ -125,7 +125,7 @@
     "TR_8":         [{"fhir": "restApi", "context": "transactionResponse-operationOutcome",
                       "verbatimPhraseToFocus": "For a failed transaction, the server returns a single OperationOutcome instead of a Bundle"}],
     "TR_9":         [{"mhd": "ITI-65_ResponseMessage", "context": "messageSemantics_p1", "verbatimPhraseToFocus": "contains one entry for each entry in the request"}],
-    "mhdIgMayHaveBugs_1": [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
+    "mhdIgBug_1":   [{"mhdv4": "ITI-65_RequestMessage", "context": "elements"},
                           {"mhd": "DocumentReference", "context": "MinMeta_mappingToXds"},
                           {"mhdIg": "Issues", "context": "bugDocumentReferenceIdentifier_1"}]
 

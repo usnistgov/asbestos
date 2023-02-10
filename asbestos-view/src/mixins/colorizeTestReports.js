@@ -98,7 +98,7 @@ export default {
             result = this.doesReportHaveBugExtension(this.report)
             return result
         },
-        isWarningOperation() {
+        hasWarningOperation() {
 
             if (this.report=== undefined || this.report=== null) return false
             let result = false
