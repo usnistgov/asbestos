@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 public class UIEvent {
     private String hostPort;
@@ -26,6 +27,7 @@ public class UIEvent {
     private String resourceType;
     private List<UITask> tasks = new ArrayList<>();
     private EC ec;
+    private static final Logger logger = Logger.getLogger(UIEvent.class.getName());
 
     public UIEvent(EC ec) {
         this.ec = ec;
@@ -102,25 +104,29 @@ public class UIEvent {
     }
 
     public UIEvent fromURI(URI uri) {
-        List<String> parts = Arrays.asList(uri.toString().split("/"));
-        for (int i=0; i<parts.size(); i++) {
-            String part = parts.get(i);
-            if ("asbestos".equals(part) && "log".equals(parts.get(i+1))) {
-                String testSession = parts.get(i+2);
-                String channelId = parts.get(i+3);
-                String resourceType = parts.get(i+4);
-                String eventName = parts.get(i+5);
-                return fromParms(testSession, channelId, resourceType, eventName);
+        try {
+            List<String> parts = Arrays.asList(uri.toString().split("/"));
+            for (int i = 0; i < parts.size(); i++) {
+                String part = parts.get(i);
+                if ("asbestos".equals(part) && "log".equals(parts.get(i + 1))) {
+                    String testSession = parts.get(i + 2);
+                    String channelId = parts.get(i + 3);
+                    String resourceType = parts.get(i + 4);
+                    String eventName = parts.get(i + 5);
+                    return fromParms(testSession, channelId, resourceType, eventName);
+                }
+                if ("asbestos".equals(part) && "proxy".equals(parts.get(i + 1))) {
+                    String testSessionChannelId = parts.get(i + 2);
+                    String[] tsParts = testSessionChannelId.split("__");
+                    String testSession = tsParts[0];
+                    String channelId = tsParts[1];
+                    String resourceType = parts.get(i + 3);
+                    String eventName = parts.get(i + 4);
+                    return fromParms(testSession, channelId, resourceType, eventName);
+                }
             }
-            if ("asbestos".equals(part) && "proxy".equals(parts.get(i+1))) {
-                String testSessionChannelId = parts.get(i+2);
-                String[] tsParts = testSessionChannelId.split("__");
-                String testSession = tsParts[0];
-                String channelId = tsParts[1];
-                String resourceType = parts.get(i+3);
-                String eventName = parts.get(i+4);
-                return fromParms(testSession, channelId, resourceType, eventName);
-            }
+        } catch (Exception ex) {
+            logger.fine("UIEvent.fromURI" + ex.toString());
         }
         return null;
     }

@@ -1848,13 +1848,13 @@ public class TestEngine  implements TestDef {
                     FixtureComponent fixtureComponent = this.fixtureMgr.get(innerName);
                     if (errorReport == null) {
                         if (fixtureComponent == null)
-                            throw new RuntimeException("updateFixtureOut: Script import - " + this.getTestDef() /*componentReference.getComponentRef()*/ + " did not produce out Fixture " + innerName);
+                            throw new RuntimeException("updateParentFixtureOut: Script import - " + this.getTestDef() /*componentReference.getComponentRef()*/ + " did not produce out Fixture " + innerName);
                         if (this.parent.fixtureMgr.containsKey(outerName)) {
-                            log.warning("TestEngine parent already has outName in map: " + outerName);
+                            log.warning("updateParentFixtureOut: TestEngine parent already has outName in map: " + outerName);
                         }
                         this.parent.fixtureMgr.put(outerName, fixtureComponent);
                     } else {
-                        log.severe("errorReport is not null: " + this.testDef);
+                        log.severe("updateParentFixtureOut: errorReport is not null: " + this.testDef);
                     }
                 }
 //            } else {

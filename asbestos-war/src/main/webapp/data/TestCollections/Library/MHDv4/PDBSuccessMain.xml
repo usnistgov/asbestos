@@ -140,7 +140,7 @@
         </action>
     </test>
     <test>
-        <description value="FHIR IG based validation."/>
+        <description value="FHIR IG based validation. If a Question icon appears in the status, then this part of the test needs manual review."/>
         <action>
             <modifierExtension url="urn:asbestos:test:action:mayHaveBugsWhichRequireManualReview"/>
             <operation>

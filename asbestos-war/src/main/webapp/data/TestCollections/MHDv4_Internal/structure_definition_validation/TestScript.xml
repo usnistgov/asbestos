@@ -88,7 +88,7 @@
         </action>
     </setup>
     <test>
-        <description value="Request - Structure definition based resource validation."/>
+        <description value="Request resource validation."/>
         <action>
             <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
             <assert>
@@ -127,8 +127,8 @@
             </operation>
         </action>
         <action>
-            <assert id="mhdIgBug_1">
-                <description value="Incorrect IG error on DocumentReference.identifier"/>
+            <assert id="mhdIgBug_drIdentifier1">
+                <description value="OperationOutcome does not contain the incorrect error on DocumentReference.identifier minimum required = 1. Specification text disagrees with MHD IG StructureDefinition. Assertion failure indicates presence of IG bug."/>
                 <compareToSourceId value="requestValidationResponse"/>
                 <compareToSourceExpression value="OperationOutcome.issue.select($this.severity='error' and $this.diagnostics.startsWith('DocumentReference.identifier: minimum required = 1, but only found 0')).allFalse()"/>
                 <warningOnly value="false"/>
@@ -137,7 +137,7 @@
 
     </test>
     <test>
-        <description value="Response - Structure definition based resource validation."/>
+        <description value="Response resource validation."/>
         <action>
             <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
             <assert>

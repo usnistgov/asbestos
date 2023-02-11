@@ -148,10 +148,24 @@ abstract class GenericSetupAction {
     UIEvent getUIEvent(ResourceWrapper wrapper) {
         Objects.requireNonNull(getTestEngine());
         EC ec = new EC(getTestEngine().getExternalCache());
-        return ec.getEvent(getTestEngine().getTestSession(),
+        UIEvent sameChannelUIEvent = ec.getEvent(getTestEngine().getTestSession(),
                         getTestEngine().getChannelId(),
                         wrapper.getResourceType(),
                         wrapper.getEventId());
+        UIEvent targetUriBasedEvent = new UIEvent(getTestEngine().getEC()).fromURI(targetUrl.getUri());
+        if (targetUriBasedEvent != null) {
+            if (!sameChannelUIEvent.getTestSession().equals(targetUriBasedEvent.getTestSession())
+                    || !sameChannelUIEvent.getChannelId().equals(targetUriBasedEvent.getChannelId())) {
+                return resetProxyChannel(sameChannelUIEvent, targetUriBasedEvent.getTestSession(), targetUriBasedEvent.getChannelId());
+            }
+        }
+        return sameChannelUIEvent;
+    }
+
+    private UIEvent resetProxyChannel(UIEvent uiEvent, String testSession, String channelId) {
+        uiEvent.setTestSession(testSession);
+        uiEvent.setChannelId(channelId);
+        return uiEvent;
     }
 
     void postExecute(ResourceWrapper wrapper, TestReport.SetupActionOperationComponent operationReport, boolean isFollowedByAssert) {
