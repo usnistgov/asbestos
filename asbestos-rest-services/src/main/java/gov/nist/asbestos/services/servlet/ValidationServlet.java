@@ -1,10 +1,8 @@
 package gov.nist.asbestos.services.servlet;
 
-import gov.nist.asbestos.services.restRequests.GetValidationRequest;
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.services.restRequests.ValidateFhirResourceRequest;
 import gov.nist.asbestos.simapi.tk.installation.Installation;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -12,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.util.logging.Logger;
 
 public class ValidationServlet  extends HttpServlet {
     private File externalCache = null;

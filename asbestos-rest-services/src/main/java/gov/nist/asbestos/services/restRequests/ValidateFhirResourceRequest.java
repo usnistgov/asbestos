@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 // 4 - resourceType
 // 5 - $validate
 // See also http://hl7.org/fhir/valueset-testscript-operation-codes.html
-// Example: https://fhirtoolkit.test:9743/asbestos/channelId/ftkValidate/${resourceType}/$validate?profile=${igResourceProfile}&igName=${igName}&logEvent=true
+// Example: https://fhirtoolkit.test:9743/asbestos/ftkValidate/channelId/${resourceType}/$validate?profile=${igResourceProfile}&igName=${igName}&logEvent=true
 
 public class ValidateFhirResourceRequest {
     private static Logger logger = Logger.getLogger(ValidateFhirResourceRequest.class.getName());

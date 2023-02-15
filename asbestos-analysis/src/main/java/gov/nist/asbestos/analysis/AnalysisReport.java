@@ -17,15 +17,10 @@ import gov.nist.asbestos.mhd.channel.MhdCanonicalUriCodeInterface;
 import gov.nist.asbestos.mhd.transforms.MhdTransforms;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import gov.nist.asbestos.simapi.validation.Val;
-import gov.nist.asbestos.testEngine.engine.AssertionRunner;
 import gov.nist.asbestos.testEngine.engine.FhirPathEngineBuilder;
-import gov.nist.asbestos.testEngine.engine.TestEngine;
-import gov.nist.asbestos.testEngine.engine.assertion.MinimumId;
 import gov.nist.asbestos.utilities.ResourceHasMethodsFilter;
 import org.hl7.fhir.r4.model.*;
 
-import java.io.File;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -129,7 +124,7 @@ public class AnalysisReport {
 //            if (runValidation)
 //                report.base.validationResult = runValidation(baseObj.getResource());
 //            else
-            report.base.validationResult = new OperationOutcome();
+                report.base.validationResult = new OperationOutcome();
         }
 
         for (Related rel : related) {
@@ -149,9 +144,9 @@ public class AnalysisReport {
                 relatedReport.atts = rel.atts;
                 relatedReport.binaryUrl = rel.binaryUrl;
 
-                if (runValidation)
-                    relatedReport.validationResult = runValidation(resource);
-                else
+//                if (runValidation)
+//                    relatedReport.validationResult = runValidation(resource);
+//                else
                     relatedReport.validationResult = new OperationOutcome();
             }
             report.objects.add(relatedReport);

@@ -10,10 +10,9 @@ package gov.nist.asbestos.services.restRequests;
 
 import gov.nist.asbestos.client.Base.Request;
 import gov.nist.asbestos.testEngine.engine.ModularScripts;
-import java.util.logging.Logger;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.logging.Logger;
 
 public class GetTestScriptRequest {
     private static Logger log = Logger.getLogger(GetTestScriptRequest.class.getName());
@@ -45,7 +44,7 @@ public class GetTestScriptRequest {
             String json = modularScripts.asJson();
             request.returnString(json);
             request.ok();
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             request.badRequest(ex.toString());
         }
     }

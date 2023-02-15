@@ -53,9 +53,8 @@
                         :start-open="true"> </log-error-list>
             </div>
         </div>
-        <!-- Defer to validation test collection
-        end Defer
-        -->
+        <!--
+        Defer to validation test collection because IG package bugs are handled as a TestScript Assertion
         <div>
             <span v-if="report.validationResult.length === 0"><img src="../../assets/check.png"></span>
             <span v-else-if="isError"><img src="../../assets/cross.png"></span>
@@ -66,6 +65,8 @@
                     :oo="report.validationResult"
                     :header-message="'Only the standard FHIR validators are included'"> </operation-outcome-display>
         </div>
+        end Defer
+        -->
         <div v-if="report.name === 'Binary'">
             <div>Contents: <a v-bind:href="report.binaryUrl" target="_blank">open</a> (in new browser tab) </div>
             <div>Contents direct from server: <a v-bind:href="report.url" target="_blank">open</a> (in new browser tab) </div>
@@ -78,7 +79,7 @@
 <script>
     import LogErrorList from "./LogErrorList"
     import LogAtts from "./LogAtts"
-    import OperationOutcomeDisplay from "./OperationOutcomeDisplay";
+    // import OperationOutcomeDisplay from "./OperationOutcomeDisplay";
 
     export default {
         computed: {
@@ -106,7 +107,7 @@
         props: [
             'report'
         ],
-        components: { LogErrorList, LogAtts , OperationOutcomeDisplay  },
+        components: { LogErrorList, LogAtts  /* , OperationOutcomeDisplay */ },
         name: "LogObjectDisplay"
     }
 </script>
