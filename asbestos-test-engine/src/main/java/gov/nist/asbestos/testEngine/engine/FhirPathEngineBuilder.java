@@ -150,7 +150,7 @@ public class FhirPathEngineBuilder {
         if (result instanceof DateType) {
             return ((DateType) result).getValueAsString();
         }
-        logger.warning("Default string value warning for class: " + result.getClass());
+        logger.warning("Default String value warning for class: " + result.getClass());
         String className = result.getClass().getSimpleName();
         if (className.endsWith("Info")) {
             StringBuilder buf = new StringBuilder();

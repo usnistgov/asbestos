@@ -88,7 +88,7 @@ public class ModularScripts {
 
         String json = ParserBase.encode(testScript, Format.JSON);
         scripts.put(testScript.getName(), json);
-        testActionsHandleImport(testDef, testId, testScript);
+        testActionsHandleImport(testFile, testId, testScript);
         allocateMultiUseScript();
         return;
     }
@@ -166,12 +166,12 @@ public class ModularScripts {
     }
 
 
-    private List<ComponentPathValue> testActionsHandleImport(File testDef, String testId, TestScript testScript ) throws IOException, ModularScriptCircularReferenceException {
+    private List<ComponentPathValue> testActionsHandleImport(File testFile, String testId, TestScript testScript ) throws IOException, ModularScriptCircularReferenceException {
         List<ComponentPathValue> componentPathValues = new ArrayList<>();
         TestScript.TestScriptSetupComponent setup = testScript.getSetup();
         if (setup != null ) {
             for (TestScript.SetupActionComponent action : setup.getAction()) {
-                List<ComponentPathValue> list = handleImportScripts(testDef, testId, action, testScript.getVariable() );
+                List<ComponentPathValue> list = handleImportScripts(testFile, testId, action, testScript.getVariable() );
                 if (list != null) {
                     componentPathValues.addAll(list);
                 }
@@ -180,7 +180,7 @@ public class ModularScripts {
 
         for (TestScript.TestScriptTestComponent test : testScript.getTest()) {
             for (TestScript.TestActionComponent action: test.getAction()) {
-                List<ComponentPathValue> list = handleImportScripts(testDef, testId, action, testScript.getVariable() );
+                List<ComponentPathValue> list = handleImportScripts(testFile, testId, action, testScript.getVariable() );
                 if (list != null) {
                     componentPathValues.addAll(list);
                 }
@@ -190,14 +190,14 @@ public class ModularScripts {
         return componentPathValues;
     }
 
-    List<ComponentPathValue> handleImportScripts(File testDef, String testId, TestScript.SetupActionComponent action, List<TestScript.TestScriptVariableComponent> variableComponentList ) throws IOException, ModularScriptCircularReferenceException {
+    List<ComponentPathValue> handleImportScripts(File testFile, String testId, TestScript.SetupActionComponent action, List<TestScript.TestScriptVariableComponent> variableComponentList ) throws IOException, ModularScriptCircularReferenceException {
         if (!action.hasOperation())
             return null;
         TestScript.SetupActionOperationComponent op = action.getOperation();
         if (! op.hasId()) {
             setOperationId(op);
         }
-        return handleImportAction(testDef, testId, op, variableComponentList );
+        return handleImportAction(testFile, testId, op, variableComponentList );
     }
 
     private void setOperationId(TestScript.SetupActionOperationComponent op) {
@@ -205,15 +205,16 @@ public class ModularScripts {
         op.setId(UUID.randomUUID().toString());
     }
 
-    List<ComponentPathValue> handleImportScripts(File testDef, String testId, TestScript.TestActionComponent action, List<TestScript.TestScriptVariableComponent> variableComponentList) throws IOException, ModularScriptCircularReferenceException {
+    List<ComponentPathValue> handleImportScripts(File testFile, String testId, TestScript.TestActionComponent action, List<TestScript.TestScriptVariableComponent> variableComponentList) throws IOException, ModularScriptCircularReferenceException {
         if (!action.hasOperation())
             return null;
         TestScript.SetupActionOperationComponent op = action.getOperation();
         setOperationId(op);
-        return handleImportAction(testDef, testId, op, variableComponentList);
+        return handleImportAction(testFile, testId, op, variableComponentList);
     }
 
-    private List<ComponentPathValue> handleImportAction(File testDef, String testId, TestScript.SetupActionOperationComponent op, List<TestScript.TestScriptVariableComponent> variableComponentList) throws IOException, ModularScriptCircularReferenceException {
+    private List<ComponentPathValue> handleImportAction(File testFile, String testId, TestScript.SetupActionOperationComponent op, List<TestScript.TestScriptVariableComponent> variableComponentList) throws IOException, ModularScriptCircularReferenceException {
+        File testDef = testFile.getParentFile();
         List<ComponentPathValue> componentPathValues = new ArrayList<>();
         if (!op.hasModifierExtension())
             return null;
@@ -231,9 +232,8 @@ public class ModularScripts {
                         }
                         String componentPath = testDef.getPath() + File.separator + relativePath;
                         File componentFile = new File(componentPath);
-                        File callerModuleFile = new File (testDef,  "TestScript.xml");
-                        if (componentFile.getCanonicalFile().equals(callerModuleFile.getCanonicalFile())) {
-                            String errorStr = String.format("TestScript Import circular reference detected in %s.", callerModuleFile);
+                        if (componentFile.getCanonicalFile().equals(testFile.getCanonicalFile())) {
+                            String errorStr = String.format("TestScript Import circular reference detected in %s.", testFile);
                             throw new ModularScriptCircularReferenceException(errorStr);
                         }
                         TestScript componentScript = (TestScript) ParserBase.parse(componentFile);
