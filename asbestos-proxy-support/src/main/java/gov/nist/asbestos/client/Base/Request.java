@@ -4,8 +4,6 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.http.support.Common;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,13 +11,17 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Request {
     public HttpServletRequest req;
@@ -152,7 +154,7 @@ public class Request {
     }
 
     public void badRequest() {
-        log.severe("Do not understand " + uri.toString());
+        log.severe("Do not understand Request URI " + uri.toString());
         setStatus(resp.SC_BAD_REQUEST);
     }
 

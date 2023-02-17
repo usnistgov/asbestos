@@ -104,27 +104,26 @@
                     <template v-else>
                         <span v-bind:class="{
                         'grayText' : isPdbValDisabled,
-                         'selected': displayValidations,
-                         'not-selected': !displayValidations,
-                         }" @click="doPdbVal">
-                         Validation TestCollection
-                        </span>
-                        <select size="1" v-model="bundleEvalIgVersion">
-                            <option :key="eKey"
-                                    :value="e.tcName"
-                                    v-for="(e,eKey) in getChannelTypeIgTestCollectionArray($store.state.base.channel.channelType)">
-                                {{ e.igName }}
-                            </option>
-                        </select>
-
-                        <span v-bind:class="{
-                        'grayText' : isPdbValDisabled,
                          'selected': displayIgValidations,
                          'not-selected': !displayIgValidations,
                          }" @click="doIgVal">
                          IG Validation
                         </span>
                         <select size="1" v-model="igVal">
+                            <option :key="eKey"
+                                    :value="e.tcName"
+                                    v-for="(e,eKey) in getChannelTypeIgTestCollectionArray($store.state.base.channel.channelType)">
+                                {{ e.igName }}
+                            </option>
+                        </select>
+                        <span v-bind:class="{
+                        'grayText' : isPdbValDisabled,
+                         'selected': displayValidations,
+                         'not-selected': !displayValidations,
+                         }" @click="doPdbVal">
+                         Transaction Validation
+                        </span>
+                        <select size="1" v-model="bundleEvalIgVersion">
                             <option :key="eKey"
                                     :value="e.tcName"
                                     v-for="(e,eKey) in getChannelTypeIgTestCollectionArray($store.state.base.channel.channelType)">

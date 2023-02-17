@@ -21,7 +21,8 @@
 
     <variable>
         <name value="pdbBundleProfile"/>
-        <defaultValue value="''"/>
+        <expression value="''"/>
+        <sourceId value="anonymous"/>
     </variable>
     <variable>
         <name value="igName"/>

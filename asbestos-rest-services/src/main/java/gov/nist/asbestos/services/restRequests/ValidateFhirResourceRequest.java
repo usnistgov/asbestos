@@ -21,6 +21,7 @@ import gov.nist.asbestos.simapi.simCommon.SimId;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.OperationOutcome;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -103,7 +104,8 @@ public class ValidateFhirResourceRequest {
             if (faultCount == 0) {
                 request.ok();
             } else {
-                request.badRequest();
+                logger.info(() -> String.format("IG Validation request has %d OperationOutcome Issues. URI=%s.", faultCount, request.uri));
+                request.resp.setStatus(HttpServletResponse.SC_BAD_REQUEST); // Use the same HTTP response status code as HAPI FHIR Validator when it catches errors
             }
         } catch (Exception ex) {
             request.serverError(ex);
