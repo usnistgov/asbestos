@@ -196,6 +196,8 @@ public class TestEngine  implements TestDef {
         engineVal.setMsg("TestEngine");
         try {
             initWorkflow();
+            doPreProcessing();
+            doLoadVariables();
             doLoadFixtures();
             if (requestResource != null)
                 fixtureMgr.add("request", requestResource);
@@ -203,6 +205,8 @@ public class TestEngine  implements TestDef {
             if (responseResource != null)
                 fixtureMgr.add("response", responseResource);
                 //fixtureMgr.put("response", new FixtureComponent(responseResource));
+            doAutoCreates();
+            doSetup();
             doTest(); // should only be asserts
             errorOut();
             fillInSkips();
@@ -883,7 +887,7 @@ public class TestEngine  implements TestDef {
         }
     }
 
-    Set<String> moduleIds = new HashSet<>();
+    Set<String> moduleIds = new LinkedHashSet<>();
 
 
     private void handleImport(Extension extension, TestScript.SetupActionOperationComponent opScript, TestReport.SetupActionOperationComponent opReport) {
@@ -984,7 +988,7 @@ public class TestEngine  implements TestDef {
             getDebugger().getState().pushParentExecutionIndex();
 
         // check if moduleIds are really accessible to new test engines
-        Set<String> moduleIds = new HashSet<>();
+        Set<String> moduleIds = new LinkedHashSet<>();
                 for (TestEngine te : modularEngine.getTestEngines()) {
                        moduleIds.addAll(te.moduleIds);
                 }

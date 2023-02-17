@@ -46,7 +46,7 @@
                             selected: displayRequest,
                             'not-selected': !displayRequest
                          }"
-                          @click="displayRequest = true; displayResponse = false; displayInspector = false; displayValidations = false">
+                          @click="displayRequest = true; displayResponse = false; displayInspector = false; displayValidations = false; displayIgValidations = false">
                             Request
                         </span>
 
@@ -56,7 +56,7 @@
                             selected: displayResponse,
                             'not-selected': !displayResponse
                             }"
-                            @click="displayRequest = false; displayResponse = true; displayInspector = false; displayValidations = false">
+                            @click="displayRequest = false; displayResponse = true; displayInspector = false; displayValidations = false; displayIgValidations = false">
                             Response
                         </span>
                         &nbsp; | &nbsp;
@@ -92,7 +92,7 @@
                         selected: inspectResponse,
                         'not-selected': !(inspectResponse && responseEnabled)
                         }"
-                          @click="displayRequest = false; displayResponse = false; displayInspector = true; inspectType = 'response'; displayValidations = false">
+                          @click="displayRequest = false; displayResponse = false; displayInspector = true; inspectType = 'response'; displayValidations = false; displayIgValidations = false">
                     Inspect Response/Server
                     </span>
                     <div class="divider"></div>
@@ -116,6 +116,22 @@
                                 {{ e.igName }}
                             </option>
                         </select>
+
+                        <span v-bind:class="{
+                        'grayText' : isPdbValDisabled,
+                         'selected': displayIgValidations,
+                         'not-selected': !displayIgValidations,
+                         }" @click="doIgVal">
+                         IG Validation
+                        </span>
+                        <select size="1" v-model="igVal">
+                            <option :key="eKey"
+                                    :value="e.tcName"
+                                    v-for="(e,eKey) in getChannelTypeIgTestCollectionArray($store.state.base.channel.channelType)">
+                                {{ e.igName }}
+                            </option>
+                        </select>
+
                     </template>
                 </div>
             </div>
@@ -123,7 +139,7 @@
         </div>
 
         <!-- basic event display choices -->
-            <div v-if="!displayInspector && !displayValidations /*&& getEvent()*/">
+            <div v-if="!displayInspector && !displayValidations && !displayIgValidations /*&& getEvent()*/">
                 <div v-if="displayRequest" class="event-details">
                             <pre>{{ requestHeader }}
                             </pre>
@@ -166,6 +182,17 @@
                         :no-inspect-label="true"
                         :modal-mode="modalMode"></eval-details>
             </div>
+            <div v-if="displayIgValidations" class="request-response">
+                <eval-details
+                        :session-id="sessionId"
+                        :channel-name="channelName"
+                        :event-id="eventId"
+                        :test-id="'structure_definition_validation'"
+                        :test-collection="igValAssertion"
+                        :run-eval="true"
+                        :no-inspect-label="true"
+                        :modal-mode="modalMode"></eval-details>
+            </div>
     </div>
 </template>
 
@@ -187,11 +214,13 @@
                 displayResponse: (this.modalMode===undefined)?(this.reqresp==='respmessage'?true:this.reqresp==='resp'):this.modalMode === 'response',
                 displayInspector: false,
                 displayValidations: false,
+                displayIgValidations: false,
                 inspectType: (this.modalMode===undefined)?'request':this.modalMode,
                 allEnabled: false,
                 isLoading: false,
                 // defaultMhdVersion: 'MHDv3.x',
                 pdbValMhdAssertion: '',
+                igValAssertion: '',
                 currentEventSummary: []
             }
         },
@@ -340,6 +369,7 @@
                 this.displayInspector = true;
                 this.inspectType = 'request';
                 this.displayValidations = false
+                this.displayIgValidations = false
             },
             doPdbVal() {
                 if (!this.isPdbValDisabled) {
@@ -358,11 +388,33 @@
                                 this.displayInspector = false;
                                 this.inspectType = '';
                                 this.displayValidations = true;
+                                this.displayIgValidations = false;
                             })
                         })
                     }
 
                 }
+            },
+            doIgVal() {
+                    // console.log(this.bundleEvalIgVersion)
+                    if (this.modalMode === undefined || this.modalMode==='') {
+                        this.$store.commit('setTestCollectionName', this.igVal)
+                        this.$store.dispatch('runSingleEventEval',
+                            {
+                                testId: 'structure_definition_validation',
+                                eventId: this.eventId,
+                                testCollectionName: this.igVal
+                            }).then(() => {
+                            this.$store.dispatch('loadTestScripts', ['structure_definition_validation']).then(() => {
+                                this.displayRequest = false;
+                                this.displayResponse = false;
+                                this.displayInspector = false;
+                                this.inspectType = '';
+                                this.displayValidations = false;
+                                this.displayIgValidations = true;
+                            })
+                        })
+                    }
             },
 
         },
@@ -473,6 +525,17 @@
                 },
                 get() {
                     return this.pdbValMhdAssertion
+                }
+            },
+            igVal: {
+                set(val) {
+                      if (val === '' || val === undefined)
+                          return;
+                      this.igValAssertion = val
+                    this.doIgVal()
+                },
+                get() {
+                    return this.igValAssertion
                 }
             }
         },

@@ -23,35 +23,44 @@
                     </span>
             </div>
 
+            <script-details
+                    :script="script"
+                    :report="report"
+                    :test-script-index="'0'"
+                    :disable-debugger="'true'"
+                    :parent-test-index="'0'"
+                    :eval-test-id="testId"
+            > </script-details>
 
-            <div v-for="(test, testi) in tests" class="test-part"
-                 :key="'Eval' + testi">
-                <div >{{test.description}}</div>
 
-                <!-- actions will be asserts only OR actions with Asbestos extensions ex. test script module call -->
-                <div v-for="(action, actioni) in actions(testi)" class="assert-part"
-                     :key="'Eval' + testi + 'Action' + actioni">
-                    <div v-for="(resultObj, resultKey) in scriptImport(action)" :key="resultKey">
-                        <template v-if="'hasImport' in resultObj && resultObj.hasImport">
-                            <!-- EEE{{eventId}} -->
-                            <component-script
-                                    :action-script="action"
-                                    :action-report="reportAction(testi, actioni)"
-                                    :action-component-name="resultObj.componentName"
-                                    :disable-debugger="'true'"
-                                    :eval-test-id="testId"
-                                    :report-event-id="eventId"
-                            ></component-script>
-                        </template>
-                        <template v-else class="has-cursor">
-                            <eval-action-details
-                                    :script="action"
-                                    :report="reportAction(testi, actioni)"
-                            > </eval-action-details>
-                        </template>
-                    </div>
-                </div>
-            </div>
+            <!--            <div v-for="(test, testi) in tests" class="test-part"-->
+<!--                 :key="'Eval' + testi">-->
+<!--                <div >{{test.description}}</div>-->
+
+<!--                &lt;!&ndash; actions will be asserts only OR actions with Asbestos extensions ex. test script module call &ndash;&gt;-->
+<!--                <div v-for="(action, actioni) in actions(testi)" class="assert-part"-->
+<!--                     :key="'Eval' + testi + 'Action' + actioni">-->
+<!--                    <div v-for="(resultObj, resultKey) in scriptImport(action)" :key="resultKey">-->
+<!--                        <template v-if="'hasImport' in resultObj && resultObj.hasImport">-->
+<!--&lt;!&ndash;                             EEE{{eventId}}&ndash;&gt;-->
+<!--                            <component-script-->
+<!--                                    :action-script="action"-->
+<!--                                    :action-report="reportAction(testi, actioni)"-->
+<!--                                    :action-component-name="resultObj.componentName"-->
+<!--                                    :disable-debugger="'true'"-->
+<!--                                    :eval-test-id="testId"-->
+<!--                                    :report-event-id="eventId"-->
+<!--                            ></component-script>-->
+<!--                        </template>-->
+<!--                        <template v-else class="has-cursor">-->
+<!--                            <eval-action-details-->
+<!--                                    :script="action"-->
+<!--                                    :report="reportAction(testi, actioni)"-->
+<!--                            > </eval-action-details>-->
+<!--                        </template>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
 
             <!-- add TEARDOWN here -->
 
@@ -65,10 +74,11 @@
 <script>
     import errorHandlerMixin from '../../mixins/errorHandlerMixin'
     import colorizeTestReports from "../../mixins/colorizeTestReports";
-    import EvalActionDetails from "./EvalActionDetails";
     import importMixin from "../../mixins/importMixin";
+    import ScriptDetails from './ScriptDetails'
 
-    import ComponentScript from "./ComponentScript";
+    // import EvalActionDetails from "./EvalActionDetails";
+    // import ComponentScript from "./ComponentScript";
 
     export default {
         data() {
@@ -269,9 +279,10 @@
             //EvalReportAssert
 
             InspectEvent: () => import('../logViewer/InspectEvent'),
+            ScriptDetails,
            // TestStatus,
-            EvalActionDetails,
-            ComponentScript,
+           //  EvalActionDetails,
+           //  ComponentScript,
         },
         name: "EvalDetails"
     }

@@ -287,10 +287,12 @@
                             let arr = e.igTestCollections
                             let o = arr.find(igTc => ('tcName' in igTc) ? (igTc.tcName === currentTcName ? true : false) : false)
                             if (o !== undefined && o !== null) {
-                                if ('fhirIgName' in o) {
-                                    return o.fhirIgName
+                                if ('igName' in o) {
+                                    return o.igName // See IgTestCollection Java class
                                 }
                             }
+                        } else {
+                            console.log('No igTestCollections in ' + (e.channelType === undefined || e.channelType === null) ? 'No channel.' : e.channelType)
                         }
                     }
                     /*
@@ -306,13 +308,12 @@
                     } else {
                         tcCollectionObjs = this.$store.state.testRunner.serverTestCollectionObjs
                     }
-                    return tcCollectionObjs.filter(e => e.name === currentTcName)[0].fhirIgName
+                    return tcCollectionObjs.filter(e => e.name === currentTcName)[0].fhirIgName // See TestCollectionDetail Java class
                     // }
                 } catch (e) {
-                    console.error('getTcIgVersion error ' + e)
+                    console.error('getTcIgVersion Error currentTcName: ' + currentTcName + ', Exception: ' + e)
+                    return undefined
                 }
-                console.error('Undefined tcMhdVersion')
-                return undefined
             }
 
         }

@@ -3,13 +3,11 @@ package gov.nist.asbestos.testEngine.engine;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.client.FhirClient;
-import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.client.debug.StopDebugTestScriptException;
 import gov.nist.asbestos.client.debug.TestScriptDebugState;
+import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
@@ -22,11 +20,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 public class ModularEngine {
@@ -53,7 +53,7 @@ public class ModularEngine {
 
     public ModularEngine(File testDefDir, URI sut, TestScriptDebugState state) {
         nameFromTestDefDir(testDefDir);
-        Set<String> moduleIds = new HashSet<>();
+        Set<String> moduleIds = new LinkedHashSet<>();
         for (TestEngine te : engines) {
            moduleIds.addAll(te.moduleIds);
         }

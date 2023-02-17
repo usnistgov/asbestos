@@ -447,6 +447,7 @@ export const testRunnerStore = {
             ENGINE.get(url)
                 .then(response => {
                     const results = response.data
+                    // console.log(JSON.stringify(results[testId]))
                     commit('setClientTestResult', { testId: testId, reports: results[testId] } )
                     // setTestReport is not really useful if modular test scripts were used and multiple reports are compressed all into one report file
                     // commit('setTestReport', results[testId][eventId] )

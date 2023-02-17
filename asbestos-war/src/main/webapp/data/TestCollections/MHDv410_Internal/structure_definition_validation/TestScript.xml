@@ -15,8 +15,8 @@
     </modifierExtension>
 
 
-    <id value="MHDv4StructureDefinitionValidation"/>
-    <name value="MHDv4StructureDefinitionValidation"/>
+    <id value="MHDv410StructureDefinitionValidation"/>
+    <name value="MHDv410StructureDefinitionValidation"/>
     <description value="Validation server is the channel Id, which is composed of testSession and channelName, joined by two underscore characters. For example, testSession__channelName. This channel Id will be resolved to a FHIR base address through an internal operation module call."/>
 
     <variable>
