@@ -63,7 +63,7 @@
                     <code value="ftkValidate"/>
                 </type>
                 <requestHeader>
-                    <field value="x-Url"/>
+                    <field value="x-ftk-Url"/>
                     <value value="${validationServerBase}/${resourceType}/$validate?profile=${pdbBundleProfile}&amp;igName=${igName}&amp;logEvent=true"/>
                 </requestHeader>
                 <method value="post"/>
@@ -110,7 +110,7 @@
                     <code value="ftkValidate"/>
                 </type>
                 <requestHeader>
-                    <field value="x-Url"/>
+                    <field value="x-ftk-Url"/>
                     <value value="${validationServerBase}/${resourceType}/$validate?profile=${pdbBundleProfile}"/>
                 </requestHeader>
                 <method value="post"/>

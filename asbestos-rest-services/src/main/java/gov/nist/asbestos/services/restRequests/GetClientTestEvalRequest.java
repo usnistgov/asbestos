@@ -6,14 +6,13 @@ import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.events.Event;
 import gov.nist.asbestos.client.events.ITask;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.simapi.simCommon.SimId;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.ModularEngine;
 import gov.nist.asbestos.testEngine.engine.TestEngine;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureMgr;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.TestReport;
 import org.hl7.fhir.r4.model.TestScript;
@@ -22,7 +21,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 // 0 - empty
@@ -200,21 +206,32 @@ public class GetClientTestEvalRequest {
                     modularEngine.setTestSession(testSession);
                     modularEngine.setExternalCache(request.externalCache);
                     modularEngine.setModularScripts();
-                    ResourceWrapper requestResource = getRequestResource(event);
-                    ResourceWrapper responseResource = getResponseResource(event);
-                    modularEngine.runEval(requestResource, responseResource);
-                    EventResult eventResult = result.results.get(theTestId);
-                    if (eventResult == null)
-                        eventResult = new EventResult();
-                    List<TestReport> thisReports = modularEngine.getTestReports();
-                    eventResult.reports.put(event.getEventId(), thisReports);
-                    if (!thisReports.isEmpty()) {
-                        if (thisReports.get(0).getResult().toCode().equalsIgnoreCase("pass")) {
-                            testGoodCount++;
-                            lastGoodEvent = event.getEventId();
+                    boolean skipThisEvent = isInternalRequestUrl(event)
+                            || ITask.HTTP_VERB_GET.equals(event.getClientTask().getVerb()); // GET request has no resource request body
+                    ResourceWrapper requestResource = (skipThisEvent) ? null : getRequestResource(event);
+                    ResourceWrapper responseResource = (skipThisEvent) ? null : getResponseResource(event);
+                    if (!skipThisEvent && ( requestResource == null || responseResource == null)) {
+                        log.log(Level.SEVERE, "Request or Response cannot be Null for EventId %s. Check contentType in respective HTTP Header(s)." + event.getEventId());
+                    } else {
+                        modularEngine.runEval(requestResource, responseResource, skipThisEvent);
+                        EventResult eventResult = result.results.get(theTestId);
+                        if (eventResult == null)
+                            eventResult = new EventResult();
+                        List<TestReport> thisReports = modularEngine.getTestReports();
+                        eventResult.reports.put(event.getEventId(), thisReports);
+                        if (!thisReports.isEmpty()) {
+                            if (thisReports.get(0).getResult().toCode().equalsIgnoreCase("pass")) {
+                                if (skipThisEvent) {
+                                    // Reset eval status to Null because this event is not a qualifying event
+                                    thisReports.get(0).setResult(TestReport.TestReportResult.NULL);
+                                } else {
+                                    testGoodCount++;
+                                    lastGoodEvent = event.getEventId();
+                                }
+                            }
                         }
+                        result.results.put(theTestId, eventResult);
                     }
-                    result.results.put(theTestId, eventResult);
                 } catch (Throwable t) {
                     log.log(Level.SEVERE, t.toString(), t);
                     throw t;
@@ -225,13 +242,28 @@ public class GetClientTestEvalRequest {
         }
     }
 
+    private static boolean isInternalRequestUrl(Event event) {
+        return event.getClientTask().getRequestHeader().get(Headers.X_FTK_URL) != null;
+    }
 
+
+    /**
+     * Request
+     * https://hl7.org/fhir/http.html#mime-type
+     * The correct mime type SHALL be used by clients and servers.
+     * @param event
+     * @return
+     */
     private ResourceWrapper getRequestResource(Event event) {
         ITask task = event.getClientTask();
 
         try {
             String requestContentType = event.getClientTask().getRequestHeader().getContentType().getValue();
             Format format = Format.fromContentType(requestContentType);
+            if (format == null) {
+                log.log(Level.SEVERE, String.format("Request header content-type is missing for EventId %s.", event.getEventId()));
+                return null;
+            }
             String requestString = task.getRequestBodyAsString();
             ResourceWrapper wrapper;
             if (requestString == null) {
@@ -248,13 +280,25 @@ public class GetClientTestEvalRequest {
         }
     }
 
+    /**
+     * Response
+     * https://hl7.org/fhir/http.html#mime-type
+     * The correct mime type SHALL be used by clients and servers.
+     * @param event
+     * @return
+     */
     private ResourceWrapper getResponseResource(Event event) {
         ITask task = event.getClientTask();
 
         try {
             String responseString = event.getClientTask().getResponseBodyAsString();
             String responseContentType = event.getClientTask().getResponseHeader().getContentType().getValue();
+
             Format rformat = Format.fromContentType(responseContentType);
+            if (rformat == null) {
+                log.log(Level.SEVERE, "Response header content-type is missing for EventId %s." + event.getEventId());
+                return null;
+            }
             ResourceWrapper wrapper;
             if (responseString == null) {
                 wrapper = new ResourceWrapper();

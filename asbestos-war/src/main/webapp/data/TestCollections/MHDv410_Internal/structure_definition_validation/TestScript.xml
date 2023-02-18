@@ -99,6 +99,7 @@
         </action>
     </setup>
     <test>
+        <modifierExtension url="urn:noErrors"/>
         <description value="Request resource validation."/>
         <action>
             <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
@@ -137,7 +138,19 @@
                 </modifierExtension>
             </operation>
         </action>
+    </test>
+    <test>
+        <description value="Unusual features."/>
         <action>
+            <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+            <assert>
+                <description value="Is validation OperationOutcome available?"/>
+                <resource value="OperationOutcome"/>
+                <sourceId value="requestValidationResponse"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    <action>
             <assert id="mhdIgBug_drIdentifier1">
                 <description value="OperationOutcome does not contain the incorrect error on DocumentReference.identifier minimum required = 1. Specification text disagrees with MHD IG StructureDefinition. Assertion failure indicates presence of IG bug."/>
                 <compareToSourceId value="requestValidationResponse"/>
@@ -145,7 +158,6 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-
     </test>
     <test>
         <description value="Response resource validation."/>

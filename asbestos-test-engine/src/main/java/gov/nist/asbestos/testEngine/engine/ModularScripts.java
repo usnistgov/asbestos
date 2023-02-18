@@ -46,7 +46,7 @@ public class ModularScripts {
     private String testCollectionName;
     private EC ec;
 
-    public ModularScripts(EC ec, String testCollectionName, File testDef) throws IOException, ModularScriptCircularReferenceException {
+    public ModularScripts(EC ec, String testCollectionName, File testDef) throws IOException {
         this.ec = ec;
         this.testCollectionName = testCollectionName;
         // fill the script Map with the base script and all referenced component scripts
@@ -166,7 +166,7 @@ public class ModularScripts {
     }
 
 
-    private List<ComponentPathValue> testActionsHandleImport(File testDef, String testId, TestScript testScript ) throws IOException, ModularScriptCircularReferenceException {
+    private List<ComponentPathValue> testActionsHandleImport(File testDef, String testId, TestScript testScript ) throws IOException {
         List<ComponentPathValue> componentPathValues = new ArrayList<>();
         TestScript.TestScriptSetupComponent setup = testScript.getSetup();
         if (setup != null ) {
@@ -190,7 +190,7 @@ public class ModularScripts {
         return componentPathValues;
     }
 
-    List<ComponentPathValue> handleImportScripts(File testDef, String testId, TestScript.SetupActionComponent action, List<TestScript.TestScriptVariableComponent> variableComponentList ) throws IOException, ModularScriptCircularReferenceException {
+    List<ComponentPathValue> handleImportScripts(File testDef, String testId, TestScript.SetupActionComponent action, List<TestScript.TestScriptVariableComponent> variableComponentList ) throws IOException {
         if (!action.hasOperation())
             return null;
         TestScript.SetupActionOperationComponent op = action.getOperation();
@@ -205,7 +205,7 @@ public class ModularScripts {
         op.setId(UUID.randomUUID().toString());
     }
 
-    List<ComponentPathValue> handleImportScripts(File testDef, String testId, TestScript.TestActionComponent action, List<TestScript.TestScriptVariableComponent> variableComponentList) throws IOException, ModularScriptCircularReferenceException {
+    List<ComponentPathValue> handleImportScripts(File testDef, String testId, TestScript.TestActionComponent action, List<TestScript.TestScriptVariableComponent> variableComponentList) throws IOException {
         if (!action.hasOperation())
             return null;
         TestScript.SetupActionOperationComponent op = action.getOperation();
@@ -213,7 +213,7 @@ public class ModularScripts {
         return handleImportAction(testDef, testId, op, variableComponentList);
     }
 
-    private List<ComponentPathValue> handleImportAction(File testDef, String testId, TestScript.SetupActionOperationComponent op, List<TestScript.TestScriptVariableComponent> variableComponentList) throws IOException, ModularScriptCircularReferenceException {
+    private List<ComponentPathValue> handleImportAction(File testDef, String testId, TestScript.SetupActionOperationComponent op, List<TestScript.TestScriptVariableComponent> variableComponentList) throws IOException {
         List<ComponentPathValue> componentPathValues = new ArrayList<>();
         if (!op.hasModifierExtension())
             return null;
@@ -231,13 +231,6 @@ public class ModularScripts {
                         }
                         String componentPath = testDef.getPath() + File.separator + relativePath;
                         File componentFile = new File(componentPath);
-                        /*
-                        TODO fix circular reference checking
-                        if (componentFile.getCanonicalFile().equals(testFile.getCanonicalFile())) {
-                            String errorStr = String.format("TestScript Import circular reference detected in %s.", testFile);
-                            throw new ModularScriptCircularReferenceException(errorStr);
-                        }
-                         */
                         TestScript componentScript = (TestScript) ParserBase.parse(componentFile);
                         String componentId = fileName(componentFile);
                         String fullComponentId = testId + '/' + componentId;

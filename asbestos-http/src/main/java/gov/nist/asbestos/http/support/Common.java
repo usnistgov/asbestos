@@ -1,18 +1,17 @@
 package gov.nist.asbestos.http.support;
 
 import gov.nist.asbestos.http.headers.Headers;
-import gov.nist.asbestos.http.operations.HttpBase;
 import gov.nist.asbestos.http.operations.Verb;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URIBuilder;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Common {
 
@@ -103,14 +102,18 @@ public class Common {
             map.put(theKey, theValues);
     }
 
-    public static Headers getRequestHeaders(HttpServletRequest req, Verb verb) {
+    public static Headers getRequestHeaders(HttpServletRequest req) {
         List<String> names = Collections.list(req.getHeaderNames());
         Map<String, List<String>> hdrs = new HashMap<>();
         for (String name : names) {
             List<String> values = Collections.list(req.getHeaders(name));
             hdrs.put(name, values);
         }
-        Headers headers = new Headers(hdrs);
+        return new Headers(hdrs);
+    }
+
+    public static Headers getRequestHeaders(HttpServletRequest req, Verb verb) {
+        Headers headers = getRequestHeaders(req);
         headers.setVerb(verb.toString());
         try {
             headers.setPathInfo(Common.buildURI(req));

@@ -1,15 +1,14 @@
 package gov.nist.asbestos.http.headers;
 
 
-import java.util.logging.Logger;
-
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class Headers {
-    public static final String X_FTK_VALIDATION_EVENT = "x-ftkValidation-event";
+    public static final String X_FTK_VALIDATION_EVENT = "x-ftk-Validation-event";
+    public static final String X_FTK_URL = "x-ftk-Url";
     String verb = null;
     URI pathInfo = null;
     int status = 0;

@@ -4,6 +4,7 @@ import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.serviceproperties.ServiceProperties;
 import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.simapi.validation.ValE;
@@ -265,7 +266,7 @@ public class OperationRunner {
                     .setExternalVariables(externalVariables)
                     .setVal(val)
                     .setOpReport(operationReport);
-            final String xUrlRequestHeader = "x-Url";
+            final String xUrlRequestHeader = Headers.X_FTK_URL;
             String xUrlRequestHeaderValue = getHeaderComponentValue(xUrlRequestHeader, op, variableMgr);
             if (xUrlRequestHeaderValue == null) {
                 String error = String.format("%s headerComponent value not found.", xUrlRequestHeader);

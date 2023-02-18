@@ -30,6 +30,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
@@ -187,7 +188,7 @@ public class TestEngine  implements TestDef {
 
     // if inputResource == null then this is a test
     // if null then this is an evaluation
-    public TestEngine runEval(ResourceWrapper requestResource, ResourceWrapper responseResource) {
+    public TestEngine runEval(ResourceWrapper requestResource, ResourceWrapper responseResource, boolean skipAll) {
         Objects.requireNonNull(val);
         Objects.requireNonNull(testSession);
         Objects.requireNonNull(externalCache);
@@ -205,9 +206,11 @@ public class TestEngine  implements TestDef {
             if (responseResource != null)
                 fixtureMgr.add("response", responseResource);
                 //fixtureMgr.put("response", new FixtureComponent(responseResource));
-            doAutoCreates();
-            doSetup();
-            doTest(); // should only be asserts
+            if (! skipAll) {
+                doAutoCreates();
+                doSetup();
+                doTest(); // should only be asserts
+            }
             errorOut();
             fillInSkips();
             doLintTestReport();
@@ -319,6 +322,12 @@ public class TestEngine  implements TestDef {
             doTearDown();
             fillInSkips();
             doLintTestReport();
+        } catch (Exception ex) {
+                String msg = ex.getMessage();
+                if (msg == null || msg.equals("")) {
+                    msg = "TestEngine#doWorkflow Error: Check server log for details.";
+                    log.log(Level.SEVERE, msg, ex);
+                }
         } finally {
             doAutoDeletes();
             doPostProcessing();
@@ -456,7 +465,7 @@ public class TestEngine  implements TestDef {
         part.setDisplay("NIST Asbestos TestEngine");
     }
 
-    private boolean errorOut() {
+    private boolean errorOut() throws IOException, CircularModularScriptReferenceException {
 //        propagateStatus(testReport);
         errors = doReportResult();
         if (hasError()) {
@@ -671,7 +680,7 @@ public class TestEngine  implements TestDef {
     }
 
 
-    private void doSetup() {
+    private void doSetup() throws IOException, CircularModularScriptReferenceException {
         boolean reportAsConditional = false;  // upgrade this when conditional execution comes to setup
         if (testScript.hasSetup()) {
            if (hasDebugger())
@@ -736,7 +745,7 @@ public class TestEngine  implements TestDef {
         }
     }
 
-    private void doOperation(ActionReference actionReference, String typePrefix, TestScript.SetupActionOperationComponent operation, TestReport.SetupActionOperationComponent report, boolean isFollowedByAssert) {
+    private void doOperation(ActionReference actionReference, String typePrefix, TestScript.SetupActionOperationComponent operation, TestReport.SetupActionOperationComponent report, boolean isFollowedByAssert) throws IOException, CircularModularScriptReferenceException {
         Objects.requireNonNull(channelId);
         if (operation.hasType()) {
             try {
@@ -890,7 +899,7 @@ public class TestEngine  implements TestDef {
     Set<String> moduleIds = new LinkedHashSet<>();
 
 
-    private void handleImport(Extension extension, TestScript.SetupActionOperationComponent opScript, TestReport.SetupActionOperationComponent opReport) {
+    private void handleImport(Extension extension, TestScript.SetupActionOperationComponent opScript, TestReport.SetupActionOperationComponent opReport) throws IOException, CircularModularScriptReferenceException {
 
         /*
             Validate and align request input fixtures and variables
@@ -992,6 +1001,13 @@ public class TestEngine  implements TestDef {
                 for (TestEngine te : modularEngine.getTestEngines()) {
                        moduleIds.addAll(te.moduleIds);
                 }
+
+       if (this.parent != null) {
+           File parentTestScript = this.parent.getTestScriptFile().getCanonicalFile();
+           if (parentTestScript.equals(componentReference.getComponentRef().getCanonicalFile())) {
+               throw new CircularModularScriptReferenceException(String.format("Parent TestScript file has a circular reference: %s.", parentTestScript));
+           }
+       }
 
         TestEngine testEngine1 = sut == null
                 ? new TestEngine(componentReference.getComponentRef(), moduleIds)
@@ -1231,7 +1247,7 @@ public class TestEngine  implements TestDef {
     }
 
     // returns ok?
-    private boolean handleConditionalTest(TestScript.TestScriptTestComponent testComponent, TestReport.TestReportTestComponent testReportComponent, Extension extension) {
+    private boolean handleConditionalTest(TestScript.TestScriptTestComponent testComponent, TestReport.TestReportTestComponent testReportComponent, Extension extension) throws IOException, CircularModularScriptReferenceException {
         TestScript containedTestScript = null;
 
         if (extension.getValue() instanceof Reference) {
@@ -1292,7 +1308,7 @@ public class TestEngine  implements TestDef {
         setupActionOperationComponent.setMessage("skipped");
     }
 
-    private boolean doTestPart(TestScript.TestScriptTestComponent testScriptElement, TestReport.TestReportTestComponent testReportComponent, TestReport testReport, boolean reportAsConditional) {
+    private boolean doTestPart(TestScript.TestScriptTestComponent testScriptElement, TestReport.TestReportTestComponent testReportComponent, TestReport testReport, boolean reportAsConditional) throws IOException, CircularModularScriptReferenceException {
         int testIndex = testScript.getTest().indexOf(testScriptElement);
         ValE fVal = new ValE(engineVal).setMsg("Test");
 
@@ -1476,7 +1492,7 @@ public class TestEngine  implements TestDef {
         return null;
     }
 
-    private void doTearDown() {
+    private void doTearDown() throws IOException, CircularModularScriptReferenceException {
         if (testScript.hasTeardown()) {
             String typePrefix = "teardown";
             ValE fVal = new ValE(engineVal).setMsg("Teardown");

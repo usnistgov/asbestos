@@ -1,7 +1,7 @@
 <TestScript xmlns="http://hl7.org/fhir">
     <id value="mhdv410singleDoc"/>
     <name value="mhdv410singleDoc"/>
-    <description value="Send valid Provide Document Bundle transaction containing a single DocumentReference. Comprehensive metadata is required."/>
+    <description value="Send valid Provide Document Bundle transaction containing a single DocumentReference. Comprehensive metadata is required. (Irrelevant channel message events, such as GET requests or some internal requests, will be skipped for evaluation and the test status will be undefined.)"/>
     
     <variable>
         <name value="isComprehensiveMetadataExpected"/>

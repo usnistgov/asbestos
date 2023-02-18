@@ -240,8 +240,8 @@ public class ModularEngine {
         return this;
     }
 
-    public ModularEngine runEval(ResourceWrapper request, ResourceWrapper response) {
-        getMainTestEngine().runEval(request, response);
+    public ModularEngine runEval(ResourceWrapper request, ResourceWrapper response, boolean skipAll) {
+        getMainTestEngine().runEval(request, response, skipAll);
         installModuleNames();
         return this;
     }

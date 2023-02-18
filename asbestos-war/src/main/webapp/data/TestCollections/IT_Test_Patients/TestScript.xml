@@ -72,11 +72,11 @@
 	</test>
 
 	<test>
+		<modifierExtension url="urn:noErrors"/>
 		<description value="Does the Patient need loading?"/>
 		<!-- this would normally run because it is in a different test
      The extension changes that - a previous failure causes this not to run
     -->
-    <modifierExtension url="urn:noErrors"/>
 		<action>
 			<!--
                 This is a condition.  If this assert fails then the remaining actions in this test do not run.

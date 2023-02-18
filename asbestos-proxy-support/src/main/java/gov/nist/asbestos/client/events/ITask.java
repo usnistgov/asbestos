@@ -4,6 +4,10 @@ import gov.nist.asbestos.http.headers.Headers;
 import gov.nist.asbestos.http.operations.HttpBase;
 
 public interface ITask {
+    public static final String HTTP_VERB_GET = "GET";
+    public static final String HTTP_VERB_POST = "POST";
+    public static final String HTTP_VERB_DELETE = "DELETE";
+
     String getVerb();
 
     Event getEvent();

@@ -1,7 +1,7 @@
 <TestScript xmlns="http://hl7.org/fhir">
     <id value="twoDoc"/>
     <name value="twoDoc"/>
-    <description value="Send valid Provide Document Bundle transaction containing two DocumentReferences. Minimal metadata is required."/>
+    <description value="Send valid Provide Document Bundle transaction containing two DocumentReferences. Minimal metadata is required. (Irrelevant channel message events, such as GET requests or some internal requests, will be skipped for evaluation and the test status will be undefined.)"/>
     
 <!--    <fixture id="referenceDocumentReference">-->
 <!--        <autocreate value="false"/>-->

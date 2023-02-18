@@ -37,11 +37,11 @@ public class Task implements ITask {
     public HttpBase getHttpBase() {
         HttpBase base = null;
         String verb = getVerb();
-        if ("GET".equalsIgnoreCase(verb))
+        if (HTTP_VERB_GET.equalsIgnoreCase(verb))
             base = new HttpGetter();
-        else if ("POST".equalsIgnoreCase(verb))
+        else if (HTTP_VERB_POST.equalsIgnoreCase(verb))
             base = new HttpPost();
-        else if ("DELETE".equalsIgnoreCase(verb))
+        else if (HTTP_VERB_DELETE.equalsIgnoreCase(verb))
             base = new HttpDelete();
         else
             throw new Error("Cannot translate Task into HttpBase - Headers are " + _requestHeaders);

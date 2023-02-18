@@ -40,7 +40,7 @@ class ClientApiTest {
                 .setVal(new Val())
                 .setTestSession("default")
                 .setExternalCache(ec.externalCache)
-                .runEval(requestWrapper, responseWrapper)
+                .runEval(requestWrapper, responseWrapper, false)
                 .getTestReportErrors();
 
 
