@@ -21,6 +21,9 @@
         <extension url="urn:variable-in">
             <valueString value="correctBundleMetaProfile"/>
         </extension>
+        <extension url="urn:variable-in">
+            <valueString value="igVersion"/>
+        </extension>
     </modifierExtension>
 
     <id value="PDBFailsMain"/>
@@ -142,7 +145,32 @@
             </operation>
         </action>
     </test>
-    <!-- TODO insert structuredefinition validation here -->
+    <test>
+        <description value="FHIR IG based validation. (If a Question icon appears in the status, then this part of the test needs manual review.)"/>
+        <action>
+            <modifierExtension url="urn:asbestos:test:action:mayHaveBugsWhichRequireManualReview"/>
+            <operation>
+                <description value="Module usage description"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../AggregateModule/StructureDefinitionValidation.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-bundle"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="pdbBundleProfile"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="igVersion"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
     <test>
         <description value="PDB Validations."/>
         <action>

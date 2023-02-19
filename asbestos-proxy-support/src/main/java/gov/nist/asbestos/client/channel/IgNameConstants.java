@@ -3,7 +3,8 @@ package gov.nist.asbestos.client.channel;
 public enum IgNameConstants {
     MHDV_3_X ( "MHDv3.x"),
     MHDV_4 ( "MHDv4"),
-    MHDV_410 ( "MHDv410");
+    MHDV_410 ( "MHDv410"),
+    MHDV_420 ( "MHDv420");
 
     private String igName;
 

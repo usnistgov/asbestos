@@ -8,6 +8,7 @@ public enum FixturePlaceholderEnum {
     BundleMetaMinimalProfileElement,
     BundleMetaComprehensiveProfileElement,
     DocumentReferenceMetaMinimalProfileElement,
+    DocumentReferenceMetaComprehensiveProfileElement,
     SubmissionSetResourceElement,
     SubmissionSetRequestUrlElement,
     SubmissionSetResourceMinimalProfileElement
