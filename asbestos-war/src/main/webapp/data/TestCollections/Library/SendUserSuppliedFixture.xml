@@ -1,0 +1,41 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString  value="request"/>
+        </extension>
+        <extension url="urn:fixture-out">
+            <valueString value="response"/>
+        </extension>
+    </modifierExtension>
+
+    <url value=""/>
+    <name value="SendUserSuppliedFixture"/>
+    <status value="active"/>
+
+    <test>
+<!--        <description value="Submit Provide Document Bundle to MHD Document Recipient."/>-->
+        <!--
+            Actions generic to all PDB transactions
+        -->
+        <action>
+            <operation>
+                <!-- references patient from resourceCache in EC -->
+                <description value="Send."/>
+                <label value="create"/>
+                <type>
+                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
+                    <code value="transaction"/>
+                </type>
+                <sourceId value="request"/>
+                <responseId value="response"/>
+            </operation>
+        </action>
+        <action>
+            <assert>
+                <description value="... successful."/>
+                <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>

@@ -49,6 +49,7 @@ public class GetTestCollectionRequest {
          *
          */
         Map<String, String[]> testDependencies;
+        boolean isUserSuppliedTestFixture;
     }
 
     private static Logger log = Logger.getLogger(GetTestCollectionRequest.class.getName());
@@ -74,6 +75,7 @@ public class GetTestCollectionRequest {
         tc.isServerTest = !"client".equals(props.getProperty(TestCollectionPropertiesEnum.TestType.name()));
         tc.testNames = request.ec.getTestsInCollection(collectionName);
         tc.requiredChannel = props.getProperty(TestCollectionPropertiesEnum.Channel.name());
+        tc.isUserSuppliedTestFixture = new Boolean(props.getProperty(TestCollectionPropertiesEnum.UserSuppliedTestFixture.name())).booleanValue();
 
         String dependsOnValue = props.getProperty(TestCollectionPropertiesEnum.DependsOn.name());
         Map<String, String[]> tempMap = loadTestCollectionDependencies(dependsOnValue);

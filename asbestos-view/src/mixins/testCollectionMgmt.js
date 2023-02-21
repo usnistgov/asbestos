@@ -54,14 +54,24 @@ export default {
             this.beginTestTime()
             this.$store.commit('setCurrentTest', null)
             await this.$store.dispatch('runTest', testName)
-            this.$store.commit('setCurrentTest', testName)
-            this.$store.commit('setRunning',false)
-            this.endTestTime()
-            const currentRoutePath = this.$router.currentRoute.path
-            const testRoutePathToBe = `${testRoutePath}/${testName}`
-            if (currentRoutePath !== testRoutePathToBe) {
-                this.$router.push(testRoutePathToBe)
-            }
+                .then(r=>
+            {
+                // console.log(JSON.stringify(r))
+                if ('data' in r) {
+                    this.$store.commit('setCurrentTest', testName)
+                    this.$store.commit('setRunning',false)
+                    this.endTestTime()
+                    const currentRoutePath = this.$router.currentRoute.path
+                    const testRoutePathToBe = `${testRoutePath}/${testName}`
+                    if (currentRoutePath !== testRoutePathToBe) {
+                        this.$router.push(testRoutePathToBe)
+                    }
+                } else if ('error' in r) {
+                    this.$store.commit('setRunning',false)
+                    this.endTestTime()
+                    throw r.error // Vue error is displayed on top of the screen
+                }
+            })
         },
         async doEval(testName) {  // run single client test
             // console.debug('In doEval')
@@ -267,6 +277,18 @@ export default {
             },
             get() {
                 return this.$store.state.testRunner.useTlsProxy
+            }
+        },
+        userSuppliedTestFixtureText: {
+            set(theText) {
+                this.$store.commit('setCurrentTcUserSuppliedTestFixtureText', theText)
+            },
+            get() {
+                const tc = this.$store.state.testRunner.currentTestCollectionName
+                if (tc in this.$store.state.testRunner.userSuppliedTestFixtureText)
+                    return this.$store.state.testRunner.userSuppliedTestFixtureText[tc]
+                else
+                    return ''
             }
         },
         fullChannelId() {

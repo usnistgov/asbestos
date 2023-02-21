@@ -21,6 +21,8 @@ export const testRunnerStore = {
             testScriptNames: [],
             requiredChannel: null,   // applies to entire testCollection
             isClientTest: false,  // applies to entire testCollection
+            isUserSuppliedTestFixture: false,  // applies to entire testCollection
+            userSuppliedTestFixtureText: {}, // currentTestCollectionName => text
             collectionDescription: null,
 
             testScripts: {}, // testId => TestScript
@@ -109,6 +111,10 @@ export const testRunnerStore = {
         setUseTlsProxy(state, value) {
             state.useTlsProxy = value
         },
+        setCurrentTcUserSuppliedTestFixtureText(state, value) {
+            if (state.currentTestCollectionName !== '' && state.currentTestCollectionName !== null && state.currentTestCollectionName !== undefined)
+                Vue.set(state.userSuppliedTestFixtureText, state.currentTestCollectionName, value)
+        },
         setDebug(state, value) {
             state.debug = value
         },
@@ -143,6 +149,9 @@ export const testRunnerStore = {
         },
         setIsClientTest(state, isClient) {
             state.isClientTest = isClient
+        },
+        setIsUserSuppliedTestFixture(state, isUserSuppliedTestFixture) {
+            state.isUserSuppliedTestFixture = isUserSuppliedTestFixture
         },
         setCollectionDescription(state, collectionDescription) {
             state.collectionDescription = collectionDescription
@@ -315,6 +324,18 @@ export const testRunnerStore = {
         },
         isRunning: (state) => {
             return state.running
+        },
+        hasUserSuppliedTestFixtureText: (state) => {
+            return state.isUserSuppliedTestFixture
+        },
+        getUserSuppliedTestFixtureText: (state) => {
+            if (state.isUserSuppliedTestFixture) {
+                if (state.currentTestCollectionName !== '' && state.currentTestCollectionName !== null && state.currentTestCollectionName !== undefined) {
+                    const tc = state.currentTestCollectionName
+                    return state.userSuppliedTestFixtureText[tc]
+                }
+            }
+                return null
         },
         clientTestCollectionNames: (state) => (fhirIgNames) => {
             return state.filterTestCollectionsByFhirIgNames(state.clientTestCollectionObjs, fhirIgNames)
@@ -602,16 +623,25 @@ export const testRunnerStore = {
             commit('setTestScript', script)
             return script
         },
-        runTest({commit, rootState, state}, testId) {
+        runTest({commit, rootState, state, getters}, testId) {
            // console.log(`run ${testId}`)
             //commit('setCurrentTest', testId)
-            const url = `testrun/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${state.currentTestCollectionName}/${testId}?_format=${state.useJson ? 'json' : 'xml'};_gzip=${state.useGzip};useTlsProxy=${state.useTlsProxy}`
-            const promise = ENGINE.post(url)
-            promise.then(result => {
-                const reports = result.data
-                commit('setCombinedTestReports', reports)
-            })
-            return promise
+            const url = `testrun/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${state.currentTestCollectionName}/${testId}?_format=${state.useJson ? 'json' : 'xml'};_gzip=${state.useGzip};useTlsProxy=${state.useTlsProxy};hasUserSuppliedFixture=${getters.hasUserSuppliedTestFixtureText}`
+            return ENGINE.post(url, getters.getUserSuppliedTestFixtureText).catch(e=>{
+                // console.debug('Got error 1' + e)
+                return {'error' : e}
+            }).then(result => {
+                    if ('data' in result) {
+                        // console.debug('data is in result')
+                        const reports = result.data
+                        commit('setCombinedTestReports', reports)
+                        return result
+                    } else if ('error' in result) {
+                        // console.debug('data is Not in result... is error? ' + ('error' in result))
+                        return result
+                    }
+                })
+                // return promise
         },
         async loadTestCollectionNames({commit, state}) {
             const url = 'collections'
@@ -657,6 +687,12 @@ export const testRunnerStore = {
                 if ('isServerTest' in theResponse) {
                     const isClient =  ! theResponse.isServerTest
                     commit('setIsClientTest', isClient)   // sets isClientTest
+                }
+                if ('isUserSuppliedTestFixture' in theResponse) {
+                    const isUserSuppliedTestFixture =  theResponse.isUserSuppliedTestFixture
+                    commit('setIsUserSuppliedTestFixture', isUserSuppliedTestFixture)
+                } else {
+                    commit('setIsUserSuppliedTestFixture', false)
                 }
                 if ('testDependencies' in theResponse) {
                     // NOTE: this simply overwrites existing entries, should be OK to clear the testDependencies data if needed

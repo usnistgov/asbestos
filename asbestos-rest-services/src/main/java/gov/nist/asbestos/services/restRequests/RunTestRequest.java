@@ -1,20 +1,26 @@
 package gov.nist.asbestos.services.restRequests;
 
 import gov.nist.asbestos.client.Base.EC;
-import gov.nist.asbestos.services.servlet.ChannelConnector;
+import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.client.Base.Request;
+import gov.nist.asbestos.client.channel.ChannelConfig;
 import gov.nist.asbestos.client.client.FhirClient;
 import gov.nist.asbestos.client.client.Format;
-import gov.nist.asbestos.client.channel.ChannelConfig;
+import gov.nist.asbestos.client.resolver.Ref;
+import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
+import gov.nist.asbestos.services.servlet.ChannelConnector;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.ModularEngine;
-
-import java.util.Objects;
-import java.util.logging.Logger;
+import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.r4.model.BaseResource;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.util.Objects;
+import java.util.logging.Logger;
 // 0 - empty
 // 1 - appContext
 // 2 - "engine"
@@ -29,14 +35,17 @@ public class RunTestRequest {
     private static Logger log = Logger.getLogger(RunTestRequest.class.getName());
 
     private Request request;
+    private String rawRequest;
+
 
     public static boolean isRequest(Request request) {
         return request.uriParts.size() == 7 && request.uriParts.get(3).equals("testrun");
     }
 
-    public RunTestRequest(Request request) {
+    public RunTestRequest(Request request) throws IOException {
         request.setType(this.getClass().getSimpleName());
         this.request = request;
+        this.rawRequest = IOUtils.toString(request.req.getInputStream(), Charset.defaultCharset());  // Could be xml or json, check isJson flag
     }
 
     public void run() throws URISyntaxException {
@@ -67,6 +76,11 @@ public class RunTestRequest {
                 .requestGzip(request.isGzip);
         ModularEngine modularEngine;
         modularEngine = new ModularEngine(testDir, proxy).setSaveLogs(true);
+
+        if (request.hasUserSuppliedFixture) {
+            addRequestFixture(modularEngine.getMainTestEngine().getSut(), modularEngine.getMainTestEngine().getCacheManager());
+        }
+
         modularEngine
                 .setTestSession(testSession)
                 .setChannelId(channelId)
@@ -81,10 +95,15 @@ public class RunTestRequest {
                 .runTest()
                 .getTestReport();
 
-
         String json = modularEngine.reportsAsJson();
         request.returnString(json);
         request.ok();
+    }
+
+    private void addRequestFixture(URI sut, ResourceCacheMgr resourceCacheMgr) {
+        Format format = (request.isJson) ? Format.JSON : Format.XML;
+        BaseResource resource = ParserBase.parse(rawRequest, format);
+        resourceCacheMgr.add(new Ref("urn:ftkmemory:userSuppliedTestFixture:request", sut), resource); // In memory resource cache
     }
 
     private File getPatientCacheDir(String channelId) {

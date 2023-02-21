@@ -9,6 +9,10 @@
       <div class="divider"></div>
       <div class="divider"></div>
 
+      <span v-if="$store.state.testRunner.isUserSuppliedTestFixture">
+            <textarea id="userSuppliedTestFixtureText" v-model="userSuppliedTestFixtureText" cols="80" rows="15" placeholder="Paste Resource XML or JSON here, and select the proper format option."></textarea>
+      </span>
+
       <span v-if="!$store.state.testRunner.isClientTest">
             <button :disabled="running" class="clearLogsButton" @click="doClearLogs()" title="Temporarily clear TestReports for this browser tab">&#x1f5d1; Clear Logs</button>
 <!--            <template v-if="theChannelObj.channelType === 'mhd'">-->
@@ -112,7 +116,7 @@
                                             :disabled="isWaitingForBreakpoint"
                                             @click.stop="stopDebugging(i)"
                                         class="debugTestScriptButtonNormal">&#x1F7E5; Stop</button> <!-- &#x270B; -->
-                                    <span v-if="isWaitingForBreakpoint">&nbsp;Please wait...&nbsp;&#x23F1;</span>
+                                    <span v-if="isWaitingForBreakpoint">&nbsp;&nbsp;Please wait...&nbsp;&#x23F1;</span>
                                     <!-- Display a stopwatch if waiting for breakpoint to be hit -->
                                 </template>
                             </template>
@@ -140,8 +144,8 @@ import DebugAssertionEvalModal from "./debugger/DebugAssertionEvalModal";
 import TestProgressBar from "./TestProgressBar";
 
 export default {
-  methods: {
-    load() {
+    methods: {
+      load() {
       /*
        All tests details will be collapsed when loaded.
        The following setCurrentTest to null will reset the expanded arrow indicator

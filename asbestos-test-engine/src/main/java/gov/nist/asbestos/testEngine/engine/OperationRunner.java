@@ -206,8 +206,9 @@ public class OperationRunner {
                             .setFhirClient(fhirClient)
                             .setType(type + ".transaction")
                             .setVal(val);
-            setupActionTransaction
-                    .setTestEngine(testEngine);
+            setupActionTransaction.setTestCollectionId(testCollectionId)
+                            .setTestId(testId)
+                            .setTestEngine(testEngine);
             setupActionTransaction.setVariableMgr(
                     new VariableMgr(testScript, fixtureMgr)
                             .setExternalVariables(externalVariables)

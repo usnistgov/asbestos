@@ -1,17 +1,21 @@
 package gov.nist.asbestos.client.resolver;
 
 import gov.nist.asbestos.client.client.FhirClient;
-import java.util.logging.Logger;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 /**
@@ -112,8 +116,9 @@ public class ResourceCacheMgr {
             MemoryResourceCache mcache = new MemoryResourceCache();
             mcache.add(uri, new ResourceWrapper(resource));
             caches.put(fhirbase, new CacheBundle(mcache));
+        } else {
+            cacheBundle.mem.add(uri, new ResourceWrapper(resource));
         }
-        cacheBundle.mem.add(uri, new ResourceWrapper(resource));
     }
 
     public ResourceWrapper getResource(Ref fullUrl) {

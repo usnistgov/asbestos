@@ -1129,7 +1129,7 @@ public class TestEngine  implements TestDef {
         return this;
     }
 
-    private ResourceCacheMgr getCacheManager() {
+    public ResourceCacheMgr getCacheManager() {
         return fixtureMgr.getFhirClient().getResourceCacheMgr();
     }
 

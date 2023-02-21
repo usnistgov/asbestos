@@ -54,6 +54,10 @@ public enum TestCollectionPropertiesEnum {
      *          Test Level
      *          DependsOn=TestName (current test collection scope) or TC/TestName or TC/
      */
-    TestLevelDependsOnMapKeys
+    TestLevelDependsOnMapKeys,
+    /**
+     * Allows the request fixture to be supplied as plain text by the user interface.
+     */
+    UserSuppliedTestFixture
 
     }

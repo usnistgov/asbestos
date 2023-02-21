@@ -35,6 +35,7 @@ public class Request {
     public boolean isJson = true;
     public boolean isGzip = false;
     public boolean isTlsProxy = false;
+    public boolean hasUserSuppliedFixture;
     private String query = null;
     private Map<String, String> parametersMap;
     private String type;
@@ -130,6 +131,7 @@ public class Request {
             isJson = qstring.contains("_format=json");
             isGzip = qstring.contains("_gzip=true");
             isTlsProxy = qstring.contains("useTlsProxy=true");
+            hasUserSuppliedFixture = qstring.contains("hasUserSuppliedFixture=true");
         }
     }
 
