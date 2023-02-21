@@ -56,21 +56,24 @@ export default {
             await this.$store.dispatch('runTest', testName)
                 .then(r=>
             {
-                // console.log(JSON.stringify(r))
                 if ('data' in r) {
                     this.$store.commit('setCurrentTest', testName)
-                    this.$store.commit('setRunning',false)
-                    this.endTestTime()
                     const currentRoutePath = this.$router.currentRoute.path
                     const testRoutePathToBe = `${testRoutePath}/${testName}`
                     if (currentRoutePath !== testRoutePathToBe) {
                         this.$router.push(testRoutePathToBe)
                     }
-                } else if ('error' in r) {
-                    this.$store.commit('setRunning',false)
-                    this.endTestTime()
-                    throw r.error // Vue error is displayed on top of the screen
                 }
+            })
+           .catch(e =>
+                {
+                    // this.$store.commit('setError', e)
+                    console.error(e.message)
+                }).
+            finally(()=>
+            {
+                this.$store.commit('setRunning',false)
+                this.endTestTime()
             })
         },
         async doEval(testName) {  // run single client test
@@ -78,9 +81,18 @@ export default {
             if (testName) {
                 this.$store.commit('setRunning',true)
                 this.beginTestTime()
-                await this.$store.dispatch('runEval', testName)
-                this.$store.commit('setRunning',false)
-                this.endTestTime()
+                try {
+                    await this.$store.dispatch('runEval', testName)
+                        .catch(e => {
+                            console.error('doEval error: ' + e.message)
+                        }).finally(() => {
+                            this.$store.commit('setRunning', false)
+                            this.endTestTime()
+                        })
+                } catch {
+                    this.$store.commit('setRunning', false)
+                    this.endTestTime()
+                }
             }
         },
         // run all tests in collection
@@ -91,12 +103,16 @@ export default {
             if (! this.isClient) {
                 this.doClearLogs(true)
             }
-            for (const name of this.scriptNames) {
-                if (this.isClient) { // collection is client or server
-                    await this.$store.dispatch('runEval', name)
-                } else {
-                    await this.$store.dispatch('runTest', name)
+            try {
+                for (const name of this.scriptNames) {
+                    if (this.isClient) { // collection is client or server
+                        await this.$store.dispatch('runEval', name)
+                    } else {
+                        await this.$store.dispatch('runTest', name)
+                    }
                 }
+            } catch (e) {
+               console.error('RunAll error ' + e)
             }
             this.$store.commit('setRunning',false)
             this.endTestTime()
@@ -281,18 +297,16 @@ export default {
         },
         userSuppliedTestFixtureText: {
             set(theText) {
-                this.$store.commit('setCurrentTcUserSuppliedTestFixtureText', theText)
+                const uniqueUstfKey = this.$store.getters.getUniqueUstfKey
+                this.$store.commit('setCurrentTcUserSuppliedTestFixtureText', {'theKey': uniqueUstfKey, 'theText': theText})
             },
             get() {
-                const tc = this.$store.state.testRunner.currentTestCollectionName
-                if (tc in this.$store.state.testRunner.userSuppliedTestFixtureText)
-                    return this.$store.state.testRunner.userSuppliedTestFixtureText[tc]
+                const uniqueUstfKey = this.$store.getters.getUniqueUstfKey
+                if (uniqueUstfKey in this.$store.state.testRunner.userSuppliedTestFixtureText)
+                    return this.$store.state.testRunner.userSuppliedTestFixtureText[uniqueUstfKey]
                 else
                     return ''
             }
-        },
-        fullChannelId() {
-            return `${this.sessionId}__${this.channelName}`
         },
         elapsedTestTime() {
             try {

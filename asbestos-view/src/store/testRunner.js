@@ -111,9 +111,14 @@ export const testRunnerStore = {
         setUseTlsProxy(state, value) {
             state.useTlsProxy = value
         },
-        setCurrentTcUserSuppliedTestFixtureText(state, value) {
-            if (state.currentTestCollectionName !== '' && state.currentTestCollectionName !== null && state.currentTestCollectionName !== undefined)
-                Vue.set(state.userSuppliedTestFixtureText, state.currentTestCollectionName, value)
+        setCurrentTcUserSuppliedTestFixtureText(state, valueObj) {
+            if ('theKey' in valueObj) {
+                const key = valueObj.theKey
+                if (key !== '' && key !== null && key !== undefined)
+                    Vue.set(state.userSuppliedTestFixtureText, key, valueObj.theText)
+            } else {
+                console.error('No Ustf Key supplied.');
+            }
         },
         setDebug(state, value) {
             state.debug = value
@@ -328,12 +333,11 @@ export const testRunnerStore = {
         hasUserSuppliedTestFixtureText: (state) => {
             return state.isUserSuppliedTestFixture
         },
-        getUserSuppliedTestFixtureText: (state) => {
+        getUserSuppliedTestFixtureText (state,getters)  {
             if (state.isUserSuppliedTestFixture) {
-                if (state.currentTestCollectionName !== '' && state.currentTestCollectionName !== null && state.currentTestCollectionName !== undefined) {
-                    const tc = state.currentTestCollectionName
-                    return state.userSuppliedTestFixtureText[tc]
-                }
+                const key = getters.getUniqueUstfKey
+                if (key in state.userSuppliedTestFixtureText)
+                    return state.userSuppliedTestFixtureText[key]
             }
                 return null
         },
@@ -392,7 +396,13 @@ export const testRunnerStore = {
         },
         currentTcName: (state) => {
             return state.currentTestCollectionName
-        }
+        },
+        getUniqueUstfKey(getters)  {
+            const channelId = getters.getChannelId
+            const tc = getters.currentTcName
+            return  channelId + tc
+        },
+
     },
     actions: {
         loadTestAssertions({commit}) {
@@ -456,8 +466,11 @@ export const testRunnerStore = {
                     console.debug('Response from runEval is undefined or null.')
                   }
                 })
-                .catch(function (error) {
-                    commit('setError', 'runEval Error: ' + LOG.baseURL + url + ': ' + error)
+                .catch(e => {
+                    const errorMessage = 'runEval Error: ' + LOG.baseURL + url + ': ' + e.message
+                    commit('setError', errorMessage)
+                    console.error(errorMessage)
+                    throw e
                 })
         },
         runSingleEventEval({commit, rootState}, parms) {
@@ -626,21 +639,29 @@ export const testRunnerStore = {
         runTest({commit, rootState, state, getters}, testId) {
            // console.log(`run ${testId}`)
             //commit('setCurrentTest', testId)
-            const url = `testrun/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${state.currentTestCollectionName}/${testId}?_format=${state.useJson ? 'json' : 'xml'};_gzip=${state.useGzip};useTlsProxy=${state.useTlsProxy};hasUserSuppliedFixture=${getters.hasUserSuppliedTestFixtureText}`
-            return ENGINE.post(url, getters.getUserSuppliedTestFixtureText).catch(e=>{
-                // console.debug('Got error 1' + e)
-                return {'error' : e}
-            }).then(result => {
+            try {
+                const url = `testrun/${rootState.base.channel.testSession}__${rootState.base.channel.channelName}/${state.currentTestCollectionName}/${testId}?_format=${state.useJson ? 'json' : 'xml'};_gzip=${state.useGzip};useTlsProxy=${state.useTlsProxy};hasUserSuppliedFixture=${getters.hasUserSuppliedTestFixtureText}`
+                return ENGINE.post(url, getters.getUserSuppliedTestFixtureText).catch(e => {
+                    // return {'error' : e}
+                    commit('setError', 'Check server log. ' + e.message)
+                    throw e
+                }).then(result => {
                     if ('data' in result) {
                         // console.debug('data is in result')
                         const reports = result.data
                         commit('setCombinedTestReports', reports)
-                        return result
-                    } else if ('error' in result) {
+                        // return result
+                    } /*else if ('error' in result) {
                         // console.debug('data is Not in result... is error? ' + ('error' in result))
                         return result
-                    }
+                    }*/
                 })
+            } catch (e) {
+                return new Promise((resolve, reject) => {
+                    commit('setError', 'runTest Error: ' + e.message)
+                    reject(e)
+                })
+            }
                 // return promise
         },
         async loadTestCollectionNames({commit, state}) {
@@ -658,7 +679,7 @@ export const testRunnerStore = {
                 })
 
             } catch (error) {
-                this.$store.commit('setError', url + ': ' +  error)
+                commit('setError', url + ': ' +  error)
             }
         },
         async loadCurrentTestCollection({commit, state}) {
