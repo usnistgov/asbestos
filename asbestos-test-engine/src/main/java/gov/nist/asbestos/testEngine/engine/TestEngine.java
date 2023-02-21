@@ -708,10 +708,13 @@ public class TestEngine  implements TestDef {
                             getDebugger().pauseIfBreakpoint("setup", 0, actionIndex, hasImportModifierExtension(action.getOperation()));
                         doOperation(new ActionReference(testScript, action), typePrefix, action.getOperation(), actionReportComponent.getOperation(), isFollowedByAssert);
                         TestReport.SetupActionOperationComponent opReport = actionReportComponent.getOperation();
-                        if (opReport.getResult() == TestReport.TestReportActionResult.ERROR) {
+                        if (TestReport.TestReportActionResult.ERROR.equals(opReport.getResult())) {
                             testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
                             testReport.setResult(TestReport.TestReportResult.FAIL);
                             return;
+                        } else if (TestReport.TestReportActionResult.PASS.equals(opReport.getResult())) {
+                            testReport.setStatus(TestReport.TestReportStatus.COMPLETED);
+                            testReport.setResult(TestReport.TestReportResult.PASS);
                         }
                     }
                     if (action.hasAssert()) {
@@ -833,7 +836,7 @@ public class TestEngine  implements TestDef {
                     // if noErrors extension present and script has already hit an error then bail out
                     // and don't run actions in this test
                     if (getExtension(test.getModifierExtension(), ExtensionDef.noErrors) != null) {
-                        if (!getTestReport().getResult().equals(TestReport.TestReportResult.PASS))
+                        if (! TestReport.TestReportResult.PASS.equals(getTestReport().getResult()))
                             return;
                     }
 
@@ -888,8 +891,8 @@ public class TestEngine  implements TestDef {
                 String msg = t.getMessage();
                 if (msg == null || msg.equals("")) {
                     msg = "TestEngine#doTest Error: Check server log for details.";
-                    log.log(Level.SEVERE, msg, t);
                 }
+                log.log(Level.SEVERE, msg, t);
                 reportParsingError(testReport.addTest(), msg);
             }
 
