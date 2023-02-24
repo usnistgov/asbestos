@@ -304,9 +304,9 @@ public class TestEngine  implements TestDef {
     }
 
     private void doWorkflow() {
-        initWorkflow();
 
         try {
+            initWorkflow();
             doPreProcessing();
             if (errorOut()) return;
             doLoadVariables();
@@ -326,8 +326,8 @@ public class TestEngine  implements TestDef {
                 String msg = ex.getMessage();
                 if (msg == null || msg.equals("")) {
                     msg = "TestEngine#doWorkflow Error: Check server log for details.";
-                    log.log(Level.SEVERE, msg, ex);
                 }
+                log.log(Level.SEVERE, msg, ex);
         } finally {
             doAutoDeletes();
             doPostProcessing();
@@ -428,30 +428,62 @@ public class TestEngine  implements TestDef {
     }
 
     private void initWorkflow() {
-        if (testScript == null)
-            testScript = loadTestScript(testDef, testScriptName);
-        String path = testScript.getName();
-        String name = "";
-        if (path.contains(File.separator)) {
-            String[] parts = path.split(Pattern.quote(File.separator));
-            name = parts[parts.length - 2];  // testId
-        } else
-            name = path;
-        testReport.setName(name);
-        String def;
-        if (testScriptName == null) {
-            File file;
-            file = new File(testDef, "TestScript.xml");
-            if (file.exists()) {
-                def = file.toString();
+        if (testScript == null) {
+            if (this.modularEngine == null) {
+                testScript = loadTestScript(testDef, testScriptName);
+                String path = testScript.getName();
+                String name = "";
+                if (path.contains(File.separator)) {
+                    String[] parts = path.split(Pattern.quote(File.separator));
+                    name = parts[parts.length - 2];  // testId
+                } else
+                    name = path;
+                testReport.setName(name);
+                String def;
+                if (testScriptName == null) {
+                    File file;
+                    file = new File(testDef, "TestScript.xml");
+                    if (file.exists()) {
+                        def = file.toString();
+                    } else {
+                        def = new File(testDef, "TestScript.json").toString();
+                    }
+                } else {
+                    def = new File(testDef, testScriptName).toString();
+                }
+
+                testReport.setTestScript(new Reference(def));
             } else {
-                def = new File(testDef, "TestScript.json").toString();
+                ModularScripts modularScripts =  modularEngine.getModularScripts();
+                if (modularScripts != null) {
+                    File testScriptFile = findTestScriptFile(testDef, testScriptName);
+                    String testScriptId = null;
+                    String componentPart = null;
+                    if (testScriptName == null) {
+                        testScriptId = testDef.getName();
+                    } else {
+                        componentPart = this.modularEngine.stripExtension(testScriptName);
+                        testScriptId = testId + "/" + componentPart;
+                    }
+                    testReport.setName(testScriptId);
+                    testReport.setTestScript(new Reference(testScriptFile.toString()));
+                    testScript = modularScripts.getTestScriptMap().get(testScriptId);
+                    if (testScript != null) {
+                        testScript.setId(testScriptId.contains("/") ? componentPart : testScriptId);
+                        testScript.setName(testScriptId);
+                    } else {
+                        String errorMsg = "Null testScriptObj for testDef: " + testDef + " testScriptName: " + testScriptName;
+                        log.severe(errorMsg);
+                        throw new RuntimeException(errorMsg);
+                    }
+                } else {
+                    String errorMsg = "Null modularScript";
+                    log.severe(errorMsg);
+                    throw new RuntimeException(errorMsg);
+                }
             }
-        } else {
-            def = new File(testDef, testScriptName).toString();
         }
 
-        testReport.setTestScript(new Reference(def));
         testReport.setIssued(new Date());
         TestReport.TestReportParticipantComponent part = testReport.addParticipant();
         part.setType(TestReport.TestReportParticipantType.SERVER);
@@ -908,11 +940,20 @@ public class TestEngine  implements TestDef {
             Validate and align request input fixtures and variables
          */
         final Properties propertiesMap = getEC().getTestCollectionProperties(getTestCollection());
-        ComponentReference componentReference = new ComponentReference(propertiesMap, testScript.getVariable(),  testDef, Collections.singletonList(extension));
+        ComponentReference componentReference = new ComponentReference( propertiesMap, testScript.getVariable(),  testDef, Collections.singletonList(extension));
 
-        TestScript module = componentReference.getComponent();
-        // fill in componentReference with local names from module definition
-        new ComponentDefinition(getTestScriptFile(), module).loadTranslation(componentReference);
+        String theModuleKey = this.testId + "/" + MultiUseScriptId.getComponentPart(componentReference.getComponentRef().toString());
+        if (this.modularEngine.getModularScripts().getTestScriptMap().containsKey(theModuleKey)) {
+            TestScript componentTestScript = this.modularEngine.getModularScripts().getTestScriptMap().get(theModuleKey);
+//            String componentXml = this.modularEngine.getModularScripts().getTestScriptMap().get(theModuleKey);
+//            TestScript module = (TestScript) ParserBase.parse(componentXml, Format.XML);
+            // fill in componentReference with local names from module definition
+            new ComponentDefinition(getTestScriptFile(), componentTestScript).loadTranslation(componentReference);
+        } else {
+            String errorMessage = String.format("theModuleKey %s does not exist", theModuleKey);
+            log.severe(errorMessage);
+            throw new RuntimeException(errorMessage);
+        }
 
         // align fixtures for module
         Map<String, FixtureComponent> inFixturesForComponent = new HashMap<>();
@@ -1045,7 +1086,7 @@ public class TestEngine  implements TestDef {
         modularEngine.add(testEngine1);
         testEngine1.parent = this;
         String moduleName = simpleName(componentReference.getComponentRef());
-        String moduleId = modularEngine.getMultiUseScriptId(moduleName, (multiUseTestScriptName != null) ? simpleName(new File(multiUseTestScriptName)) : moduleName);
+        String moduleId = moduleName; // testScript.getId(); // modularEngine.getMultiUseScriptId(moduleName, (multiUseTestScriptName != null) ? simpleName(new File(multiUseTestScriptName)) : moduleName);
         moduleIds.add(moduleId);
         opReport.addModifierExtension(new Extension(ExtensionDef.moduleId, new StringType(moduleId)));
         opReport.addModifierExtension(new Extension(ExtensionDef.moduleName, new StringType(moduleName)));
@@ -1526,29 +1567,40 @@ public class TestEngine  implements TestDef {
     }
 
     public static TestScript loadTestScript(File testDefDir) {
-        return loadTestScript(testDefDir, null);
+            return loadTestScript(testDefDir, null);
     }
 
-    public static TestScript loadTestScript(File testDefDir, String fileName)  {
+    public static TestScript loadTestScript(File testDefDir, String fileName) {
         Objects.requireNonNull(testDefDir);
-        File location;
-        if (fileName == null)
-            location = findTestScriptFile(testDefDir);
-        else
-            location = new File(testDefDir, fileName);
-        InputStream is;
+        File location = findTestScriptFile(testDefDir, fileName);
+        InputStream is = null;
         try {
             is = new FileInputStream(location);
+            IParser parser = (location.toString().endsWith("xml") ? ParserBase.getFhirContext().newXmlParser() : ParserBase.getFhirContext().newJsonParser());
+            IBaseResource resource = parser.parseResource(is);
+            assert resource instanceof TestScript;
+            TestScript testScript = (TestScript) resource;
+            testScript.setName(location.toString());
+
+            return testScript;
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                if (is != null)
+                    is.close();
+            } catch (IOException e) {
+                // oops
+                log.severe("TestScript file close error: " + location);
+            }
         }
-        IParser parser = (location.toString().endsWith("xml") ? ParserBase.getFhirContext().newXmlParser() : ParserBase.getFhirContext().newJsonParser());
-        IBaseResource resource = parser.parseResource(is);
-        assert resource instanceof TestScript;
-        TestScript testScript = (TestScript) resource;
-        testScript.setName(location.toString());
+    }
 
-        return testScript;
+    private static File findTestScriptFile(File testDefDir, String fileName) {
+        if (fileName == null)
+            return findTestScriptFile(testDefDir);
+        else
+            return new File(testDefDir, fileName);
     }
 
     public static File findTestScriptFile(File testDefDir) {
@@ -1872,12 +1924,13 @@ public class TestEngine  implements TestDef {
                     if (errorReport == null) {
                         if (fixtureComponent == null)
                             throw new RuntimeException("updateParentFixtureOut: Script import - " + this.getTestDef() /*componentReference.getComponentRef()*/ + " did not produce out Fixture " + innerName);
-                        if (this.parent.fixtureMgr.containsKey(outerName)) {
-                            log.warning("updateParentFixtureOut: TestEngine parent already has outName in map: " + outerName);
+                        if (this.parent.fixtureMgr.containsKey(outerName) && this.parent.fixtureMgr.get(outerName).getId() != null && this.parent.fixtureMgr.get(outerName).getId().equals(fixtureComponent.getId())) {
+                            log.info("updateParentFixtureOut: TestEngine parent already has outName in map: " + outerName);
+                        } else {
+                            this.parent.fixtureMgr.put(outerName, fixtureComponent);
                         }
-                        this.parent.fixtureMgr.put(outerName, fixtureComponent);
                     } else {
-                        log.severe("updateParentFixtureOut: errorReport is not null: " + this.testDef);
+                        log.severe("updateParentFixtureOut: errorReport is not Null: TestDef: " + this.testDef + ", TestScript: " + this.getTestScriptFile());
                     }
                 }
 //            } else {

@@ -3,7 +3,6 @@ package gov.nist.asbestos.testEngine.engine.translator;
 import gov.nist.asbestos.client.Base.ParserBase;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.TestScript;
-import org.jaxen.util.SingletonList;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -60,9 +59,9 @@ public class ScriptTranslator {
         List<ComponentReference> rawRefs = new ArrayList<>();
         for (Extension e : test.getModifierExtension()) {
             if (e.getUrl().equals("urn:import")) {
-                ComponentReference ref = new ComponentReference(propertiesMap, script.getVariable(), testDef, new SingletonList(e));
-                ref.loadComponentHeader();
-                rawRefs.add(ref);
+//                ComponentReference ref = new ComponentReference(propertiesMap, script.getVariable(), testDef, new SingletonList(e));
+//                ref.loadComponentHeader();
+//                rawRefs.add(ref);
             }
         }
         return new ComponentReferences(rawRefs);
@@ -72,9 +71,9 @@ public class ScriptTranslator {
         List<ComponentReference> rawRefs = new ArrayList<>();
         for (Extension e : setup.getModifierExtension()) {
             if (e.getUrl().equals("urn:import")) {
-                ComponentReference ref = new ComponentReference(propertiesMap, script.getVariable(),  testDef, new SingletonList(e));
-                ref.loadComponentHeader();
-                rawRefs.add(ref);
+//                ComponentReference ref = new ComponentReference(propertiesMap, script.getVariable(),  testDef, new SingletonList(e));
+//                ref.loadComponentHeader();
+//                rawRefs.add(ref);
             }
         }
         return new ComponentReferences(rawRefs);
@@ -83,22 +82,22 @@ public class ScriptTranslator {
     // all references contain one or more Test elements
     private boolean validate(ComponentReferences refs) {
         for (ComponentReference ref : refs.getReferences()) {
-            TestScript component = ref.getComponent();
+//            TestScript component = ref.getComponent();
 //            if (component.getTest().size() == 0) {
 //                error("No tests defined in component " + ref.getRelativePath());
 //            }
-            if (component.hasFixture()) {
-                error("Fixtures not allowed in component: " + ref.getRelativePath());
-            }
+//            if (component.hasFixture()) {
+//                error("Fixtures not allowed in component: " + ref.getRelativePath());
+//            }
 //            if (component.hasSetup()) {
 //                error("Setup not allowed in component: " + ref.getRelativePath());
 //            }
-            if (component.hasTeardown()) {
-                error("Teardown not allowed in component: " + ref.getRelativePath());
-            }
-            if (component.hasVariable()) {
-                error("Variable not allowed in component: " + ref.getRelativePath());
-            }
+//            if (component.hasTeardown()) {
+//                error("Teardown not allowed in component: " + ref.getRelativePath());
+//            }
+//            if (component.hasVariable()) {
+//                error("Variable not allowed in component: " + ref.getRelativePath());
+//            }
         }
         return errors.isEmpty();
     }
@@ -113,13 +112,13 @@ public class ScriptTranslator {
         // responseId from parameter-out
 
         for (ComponentReference ref : refs.getReferences()) {
-            TestScript component = ref.getComponent();
-            for (TestScript.TestScriptTestComponent componentTest : component.getTest()) {
-                List<TestScript.TestActionComponent> actions = updateTestComponent(componentTest, ref);
-                for (TestScript.TestActionComponent action : actions) {
-                    scriptTest.addAction(action);
-                }
-            }
+//            TestScript component = ref.getComponent();
+//            for (TestScript.TestScriptTestComponent componentTest : component.getTest()) {
+//                List<TestScript.TestActionComponent> actions = updateTestComponent(componentTest, ref);
+//                for (TestScript.TestActionComponent action : actions) {
+//                    scriptTest.addAction(action);
+//                }
+//            }
         }
     }
 
@@ -129,12 +128,12 @@ public class ScriptTranslator {
         // responseId from parameter-out
 
         for (ComponentReference ref : refs.getReferences()) {
-            TestScript component = ref.getComponent();
-            TestScript.TestScriptSetupComponent componentSetup = component.getSetup();
-            List<TestScript.SetupActionComponent> actions = updateSetupComponent(componentSetup, ref);
-            for (TestScript.SetupActionComponent action : actions) {
-                scriptSetup.addAction(action);
-            }
+//            TestScript component = ref.getComponent();
+//            TestScript.TestScriptSetupComponent componentSetup = component.getSetup();
+//            List<TestScript.SetupActionComponent> actions = updateSetupComponent(componentSetup, ref);
+//            for (TestScript.SetupActionComponent action : actions) {
+//                scriptSetup.addAction(action);
+//            }
         }
 
     }

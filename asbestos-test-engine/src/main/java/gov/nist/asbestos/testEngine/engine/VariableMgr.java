@@ -132,7 +132,7 @@ public class VariableMgr {
             if (unresolvedVariable == null) {
                 return reference;
             } else {
-                reporter.reportError("ASBTS variable " + unresolvedVariable.name + " cannot be resolved");
+                reporter.reportError("ASBTS variable " + unresolvedVariable.name + " cannot be resolved.");
             }
             //throw new Error("variable " + var.name + " cannot be resolved");
         }

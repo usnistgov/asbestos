@@ -130,14 +130,14 @@ abstract class GenericSetupAction {
     public BaseResource updateResourceToSend(FixtureComponent toSend) {
         ResourceWrapper wrapper = toSend.getResourceWrapper();
         if (wrapper == null) {
-            reporter.reportError("Update to Fixture " + toSend.getId() + " - contains no resource");
+            reporter.reportError("Update to Fixture " + toSend.getId() + " - contains no resource.");
             return null;
         }
         BaseResource resource = wrapper.getResource();
         String resourceString = ParserBase.encode(resource, Format.JSON);
         String updatedResourceString = variableMgr.updateReference(resourceString);
         if (updatedResourceString == null) {
-            reporter.reportError("Update to Fixture " + toSend.getId() + " failed");
+            reporter.reportError("Update to Fixture " + toSend.getId() + " failed.");
             return resource;
         }
         resource = ParserBase.parse(updatedResourceString, Format.JSON);

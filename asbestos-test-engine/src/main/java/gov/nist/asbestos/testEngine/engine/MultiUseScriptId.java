@@ -1,5 +1,7 @@
 package gov.nist.asbestos.testEngine.engine;
 
+import java.util.regex.Pattern;
+
 public class MultiUseScriptId {
     private String sourceScriptId;
     private String newScriptId;
@@ -27,9 +29,13 @@ public class MultiUseScriptId {
     }
 
     public static String getComponentPart(String s) {
-        if (s.indexOf("/") > -1)
-            return s.split("/")[1];
-        else
+        String[] delimiters =  {"/","\\"};
+        for (String d : delimiters) {
+            if (s.indexOf(d) > -1) {
+                String arr[] = s.split(Pattern.quote(d));
+                return arr[arr.length - 1].replace(".xml", "");
+            }
+        }
             return s;
     }
 }

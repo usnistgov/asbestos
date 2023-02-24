@@ -1,6 +1,5 @@
 package gov.nist.asbestos.testEngine.engine.translator;
 
-import gov.nist.asbestos.client.Base.ParserBase;
 import gov.nist.asbestos.testEngine.engine.ExtensionDef;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.TestScript;
@@ -62,8 +61,11 @@ public class ComponentReference {
         if (this.relativePath == null)
             throw new RuntimeException("Import does not declare a component reference");
         this.componentRef = new File(testDef, relativePath);
+        /*
         if (!this.componentRef.exists())
             throw new RuntimeException("Modular TestScript error: Component reference " + this.componentRef + " does not exist");
+
+         */
     }
 
     @Override
@@ -87,12 +89,15 @@ public class ComponentReference {
         return variablesOut;
     }
 
+    /*
     public TestScript getComponent() {
         if (component == null) {
             component = (TestScript) ParserBase.parse(componentRef);
         }
         return component;
     }
+
+     */
 
     public File getComponentRef() {
         return componentRef;
@@ -102,10 +107,10 @@ public class ComponentReference {
         return relativePath;
     }
 
-    public void loadComponentHeader() {
+    public void loadComponentHeader(TestScript componentTestScript) {
         int inI = 0;
         int outI = 0;
-        Extension paramsExtension = getComponent().getExtensionByUrl(ExtensionDef.componentParameters);
+        Extension paramsExtension = componentTestScript.getExtensionByUrl(ExtensionDef.componentParameters);
         for (Extension e : paramsExtension.getExtension()) {
             String url = e.getUrl();
             String value = e.getValue().toString();

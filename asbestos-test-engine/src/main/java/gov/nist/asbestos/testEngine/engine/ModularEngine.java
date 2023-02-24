@@ -161,7 +161,7 @@ public class ModularEngine {
         }
     }
 
-    private String stripExtension(String name) {
+    String stripExtension(String name) {
         if (name == null) return null;
         int i = name.lastIndexOf(".");
         if (i == -1) return name;
@@ -249,23 +249,15 @@ public class ModularEngine {
     public ModularEngine setModularScripts() {
         try {
             if (modularScripts == null)
-                modularScripts = new ModularScripts(new EC(getMainTestEngine().getExternalCache()), getMainTestEngine().getTestCollectionId(), getMainTestEngine().getTestDef());
+                modularScripts = new ModularScripts(new EC(getMainTestEngine().getExternalCache()), getMainTestEngine().getTestCollectionId(), getMainTestEngine().getTestDef(), ModularScriptRunMode.BACK_END_TEST_RUNNER);
         } catch (Exception ex) {
             log.log(Level.SEVERE, "setModularScripts Exception: " + ex.toString(), ex);
         }
         return this;
     }
 
-    public String getMultiUseScriptId(String moduleName , String simpleName) {
-        if (modularScripts != null) {
-            // Try multiple-use module import scriptId by same parent TestScript
-            String scriptId = modularScripts.getMultiUseScriptId(moduleName);
-            if (moduleName.equals(scriptId)) {
-                // Try multiple-use scriptId import by different sources TestScript
-                return modularScripts.getMultiUseScriptIdByParent(moduleName, simpleName);
-            }
-            return scriptId;
-        }
-        return moduleName;
+
+    ModularScripts getModularScripts() {
+        return modularScripts;
     }
 }

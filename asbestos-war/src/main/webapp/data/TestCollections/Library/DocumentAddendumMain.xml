@@ -78,7 +78,7 @@
                         <valueString value="'ftkLoadFixture'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="getAddendumFixtureParams"/>
+                        <valueString value="getOriginalFixtureParams"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="expectedFixtureBundleEntryCount"/>

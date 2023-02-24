@@ -9,6 +9,7 @@ package gov.nist.asbestos.services.restRequests;
 // returns a TestScript
 
 import gov.nist.asbestos.client.Base.Request;
+import gov.nist.asbestos.testEngine.engine.ModularScriptRunMode;
 import gov.nist.asbestos.testEngine.engine.ModularScripts;
 
 import java.io.File;
@@ -40,7 +41,7 @@ public class GetTestScriptRequest {
         }
 
         try {
-            ModularScripts modularScripts = new ModularScripts(request.ec, collectionName, testDef);
+            ModularScripts modularScripts = new ModularScripts(request.ec, collectionName, testDef, ModularScriptRunMode.FRONT_END_TESTSCRIPT_DISPLAY);
             String json = modularScripts.asJson();
             request.returnString(json);
             request.ok();
