@@ -1,0 +1,67 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString  value="dummy"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString  value="ssListUsualIdentifier"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="ssListStatus"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="patientIdentifierSearchParamValue"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="docRespBaseAddress"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="expectSsListTotal"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="docRespBaseAddressIsAbsolute"/>
+        </extension>
+    </modifierExtension>
+
+
+    <id value="SearchSsList"/>
+    <name value="SearchSsList"/>
+    <description value="Document Responder."/>
+
+
+    <test>
+        <description value="Call main module."/>
+        <action>
+            <operation>
+                <description value="call arguments."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../MHDv4SearchSsList.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="dummy"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString  value="ssListUsualIdentifier"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="ssListStatus"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientIdentifierSearchParamValue"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="expectSsListTotal"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddressIsAbsolute"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+
+</TestScript>

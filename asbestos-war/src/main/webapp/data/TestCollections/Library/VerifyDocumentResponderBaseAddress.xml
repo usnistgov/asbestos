@@ -6,6 +6,9 @@
         <extension url="urn:variable-out">
             <valueString value="docRespBaseAddress"/>
         </extension>
+        <extension url="urn:variable-out">
+            <valueString value="docRespBaseAddressIsAbsolute"/>
+        </extension>
     </modifierExtension>
 
     <!-- this module expects the PDB to contain a DocumentReference at index position 0. See: docRefLocation variable. -->
@@ -13,7 +16,7 @@
     <url value=""/>
     <name value="VerifyDocRespBaseAddress"/>
     <status value="active"/>
-    <description value="Verify Document Responder base address."/>
+    <description value="Determine Document Responder base address."/>
 
     <variable>
         <name value="docRefLocation"/>
@@ -30,16 +33,20 @@
     </variable>
     <variable>
         <name value="docRespBaseAddress"/>
-        <defaultValue value="'${docRefLocation}'.substring(0,${indexOfdocRefInLocation})"/>
+        <defaultValue value="iif(${indexOfdocRefInLocation} > -1, '${docRefLocation}'.substring(0,${indexOfdocRefInLocation}), '')"/>
     </variable>
+    <variable>
+        <name value="docRespBaseAddressIsAbsolute"/>
+        <defaultValue value="${docRespBaseAddress}.length() > 1"/>
+        <!-- BEGIN TEST -->
+<!--    <defaultValue value="false"/>-->
+        <!-- END TEST -->
+    </variable>
+
     <!--
     When variables are referenced inside another variable, remember that only the fully interpolated variable will have to be evaluated by FHIRClient's evalForString against a resource. This is the final variable which composes all other variables, the final variable will be evaluated (all other variables are just substitutions into the final variable.)
     Care needs to be taken when coding up a FHIRPath this way.
     -->
-    <variable>
-        <name value="docRespBaseAddressDocRef"/>
-        <defaultValue value="${docRespBaseAddress}+'/'+'${docRefResourceName}'"/>
-    </variable>
 
     <test>
         <description value="Verify Document Responder base address is present in the PDB Bundle response."/>
@@ -49,27 +56,6 @@
                 <expression value="'${docRefLocation}'.length() > 0"/>
                 <operator value="equals"/>
                 <value value="true" />
-                <sourceId value="pdb-response"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="Verify resource location value has an indexOf 'DocumentReference' is greater than -1."/>
-                <expression value="${indexOfdocRefInLocation}"/>
-                <operator value="greaterThan"/>
-                <value value="-1" />
-                <sourceId value="pdb-response"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="Verify Document Responder base address length is greater than zero."/>
-                <expression value="${docRespBaseAddress}.length()"/>
-                <operator value="greaterThan"/>
-                <value value="0" />
-                <sourceId value="pdb-response"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

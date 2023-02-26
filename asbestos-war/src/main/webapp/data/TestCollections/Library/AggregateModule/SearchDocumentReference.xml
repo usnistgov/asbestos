@@ -1,0 +1,68 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString  value="dummy"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString  value="referenceMasterIdentifier"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="pdbReferenceStatus"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="patientIdentifierSearchParamValue"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="docRespBaseAddress"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="expectedDocRefCount"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="docRespBaseAddressIsAbsolute"/>
+        </extension>
+    </modifierExtension>
+
+
+
+    <id value="SearchDocumentReference"/>
+    <name value="SearchDr"/>
+    <description value="Serach Document Reference."/>
+
+
+    <test>
+        <description value="Call search document reference main module."/>
+        <action>
+            <operation>
+                <description value="Previous test action operation is analyzed using assertions."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../SDR_SearchResponse.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="dummy"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString  value="referenceMasterIdentifier"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="pdbReferenceStatus"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="patientIdentifierSearchParamValue"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddress"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="expectedDocRefCount"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddressIsAbsolute"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+
+</TestScript>

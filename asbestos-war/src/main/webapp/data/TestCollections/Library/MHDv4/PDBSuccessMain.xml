@@ -211,7 +211,7 @@
     </test>
     <test>
         <modifierExtension url="urn:noErrors"/>
-        <description value="DocumentResponder base address exists."/>
+        <description value="Determine DocumentResponder base address."/>
         <action>
             <operation>
                 <description value="Extract the base address from the PDB response location."/>
@@ -225,6 +225,9 @@
                     <extension url="urn:variable-out">
                         <valueString value="docRespBaseAddress"/>
                     </extension>
+                    <extension url="urn:variable-out">
+                        <valueString value="docRespBaseAddressIsAbsolute"/>
+                    </extension>
                 </modifierExtension>
             </operation>
         </action>
@@ -237,7 +240,10 @@
                 <description value="Module call: Verify updates to server."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../MHDv4SearchSsList.xml"/>
+                        <valueString value="../AggregateModule/SearchSsList.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-response"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="ssListUsualIdentifier"/>
@@ -254,6 +260,9 @@
                     <extension url="urn:variable-in">
                         <valueString value="expectedSsListCount"/>
                     </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddressIsAbsolute"/>
+                    </extension>
                 </modifierExtension>
             </operation>
         </action>
@@ -265,7 +274,10 @@
                 <description value="Module call: Verify updates to server."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../SDR_SearchResponse.xml"/>
+                        <valueString value="../AggregateModule/SearchDocumentReference.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-response"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="referenceMasterIdentifier"/>
@@ -281,6 +293,9 @@
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="expectedDocRefCount"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddressIsAbsolute"/>
                     </extension>
                 </modifierExtension>
             </operation>

@@ -1,5 +1,8 @@
 <TestScript xmlns="http://hl7.org/fhir">
     <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString  value="dummy"/>
+        </extension>
         <extension url="urn:variable-in">
             <valueString  value="referenceMasterIdentifier"/>
         </extension>
@@ -15,15 +18,28 @@
         <extension url="urn:variable-in">
             <valueString value="expectedDocRefCount"/>
         </extension>
+        <extension url="urn:variable-in">
+            <valueString value="docRespBaseAddressIsAbsolute"/>
+        </extension>
     </modifierExtension>
 
     <id value="SearchDocRefResponse"/>
     <name value="SearchDocRefResponse"/>
-    <description value="Search response."/>
-
+    <description value="Search operation."/>
 
     <test>
-        <description value="Test persistence to Document Responder."/>
+        <description value="Based on absolute base address."/>
+    <action>
+        <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+        <assert>
+            <description value="Document Responder uses an absolute location."/>
+            <expression value="${docRespBaseAddressIsAbsolute}"/>
+            <operator value="equals"/>
+            <value value="true" />
+            <sourceId value="dummy"/>
+            <warningOnly value="false"/>
+        </assert>
+    </action>
         <action>
             <operation>
                 <description value="for DocumentReference."/>
@@ -35,6 +51,40 @@
                 <responseId value="reference-search"/>
             </operation>
         </action>
+    </test>
+
+    <test>
+        <description value="Based on relative base address."/>
+    <action>
+        <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+        <assert>
+            <description value="Document Responder uses an relative location."/>
+            <expression value="${docRespBaseAddressIsAbsolute}"/>
+            <operator value="equals"/>
+            <value value="false" />
+            <sourceId value="dummy"/>
+            <warningOnly value="false"/>
+        </assert>
+    </action>
+
+        <action>
+            <operation>
+                <description value="search for DocumentReference."/>
+                <type>
+                    <code value="search"/>
+                </type>
+                <resource value="DocumentReference"> </resource>
+                <contentType value="json"> </contentType>
+                <params value="?identifier=${referenceMasterIdentifier}&amp;status=${pdbReferenceStatus}&amp;patient.identifier=${patientIdentifierSearchParamValue}"> </params>
+                <responseId value="reference-search"/>
+            </operation>
+        </action>
+
+    </test>
+
+
+    <test>
+        <description value="Test persistence to Document Responder."/>
         <action>
             <assert id="SDR_1">
                 <description value="Returns 200."/>

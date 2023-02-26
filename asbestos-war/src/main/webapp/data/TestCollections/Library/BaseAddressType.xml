@@ -1,0 +1,58 @@
+<TestScript  xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString value="dummy"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="docRespBaseAddress"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="isAbsolute"/>
+        </extension>
+    </modifierExtension>
+
+    <url value=""/>
+    <name value="BaseAddressType"/>
+    <status value="active"/>
+    <description value="Currently not used. Debug display script for Document Responder base address type since variable-out are not yet displayed in TestReport."/>
+
+
+    <test>
+        <description value="Absolute base address."/>
+        <action>
+            <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+            <assert>
+                <description value="absolute location, verify Document Responder base address length is greater than 1."/>
+                <expression value="${isAbsolute}"/>
+                <operator value="equals"/>
+                <value value="true" />
+                <sourceId value="dummy"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+    <test>
+        <description value="Relative base address."/>
+        <action>
+            <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+            <assert>
+                <description value="relative location in PDB response, Document Responder uses the same base address as the Document Recipient."/>
+                <expression value="${isAbsolute}"/>
+                <operator value="equals"/>
+                <value value="false" />
+                <sourceId value="dummy"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <description value="Check base address length."/>
+                <expression value="'${docRespBaseAddress}'.length()"/>
+                <operator value="equals"/>
+                <value value="0" />
+                <sourceId value="dummy"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>
