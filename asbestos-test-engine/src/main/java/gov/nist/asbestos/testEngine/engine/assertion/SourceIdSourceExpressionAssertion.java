@@ -10,8 +10,10 @@ import org.hl7.fhir.r4.model.BaseResource;
 public class SourceIdSourceExpressionAssertion {
 
     public static boolean run(AssertionContext ctx) {
-        if (ctx.getCompareToFixtureLabels() == null)
+        if (ctx.getCompareToFixtureLabels() == null) {
+            Reporter.reportError(ctx, "SourceIdSourceExpressionAssertion Error: Null fixture.");
             return false;
+        }
         FixtureComponent sourceFixture = ctx.getCompareToSource();
         FixtureLabels fixtureLabels = ctx.getCompareToFixtureLabels();
         BaseResource sourceResource = sourceFixture.getResourceResource();

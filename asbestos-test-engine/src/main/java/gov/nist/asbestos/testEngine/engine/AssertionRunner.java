@@ -252,7 +252,7 @@ public class AssertionRunner implements AssertionContext {
             // add context to report
             testEngine.reportAssertion(new Reporter(val, assertReport, "", ""), as, source);
         }
-        Reporter.reportError(this, "No assertion.");
+        Reporter.reportError(this, "No assertion or missing assertion fixture dependency (a fixture is required to evaluate an assertion).");
         return false;
     }
 

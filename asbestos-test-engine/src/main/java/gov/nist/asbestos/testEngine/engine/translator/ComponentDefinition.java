@@ -63,7 +63,7 @@ public class ComponentDefinition {
         if (fixturesIn.size() !=  componentReference.getFixturesIn().size())
             throw new RuntimeException("Calling module " + testScriptFile +
                     " - call has " + componentReference.getFixturesIn().size() +
-                    " inbound parameters but module definition declares " +
+                    " inbound fixture parameters but module definition declares " +
                     fixturesIn.size());
 
         for (int i = 0; i< fixturesIn.size(); i++) {
@@ -87,7 +87,7 @@ public class ComponentDefinition {
         if (fixturesOut.size() !=  componentReference.getFixturesOut().size())
             throw new RuntimeException("Calling module " + testScriptFile +
                     " - call has " + componentReference.getFixturesOut().size() +
-                    " outbound parameters but module definition declares " +
+                    " outbound fixture parameters but module definition declares " +
                     fixturesOut.size());
 
         for (int i = 0; i< fixturesOut.size(); i++) {
