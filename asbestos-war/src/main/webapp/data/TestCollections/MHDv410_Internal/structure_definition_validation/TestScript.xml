@@ -45,6 +45,10 @@
         <defaultValue value="Bundle"/>
     </variable>
     <variable>
+        <name value="responseResourceType"/>
+        <defaultValue value="Bundle"/>
+    </variable>
+    <variable>
         <name value="theFtkFunctionCodeQueryParameters"/>
         <expression value="'?' + iif('${igName}'.length()=0,'fn=getFtkChannelBase&amp;FhirValidationChannelId=#{TestCollection.properties:FhirValidationChannelId:DefaultToGlobalServiceProperty}','fn=getFtkValidationBase')"/>
         <sourceId value="request"/>

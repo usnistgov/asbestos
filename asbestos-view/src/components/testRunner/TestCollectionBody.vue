@@ -10,7 +10,7 @@
       <div class="divider"></div>
 
       <span v-if="$store.state.testRunner.isUserSuppliedTestFixture">
-            <textarea id="userSuppliedTestFixtureText" v-model="userSuppliedTestFixtureText" cols="80" rows="15" placeholder="Paste Resource XML or JSON here, and select the proper format option."></textarea>
+            <textarea id="userSuppliedTestFixtureText" v-model="userSuppliedTestFixtureText" cols="80" rows="15" placeholder="Paste Resource JSON or XML here, and select the proper format option."></textarea>
       </span>
 
       <span v-if="!$store.state.testRunner.isClientTest">

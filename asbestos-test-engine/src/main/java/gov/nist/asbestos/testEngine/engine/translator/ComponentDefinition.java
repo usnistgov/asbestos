@@ -64,7 +64,7 @@ public class ComponentDefinition {
             throw new RuntimeException("Calling module " + testScriptFile +
                     " - call has " + componentReference.getFixturesIn().size() +
                     " inbound fixture parameters but module definition declares " +
-                    fixturesIn.size());
+                    fixturesIn.size() + ".");
 
         for (int i = 0; i< fixturesIn.size(); i++) {
             componentReference.getFixturesIn().get(i).setLocalName(fixturesIn.get(i).getLocalName());
@@ -74,7 +74,7 @@ public class ComponentDefinition {
             throw new RuntimeException("Calling module " + testScriptFile +
                     " - call has " + componentReference.getVariablesIn().size() +
                     " inbound variables but module definition declares " +
-                    variablesIn.size());
+                    variablesIn.size() + ".");
 
         for (int i = 0; i< variablesIn.size(); i++) {
             componentReference.getVariablesIn().get(i).setLocalName(variablesIn.get(i).getLocalName());
@@ -88,7 +88,7 @@ public class ComponentDefinition {
             throw new RuntimeException("Calling module " + testScriptFile +
                     " - call has " + componentReference.getFixturesOut().size() +
                     " outbound fixture parameters but module definition declares " +
-                    fixturesOut.size());
+                    fixturesOut.size() + ".");
 
         for (int i = 0; i< fixturesOut.size(); i++) {
             componentReference.getFixturesOut().get(i).setLocalName(fixturesOut.get(i).getLocalName());
@@ -98,7 +98,7 @@ public class ComponentDefinition {
             throw new RuntimeException("Calling module " + testScriptFile +
                     " - call has " + componentReference.getVariablesOut().size() +
                     " outbound variables but module definition declares " +
-                    variablesOut.size());
+                    variablesOut.size() + ".");
 
         for (int i = 0; i< variablesOut.size(); i++) {
             componentReference.getVariablesOut().get(i).setLocalName(variablesOut.get(i).getLocalName());

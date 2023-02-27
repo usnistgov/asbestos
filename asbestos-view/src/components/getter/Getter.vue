@@ -34,7 +34,7 @@
             <button class="left" @click="inspect">INSPECT</button>
             <label for="json">Resource XML/JSON</label>
             <br />
-            <textarea id="json" v-model="resourceText" cols="80" rows="15" placeholder="Paste Resource XML or JSON here"> </textarea>
+            <textarea id="json" v-model="resourceText" cols="80" rows="15" placeholder="Paste Resource JSON or XML here"> </textarea>
 
             <!--   Display area   -->
             <template v-if="isLoading"><p>Loading...</p></template>

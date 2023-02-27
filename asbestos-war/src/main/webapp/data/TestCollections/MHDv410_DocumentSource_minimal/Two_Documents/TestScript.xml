@@ -7,7 +7,10 @@
         <name value="isComprehensiveMetadataExpected"/>
         <defaultValue value="false"/>
     </variable>
-
+    <variable>
+        <name value="responseResourceType"/>
+        <defaultValue value="Bundle"/>
+    </variable>
     <variable>
         <name value="pdbBundleProfile"/>
         <expression value="Bundle.meta.profile[0]"/>
@@ -48,6 +51,9 @@
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="internalPackageSpecificIgValidation"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="responseResourceType"/>
                     </extension>
                 </modifierExtension>
             </operation>
