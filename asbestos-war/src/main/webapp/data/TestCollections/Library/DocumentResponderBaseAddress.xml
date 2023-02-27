@@ -1,13 +1,13 @@
 <TestScript  xmlns="http://hl7.org/fhir">
     <modifierExtension url="urn:module">
-<!--        <extension url="urn:fixture-in">-->
-<!--            <valueString value="pdb-response"/>-->
-<!--        </extension>-->
         <extension url="urn:variable-in">
             <valueString value="pdbTestId"/>
         </extension>
         <extension url="urn:variable-out">
             <valueString value="docRespBaseAddress"/>
+        </extension>
+        <extension url="urn:variable-out">
+            <valueString value="docRespBaseAddressIsAbsolute"/>
         </extension>
     </modifierExtension>
 
@@ -33,12 +33,15 @@
     </variable>
     <variable>
         <name value="docRespBaseAddress"/>
-        <defaultValue value="'${docRefLocation}'.substring(0,${indexOfdocRefInLocation})"/>
+        <defaultValue value="iif(${indexOfdocRefInLocation} > -1, '${docRefLocation}'.substring(0,${indexOfdocRefInLocation}), '')"/>
     </variable>
-    <!--
-    When variables are referenced inside another variable, remember that only the last variable will have to be evaluated by FHIRClient's evalForString against a resource.
-    Care needs to be taken when coding up a FHIRPath this way.
-    -->
+    <variable>
+        <name value="docRespBaseAddressIsAbsolute"/>
+        <defaultValue value="${docRespBaseAddress}.length() > 1"/>
+        <!-- BEGIN TEST -->
+        <!--    <defaultValue value="false"/>-->
+        <!-- END TEST -->
+    </variable>
     <variable>
         <name value="docRespBaseAddressDocRef"/>
         <defaultValue value="${docRespBaseAddress}+'/'+'${docRefResourceName}'"/>

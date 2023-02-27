@@ -57,6 +57,7 @@ class ModuleIT {
                 .setExternalCache(ExternalCache.getExternalCache())
                 .setFhirClient(new FhirClient())
                 .addCache(patientCacheDir)
+                .setModularScripts()
                 .runTest();
         int i = 0;
         for (TestEngine engine : modularEngine.getTestEngines()) {

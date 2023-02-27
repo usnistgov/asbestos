@@ -40,6 +40,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * See http://hl7.org/fhir/testing.html
@@ -156,6 +157,30 @@ public class TestEngine  implements TestDef {
         return this;
     }
 
+    private void clearTestLog() throws IOException {
+        if (channelId == null || testCollection == null || testId == null)
+            return;
+        File testLogDir = this.getEC().getTestLogDir(channelId, testCollection, testId);
+        if (! testLogDir.exists())
+            return;
+        Path path = testLogDir.toPath();
+        try (Stream<Path> walk = Files.walk(path)) {
+            walk
+                    .sorted(Comparator.reverseOrder())
+                    .forEach(this::deleteLogDirectory);
+        } finally {
+            log.info("Exiting clear Test log directory: " + testLogDir.toString());
+        }
+    }
+
+    private void deleteLogDirectory(Path path) {
+        try {
+            Files.delete(path);
+        } catch (IOException e) {
+            log.warning(String.format("Unable to delete log path %s: %s", path, e.getMessage()));
+        }
+    }
+
     public TestEngine runTest() {
         Objects.requireNonNull(val);
         Objects.requireNonNull(testSession);
@@ -170,6 +195,7 @@ public class TestEngine  implements TestDef {
             }
         }
         try {
+            clearTestLog();
             doWorkflow();
         }
         catch (StopDebugTestScriptException sdex) {

@@ -107,8 +107,7 @@
         </action>
         <action>
             <operation>
-                <description value="Get the document responder base address from a prerequisite PDB submission.
-               (This test assumes the document responder base address in PDB response does not change between consecutive PDB submissions.)"/>
+                <description value="Get the document responder base address from a prerequisite PDB submission. This test assumes the document responder base address in PDB response does not change between consecutive PDB submissions."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
                         <valueString value="../DocumentResponderBaseAddress.xml"/>
@@ -118,6 +117,9 @@
                     </extension>
                     <extension url="urn:variable-out">
                         <valueString value="docRespBaseAddress"/>
+                    </extension>
+                    <extension url="urn:variable-out">
+                        <valueString value="docRespBaseAddressIsAbsolute"/>
                     </extension>
                 </modifierExtension>
             </operation>
@@ -200,11 +202,11 @@
     </test>
     <test>
         <modifierExtension url="urn:noErrors"/>
-        <description value="List was not persisted."/>
+        <description value="Search for List."/>
         <action>
             <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
             <assert>
-                <description value="Check List?"/>
+                <description value="List resource should be present or not persisted by mistake."/>
                 <expression value="${expectedSsListCount} >= 0"/>
                 <operator value="equals"/>
                 <value value="true"/>
@@ -213,10 +215,13 @@
         </action>
         <action>
             <operation>
-                <description value="Module call: Verify updates to server."/>
+                <description value="Module call: Verify on server."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../MHDv4SearchSsList.xml"/>
+                        <valueString value="../AggregateModule/SearchSsList.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-response"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="ssListUsualIdentifier"/>
@@ -233,16 +238,19 @@
                     <extension url="urn:variable-in">
                         <valueString value="expectedSsListCount"/>
                     </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddressIsAbsolute"/>
+                    </extension>
                 </modifierExtension>
             </operation>
         </action>
     </test>
     <test>
-        <description value="DocumentReference was not persisted."/>
+        <description value="Search for DocumentReference."/>
         <action>
             <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
             <assert>
-                <description value="Check DocumentReference?"/>
+                <description value="DocumentReference is present or not persisted by mistake."/>
                 <expression value="${expectedDocRefCount} >= 0"/>
                 <operator value="equals"/>
                 <value value="true"/>
@@ -251,10 +259,13 @@
         </action>
         <action>
             <operation>
-                <description value="Module call: Verify no updates to server."/>
+                <description value="Module call: Verify updates to server."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../SDR_SearchResponse.xml"/>
+                        <valueString value="../AggregateModule/SearchDocumentReference.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-response"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="referenceMasterIdentifier"/>
@@ -270,6 +281,9 @@
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="expectedDocRefCount"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddressIsAbsolute"/>
                     </extension>
                 </modifierExtension>
             </operation>

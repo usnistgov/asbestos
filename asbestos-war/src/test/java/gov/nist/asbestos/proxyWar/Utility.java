@@ -88,6 +88,7 @@ public class Utility {
                 .setFhirClient(new FhirClient())
                 .addCache(patientCacheDir)
                 .addCache(alternatePatientCacheDir)
+                .setModularScripts()
                 .runTest();
         int i = 0;
         for (TestEngine engine : modularEngine.getTestEngines()) {
