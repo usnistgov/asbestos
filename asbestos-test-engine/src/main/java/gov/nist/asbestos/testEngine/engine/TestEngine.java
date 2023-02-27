@@ -835,12 +835,12 @@ public class TestEngine  implements TestDef {
                 if (url.equals(ExtensionDef.ts_import)) {
                     handleImport(extension, operation, report);
                 } else {
-                    report.setMessage("Operation with unknown modifierExtension " + url + " found");
+                    report.setMessage("Operation with unknown modifierExtension " + url + " found.");
                     report.setResult(TestReport.TestReportActionResult.ERROR);
                 }
             }
         } else  {
-            report.setMessage("Found operation with no type and no modifierExtension");
+            report.setMessage("Found operation with no type and no modifierExtension.");
             report.setResult(TestReport.TestReportActionResult.ERROR);
         }
     }
@@ -1375,7 +1375,7 @@ public class TestEngine  implements TestDef {
         TestReport.TestActionComponent testActionComponent = reportComponent.addAction();
         TestReport.SetupActionOperationComponent setupActionOperationComponent = testActionComponent.getOperation();
         setupActionOperationComponent.setResult(TestReport.TestReportActionResult.SKIP);
-        setupActionOperationComponent.setMessage("skipped");
+        setupActionOperationComponent.setMessage("skipped.");
     }
 
     private boolean doTestPart(TestScript.TestScriptTestComponent testScriptElement, TestReport.TestReportTestComponent testReportComponent, TestReport testReport, boolean reportAsConditional) throws IOException, CircularModularScriptReferenceException {

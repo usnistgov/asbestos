@@ -6,9 +6,12 @@
     </meta>
     <type value="transaction"/>
     <entry>
-        <fullUrl value="urn:uuid:1.2.129.6.58.922.88336.1"/>
+        <fullUrl value="urn:uuid:0000000a-000b-000c-000d-000000000001"/>
         <resource>
             <DocumentReference>
+                <meta>
+                    <!--@{DocumentReferenceMetaMinimalProfileElement}-->
+                </meta>
                 <masterIdentifier>
                     <system value="urn:ietf:rfc:3986"/>
                     <value value="urn:oid:1.2.129.6.58.92.88336.4"/>
@@ -20,20 +23,23 @@
                 <content>
                     <attachment>
                         <contentType value="text/plain"/>
-                        <url value="urn:uuid:1.2.129.6.58.922.88336.4"/>
+                        <url value="urn:uuid:0000000a-000b-000c-000d-000000000002"/>
                     </attachment>
                 </content>
             </DocumentReference>
         </resource>
         <request>
             <method value="POST"/>
-            <url value="urn:uuid:1.2.129.6.58.922.88336.1"/>
+            <url value="urn:uuid:0000000a-000b-000c-000d-000000000001"/>
         </request>
     </entry>
     <entry>
-        <fullUrl value="urn:uuid:1.2.129.6.58.922.88336.2"/>
+        <fullUrl value="urn:uuid:0000000a-000b-000c-000d-000000000003"/>
         <resource>
             <DocumentReference>
+                <meta>
+                    <!--@{DocumentReferenceMetaMinimalProfileElement}-->
+                </meta>
                 <masterIdentifier>
                     <system value="urn:ietf:rfc:3986"/>
                     <value value="urn:oid:1.2.129.6.58.92.88336.4"/>
@@ -45,28 +51,28 @@
                 <content>
                     <attachment>
                         <contentType value="text/plain"/>
-                        <url value="urn:uuid:1.2.129.6.58.922.88336.5"/>
+                        <url value="urn:uuid:0000000a-000b-000c-000d-000000000004"/>
                     </attachment>
                 </content>
             </DocumentReference>
         </resource>
         <request>
             <method value="POST"/>
-            <url value="urn:uuid:1.2.129.6.58.922.88336.2"/>
+            <url value="urn:uuid:0000000a-000b-000c-000d-000000000003"/>
         </request>
     </entry>
     <entry>
-        <fullUrl value="urn:uuid:1.2.129.6.58.922.88336.3"/>
+        <fullUrl value="urn:uuid:0000000a-000b-000c-000d-000000000005"/>
         <resource>
             <!--@{SubmissionSetResourceElement}-->
         </resource>
         <request>
             <method value="POST"/>
-            <url value="urn:uuid:1.2.129.6.58.922.88336.3"/>
+            <url value="urn:uuid:0000000a-000b-000c-000d-000000000005"/>
         </request>
     </entry>
     <entry>
-        <fullUrl value="urn:uuid:1.2.129.6.58.922.88336.4"/>
+        <fullUrl value="urn:uuid:0000000a-000b-000c-000d-000000000002"/>
         <resource>
             <Binary>
                 <meta>
@@ -78,11 +84,11 @@
         </resource>
         <request>
             <method value="POST"/>
-            <url value="urn:uuid:1.2.129.6.58.922.88336.4"/>
+            <url value="urn:uuid:0000000a-000b-000c-000d-000000000002"/>
         </request>
     </entry>
     <entry>
-        <fullUrl value="urn:uuid:1.2.129.6.58.922.88336.5"/>
+        <fullUrl value="urn:uuid:0000000a-000b-000c-000d-000000000004"/>
         <resource>
             <Binary>
                 <meta>
@@ -94,7 +100,7 @@
         </resource>
         <request>
             <method value="POST"/>
-            <url value="urn:uuid:1.2.129.6.58.922.88336.5"/>
+            <url value="urn:uuid:0000000a-000b-000c-000d-000000000004"/>
         </request>
     </entry>
 </Bundle>

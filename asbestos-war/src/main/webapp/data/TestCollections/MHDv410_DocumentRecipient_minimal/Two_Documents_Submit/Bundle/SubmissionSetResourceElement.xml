@@ -1,4 +1,7 @@
 <List>
+    <meta>
+        <profile value="https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.SubmissionSet"/>
+    </meta>
     <text>
         <status value="extensions"/>
         <div xmlns="http://www.w3.org/1999/xhtml">List(SubmissionSet) with Patient</div>
@@ -33,12 +36,12 @@
     <date value="2021-08-23T22:13:00-05:00"/>
     <entry>
         <item>
-            <reference value="urn:uuid:1.2.129.6.58.922.88336.1"/>
+            <reference value="urn:uuid:0000000a-000b-000c-000d-000000000001"/>
         </item>
     </entry>
     <entry>
         <item>
-            <reference value="urn:uuid:1.2.129.6.58.922.88336.2"/>
+            <reference value="urn:uuid:0000000a-000b-000c-000d-000000000003"/>
         </item>
     </entry>
 </List>

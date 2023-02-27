@@ -15,6 +15,9 @@
         <extension url="urn:variable-in">
             <valueString value="expectedDocRefCount"/>
         </extension>
+        <extension url="urn:variable-in">
+            <valueString value="fhirIgVersion"/>
+        </extension>
     </modifierExtension>
 
     <id value="MHDPDBSuccessAggregate"/>
@@ -57,6 +60,9 @@
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="expectedDocRefCount"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="fhirIgVersion"/>
                     </extension>
                 </modifierExtension>
             </operation>
