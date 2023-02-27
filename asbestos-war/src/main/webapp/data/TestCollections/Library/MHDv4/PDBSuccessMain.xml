@@ -91,6 +91,11 @@
         <expression value="Bundle.meta.profile[0]"/>
         <sourceId value="pdb-bundle"/>
     </variable>
+    <variable>
+        <name value="responseResourceType"/>
+        <defaultValue value="Bundle"/>
+    </variable>
+
 
     <setup>
         <modifierExtension url="urn:noErrors"/>
@@ -160,6 +165,9 @@
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="igVersion"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="responseResourceType"/>
                     </extension>
                 </modifierExtension>
             </operation>

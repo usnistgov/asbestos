@@ -7,7 +7,7 @@ actor.
 linkage between List and DocumentReference and between DocumentReference and Binary is present.
 
 **Metadata contents**: List and DocumentReference contain the minimum required by Minimal
- Metadata except that List is missing. List and
+ Metadata except that List is missing sourceId. List and
 DocumentReference.masterIdentifier are given unique values before the transaction is sent.
 
 **Expected Outcome**: Transaction will fail with status 400 and no contents will be persisted to the server. An OperationOutcome resource will be returned.

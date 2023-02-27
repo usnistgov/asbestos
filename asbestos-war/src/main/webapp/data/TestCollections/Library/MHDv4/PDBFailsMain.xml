@@ -79,6 +79,10 @@
         <expression value="iif('${correctBundleMetaProfile}'.length() > 0, '${correctBundleMetaProfile}', Bundle.meta.profile[0])"/>
         <sourceId value="pdb-bundle"/>
     </variable>
+    <variable>
+        <name value="responseResourceType"/>
+        <defaultValue value="OperationOutcome"/>
+    </variable>
 
 
     <setup>
@@ -168,6 +172,9 @@
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="igVersion"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="responseResourceType"/>
                     </extension>
                 </modifierExtension>
             </operation>

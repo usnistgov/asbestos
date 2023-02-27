@@ -12,6 +12,9 @@
         <extension url="urn:variable-in">
             <valueString value="igName"/>
         </extension>
+        <extension url="urn:variable-in">
+            <valueString value="responseResourceType"/>
+        </extension>
     </modifierExtension>
 
 
@@ -39,10 +42,6 @@
     </variable>
     <variable>
         <name value="requestResourceType"/>
-        <defaultValue value="Bundle"/>
-    </variable>
-    <variable>
-        <name value="responseResourceType"/>
         <defaultValue value="Bundle"/>
     </variable>
     <variable>
@@ -164,8 +163,10 @@
         <action>
             <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
             <assert>
-                <description value="Is Response resource type correct?"/>
-                <resource value="Bundle"/>
+                <description value="Is response resource type as expected?"/>
+                <expression value="$this is ${responseResourceType}"/>
+                <operator value="equals"/>
+                <value value="true" />
                 <sourceId value="response"/>
                 <warningOnly value="false"/>
             </assert>

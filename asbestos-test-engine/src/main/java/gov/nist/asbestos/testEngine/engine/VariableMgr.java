@@ -304,7 +304,7 @@ public class VariableMgr {
 
         if (!fixtureMgr.containsKey(sourceId)) {
             if (! (testScriptLocalVariable.hasExpression() && AnonymousVariableEval.ANONYMOUS.equals(sourceId))) {
-                String error = "Variable " + variableName + " references source " + sourceId + " which does not exist";
+                String error = "Variable " + variableName + " references source " + sourceId + " which does not exist.";
                 if (errorAsValue)
                     return error;
                 reporter.reportError(error);

@@ -14,7 +14,7 @@
                         <id value="sourcePatient"/>
                         <identifier>
                             <use value="usual" />
-                            <system value="urn:oid:1.2.214" />
+                            <system value="urn:oid:1.2.132.163" />
                             <value value="myMRN" />
                         </identifier>
                     </Patient>
@@ -97,7 +97,7 @@
                         <id value="sourcePatient"/>
                         <identifier>
                             <use value="usual" />
-                            <system value="urn:oid:1.2.214" />
+                            <system value="urn:oid:1.2.132.163" />
                             <value value="myMRN" />
                         </identifier>
                     </Patient>

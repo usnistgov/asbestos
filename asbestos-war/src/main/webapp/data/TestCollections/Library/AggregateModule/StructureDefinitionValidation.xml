@@ -12,6 +12,9 @@
         <extension url="urn:variable-in">
             <valueString value="igVersion"/>
         </extension>
+        <extension url="urn:variable-in">
+            <valueString value="responseResourceType"/>
+        </extension>
     </modifierExtension>
 
     <id value="StructureDefinitionValidation"/>
@@ -54,6 +57,9 @@ This module should not be used or called by any of the MHDv3.x Test Collection T
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="igVersion"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="responseResourceType"/>
                     </extension>
                 </modifierExtension>
             </operation>

@@ -45,7 +45,7 @@
                         <valueString value="expectedFailAssertionIdList"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="''"/>
+                        <valueString value="'https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle'"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="internalPackageSpecificIgValidation"/>

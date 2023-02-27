@@ -1,4 +1,7 @@
 <List>
+    <meta>
+        <profile value="https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.SubmissionSet"/>
+    </meta>
     <text>
         <status value="extensions"/>
         <div xmlns="http://www.w3.org/1999/xhtml">List(SubmissionSet) with Patient</div>

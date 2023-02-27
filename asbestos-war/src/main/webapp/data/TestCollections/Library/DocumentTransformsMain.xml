@@ -79,7 +79,7 @@
                         <valueString value="'ftkLoadFixture'"/>
                     </extension>
                     <extension url="urn:variable-in">
-                        <valueString value="getTransformsFixtureParams"/>
+                        <valueString value="getOriginalFixtureParams"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="expectedFixtureBundleEntryCount"/>
@@ -114,15 +114,21 @@
         </action>
         <action>
             <operation>
-                <!-- references patient from resourceCache in EC -->
-                <description value="send PDB"/>
-                <label value="create"/>
-                <type>
-                    <system value="https://github.com/usnistgov/asbestos/wiki/Testscript-Operation-Codes"/>
-                    <code value="mhd-pdb-transaction"/>
-                </type>
-                <sourceId value="original-bundle"/>
-                <responseId value="pdb-response"/>
+                <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="SendPDB.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString  value="original-bundle"/>
+                    </extension>
+                    <extension url="urn:variable-in-no-translation">
+                        <valueString value="patientResourceId"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="pdb-response"/>
+                    </extension>
+                </modifierExtension>
             </operation>
         </action>
         <action>

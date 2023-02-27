@@ -24,7 +24,7 @@
                                 <code value="urn:ihe:iti:xds:2013:accession" />
                             </coding>
                         </type>
-                        <system value="urn:oid:1.2.214" />
+                        <system value="urn:oid:1.2.132.163" />
                         <value value="myMRN" />
                     </identifier>
                     </Patient>
