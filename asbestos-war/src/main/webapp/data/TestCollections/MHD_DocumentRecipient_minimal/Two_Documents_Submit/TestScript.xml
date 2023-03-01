@@ -24,6 +24,9 @@
                     <extension url="urn:variable-in">
                         <valueString value="'1'"/>
                     </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'noIgVal'"/>
+                    </extension>
                 </modifierExtension>
             </operation>
         </action>

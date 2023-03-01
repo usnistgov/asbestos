@@ -15,6 +15,9 @@
         <extension url="urn:variable-in">
             <valueString value="expectedDocRefCount"/>
         </extension>
+        <extension url="urn:variable-in">
+            <valueString value="igVersion"/>
+        </extension>
     </modifierExtension>
 
     <id value="MHDv3xPDBSuccessMain2"/>
@@ -260,6 +263,9 @@
                     <extension url="urn:variable-out">
                         <valueString value="docRespBaseAddress"/>
                     </extension>
+                    <extension url="urn:variable-out">
+                        <valueString value="docRespBaseAddressIsAbsolute"/>
+                    </extension>
                 </modifierExtension>
             </operation>
         </action>
@@ -293,13 +299,16 @@
         </action>
     </test>
     <test>
-        <description value="Search DocumentReference 1."/>
+        <description value="Search for DocumentReference 1."/>
         <action>
             <operation>
                 <description value="Module call: Verify updates to server."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../SearchDocRef.xml"/>
+                        <valueString value="../AggregateModule/SearchDocumentReference.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-response"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="referenceMasterIdentifier1"/>
@@ -316,18 +325,24 @@
                     <extension url="urn:variable-in">
                         <valueString value="expectedDocRefCount"/>
                     </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddressIsAbsolute"/>
+                    </extension>
                 </modifierExtension>
             </operation>
         </action>
     </test>
     <test>
-        <description value="Search DocumentReference 2."/>
+        <description value="Search for DocumentReference 2."/>
         <action>
             <operation>
                 <description value="Module call: Verify updates to server."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../SearchDocRef.xml"/>
+                        <valueString value="../AggregateModule/SearchDocumentReference.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-response"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="referenceMasterIdentifier2"/>
@@ -344,9 +359,69 @@
                     <extension url="urn:variable-in">
                         <valueString value="expectedDocRefCount"/>
                     </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddressIsAbsolute"/>
+                    </extension>
                 </modifierExtension>
             </operation>
         </action>
     </test>
+
+    <!--    <test>-->
+<!--        <description value="Search DocumentReference 1."/>-->
+<!--        <action>-->
+<!--            <operation>-->
+<!--                <description value="Module call: Verify updates to server."/>-->
+<!--                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">-->
+<!--                    <extension url="component">-->
+<!--                        <valueString value="../SearchDocRef.xml"/>-->
+<!--                    </extension>-->
+<!--                    <extension url="urn:variable-in">-->
+<!--                        <valueString value="referenceMasterIdentifier1"/>-->
+<!--                    </extension>-->
+<!--                    <extension url="urn:variable-in">-->
+<!--                        <valueString value="pdbReferenceStatus1"/>-->
+<!--                    </extension>-->
+<!--                    <extension url="urn:variable-in">-->
+<!--                        <valueString value="patientIdentifierSearchParamValue"/>-->
+<!--                    </extension>-->
+<!--                    <extension url="urn:variable-in">-->
+<!--                        <valueString value="docRespBaseAddress"/>-->
+<!--                    </extension>-->
+<!--                    <extension url="urn:variable-in">-->
+<!--                        <valueString value="expectedDocRefCount"/>-->
+<!--                    </extension>-->
+<!--                </modifierExtension>-->
+<!--            </operation>-->
+<!--        </action>-->
+<!--    </test>-->
+<!--    <test>-->
+<!--        <description value="Search DocumentReference 2."/>-->
+<!--        <action>-->
+<!--            <operation>-->
+<!--                <description value="Module call: Verify updates to server."/>-->
+<!--                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">-->
+<!--                    <extension url="component">-->
+<!--                        <valueString value="../SearchDocRef.xml"/>-->
+<!--                    </extension>-->
+<!--                    <extension url="urn:variable-in">-->
+<!--                        <valueString value="referenceMasterIdentifier2"/>-->
+<!--                    </extension>-->
+<!--                    <extension url="urn:variable-in">-->
+<!--                        <valueString value="pdbReferenceStatus2"/>-->
+<!--                    </extension>-->
+<!--                    <extension url="urn:variable-in">-->
+<!--                        <valueString value="patientIdentifierSearchParamValue"/>-->
+<!--                    </extension>-->
+<!--                    <extension url="urn:variable-in">-->
+<!--                        <valueString value="docRespBaseAddress"/>-->
+<!--                    </extension>-->
+<!--                    <extension url="urn:variable-in">-->
+<!--                        <valueString value="expectedDocRefCount"/>-->
+<!--                    </extension>-->
+<!--                </modifierExtension>-->
+<!--            </operation>-->
+<!--        </action>-->
+<!--    </test>-->
 
 </TestScript>

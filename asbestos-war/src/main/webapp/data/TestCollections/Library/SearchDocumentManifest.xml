@@ -22,7 +22,7 @@
     <status value="active"/>
 
     <test>
-      <description value="Test persistence to server."/>
+      <description value="Test assumes absolute resource location in PDB response. Test persistence to server."/>
       <action>
             <operation>
                 <description value="for DocumentManifest."/>

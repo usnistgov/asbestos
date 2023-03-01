@@ -18,6 +18,12 @@
             <extension url="urn:variable-in">
                 <valueString value="expectedFailAssertionIdList"/>
             </extension>
+            <extension url="urn:variable-in">
+                <valueString value="correctBundleMetaProfile"/>
+            </extension>
+            <extension url="urn:variable-in">
+                <valueString value="igVersion"/>
+            </extension>
         </modifierExtension>
 
         <id value="MHDv3xPDBFailsMain"/>
@@ -204,11 +210,11 @@
         </action>
     </test>
     <test>
-        <description value="DocumentReference was not persisted."/>
+        <description value="Search for DocumentReference."/>
         <action>
             <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
             <assert>
-                <description value="Check DocumentReference?"/>
+                <description value="DocumentReference is present or not persisted by mistake."/>
                 <expression value="${expectedDocRefCount} >= 0"/>
                 <operator value="equals"/>
                 <value value="true"/>
@@ -217,10 +223,13 @@
         </action>
         <action>
             <operation>
-                <description value="Module call: Verify no updates to server."/>
+                <description value="Module call: Verify updates to server."/>
                 <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
                     <extension url="component">
-                        <valueString value="../SDR_SearchResponse.xml"/>
+                        <valueString value="../AggregateModule/SearchDocumentReference.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="pdb-response"/>
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="referenceMasterIdentifier"/>
@@ -236,6 +245,9 @@
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="expectedDocRefCount"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="docRespBaseAddressIsAbsolute"/>
                     </extension>
                 </modifierExtension>
             </operation>
