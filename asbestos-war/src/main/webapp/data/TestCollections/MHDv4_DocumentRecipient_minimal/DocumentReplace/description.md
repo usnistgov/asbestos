@@ -1,3 +1,5 @@
+**Assumption(s)**: Test assumes Provide Document Bundle transaction [ITI-65] response contains an absolute Bundle entry response location.
+
 **Setup**: Submit a Provide Document Bundle transaction [ITI-65] containing Minimal Metadata to a Document Recipient
 actor. It contains a single DocumentReference, a List, and a Binary.
 

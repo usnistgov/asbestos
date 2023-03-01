@@ -36,48 +36,83 @@ export default {
         },
 
         async ftkLoadChannel(channelIdentifier, updateUri, raiseFtkCommit) {
-            console.log(`ftkLoadChannel ${channelIdentifier}`)
+            console.debug(`ftkLoadChannel ${channelIdentifier}`)
             const theChannelId = (channelIdentifier.includes('__') ? channelIdentifier /* name is indicative of an Included channel within the test session */ : this.$store.state.base.session + '__' + channelIdentifier /* a channel local to the test session */) // this.$store.getters.getChannelId
             const theSessionName = theChannelId.split('__')[0]
             const theChannelName = theChannelId.split('__')[1]
-            return this.$store.dispatch('loadChannel', {channelId: theChannelId, raiseFtkCommit: raiseFtkCommit})
+            return this.$store.dispatch('loadChannel', {channelId: theChannelId /*, raiseFtkCommit: raiseFtkCommit */})
                 .then(c => {
                     if (updateUri) {
+                        // console.debug(JSON.stringify(c))
                         if (c !== null && c !== undefined) {
                             const current = this.$router.currentRoute.path;
-                            const parts = current.split("/");
+                            let parts = current.split("/");
                             const size = parts.length;
                             let i;
                             // https://fhirtoolkit.test:8082/session/default/channel/default/collection/Test_Documents
+                            // or
+                            // https://fhirtoolkit.test:8082/session/default/channels/copy7766
+                            // or
+                            // https://fhirtoolkit.test:8082/session/default/channels
                             for (i = 0; i < size; i++) {
-                                if (parts[i] === 'session') {
-                                    i++;
+                                if (parts[i] === 'session' && i + 1 < size) {
+                                    i++; // forward to value
                                     parts[i] = theSessionName
-                                    // console.log('Updated test session part in the URL')
-                                } else if (parts[i] === 'channel' || parts[i] === 'channels' && i + 1 <= size /*&& i<size+1*/) {
-                                    i++;
+                                } else if (parts[i] === 'channel' && i + 1 < size) {
+                                    i++; // forward to value
                                     parts[i] = theChannelName;  // insert new channelId
+                                } else if (parts[i] === 'channels' && i + 1 < size) {
+                                    i++; // forward to value
+                                    parts[i] = theChannelName;  // insert new channelId
+                                } else if (parts[i] === 'channels' && i  == size-1) {
+                                    parts.splice(size,0, theChannelName);  // add new channelId
+                                    break;
+                                } else if (parts[i] === 'collection' && i + 1 < size) {
+                                    i++; // forward to value
+                                    const tcName = parts[i]
+                                    const clientTcCollection = this.$store.getters.clientTestCollectionNames(c.ccFhirIgName)
+                                    if (clientTcCollection !== undefined && clientTcCollection !== null) {
+                                        const foundTcName = clientTcCollection.find(item => item === tcName)
+                                        if (foundTcName === undefined) {
+                                            const serverTcCollection = this.$store.getters.serverTestCollectionNames(c.ccFhirIgName)
+                                            if (serverTcCollection !== undefined && serverTcCollection !== null) {
+                                                const foundServerTcName = serverTcCollection.find(item => item === tcName)
+                                                if (foundServerTcName === undefined) {
+                                                    console.debug('ftkLoadChannel find test collection list exhausted.')
+                                                    this.$store.commit('setTestCollectionName', undefined)
+                                                    parts = parts.slice(0, i) // remove test collection since it is not applicable to current channel, goes to temporary parking page
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                                     const newRoute = parts.join('/');
                                     if (newRoute !== current) {
-                                        console.log('Updated route: ' + newRoute)
+                                        console.debug('ftkLoadChannel updating route: ' + newRoute)
                                         this.$store.commit('setChannelName', theChannelName);
                                         this.$store.commit('setChannelIsNew', false);
                                         this.$router.push(newRoute, () => {
                                                 // console.debug('push complete.')
+                                                if (this.$store.getters.currentTestCollectionName !== undefined) {
+                                                    if (raiseFtkCommit) {
+                                                        this.$store.commit('ftkChannelLoaded', true);
+                                                    }
+                                                }
                                                 return true
                                             }
                                             , () => {
                                                 console.error('Route push failed.')
                                                 return false
                                             });
+                                    } else if (raiseFtkCommit) {
+                                        this.$store.commit('ftkChannelLoaded', true);
                                     }
-                                    break;
                                 }
                             }
                             return true
-                        }
-                    }
-                })
+                }).catch((e)=>{this.$store.commit('ftkLoadChannel setError',e)})
         }
     }
 

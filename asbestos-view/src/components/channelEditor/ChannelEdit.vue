@@ -249,7 +249,7 @@ export default {
   },
   computed: {
     channelId() {
-      return this.sessionId + '__' + this.channelName;
+      return this.sessionId + '__' +  this.channelName;
     },
     channelIsNew() {
         return this.$store.state.base.channelIsNew;
@@ -365,7 +365,11 @@ export default {
             this.$store.commit('setChannelIsNew', false);
             this.edit = false
             this.lockAckMode = ""
-            this.fetch(true)
+            if (this.channelName === 'copy') { /* copy is a temp placeholder route, fix route once the real channel config is saved */
+              this.$router.push('/session/' + this.sessionId + '/channels/' + this.channel.channelName)
+            } else {
+              this.fetch(true)
+            }
             await this.$store.dispatch('loadChannelIds')
             this.msg('Saved.')
           }
@@ -468,6 +472,9 @@ export default {
       } else {
           if (this.$store.state.base.channelName !== this.channelName) {
             this.$store.commit('setChannelName', this.channelName)
+            // console.log('current base channel name : ' + this.$store.state.base.channelName );
+            // console.log('current this channel name : ' + this.channel.channelName );
+            // console.log('set channel name to : ' + this.channelName);
           }
       }
 
@@ -480,13 +487,20 @@ export default {
         }
       }
 
-      this.channel = null
-      const fullId = this.channelId;
+      const fullId =  this.channelId;
 
-      this.$store.dispatch('loadChannel', {channelId: fullId, raiseFtkCommit: false})
+      console.log('about to loadChannel')
+
+      this.$store.dispatch('loadChannel', {channelId: fullId /*, raiseFtkCommit: false */})
           .then(channel => {
             this.channel = cloneDeep(channel)
             this.discarding = false
+          }).catch((e)=>{
+            // console.log('ch is null to reset')
+            this.channel = null
+            const errorMsg = 'loadChannel error: ' + e
+            console.error(errorMsg)
+            this.error(errorMsg)
           })
     },
     getChannel() {

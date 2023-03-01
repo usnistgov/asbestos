@@ -12,6 +12,9 @@
         <extension url="urn:variable-in">
             <valueString value="igName"/>
         </extension>
+        <extension url="urn:variable-in">
+            <valueString value="responseResourceType"/>
+        </extension>
     </modifierExtension>
 
 
@@ -21,7 +24,8 @@
 
     <variable>
         <name value="pdbBundleProfile"/>
-        <defaultValue value="''"/>
+        <expression value="''"/>
+        <sourceId value="anonymous"/>
     </variable>
     <variable>
         <name value="igName"/>
@@ -98,6 +102,7 @@
         </action>
     </setup>
     <test>
+        <modifierExtension url="urn:noErrors"/>
         <description value="Request resource validation."/>
         <action>
             <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
@@ -136,6 +141,18 @@
                 </modifierExtension>
             </operation>
         </action>
+    </test>
+    <test>
+        <description value="Unusual features."/>
+        <action>
+            <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+            <assert>
+                <description value="Is validation OperationOutcome available?"/>
+                <resource value="OperationOutcome"/>
+                <sourceId value="requestValidationResponse"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
         <action>
             <assert id="mhdIgBug_drIdentifier1">
                 <description value="OperationOutcome does not contain the incorrect error on DocumentReference.identifier minimum required = 1. Specification text disagrees with MHD IG StructureDefinition. Assertion failure indicates presence of IG bug."/>
@@ -144,15 +161,16 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-
     </test>
     <test>
         <description value="Response resource validation."/>
         <action>
             <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
             <assert>
-                <description value="Is Response resource type correct?"/>
-                <resource value="Bundle"/>
+                <description value="Is response resource type as expected?"/>
+                <expression value="$this is ${responseResourceType}"/>
+                <operator value="equals"/>
+                <value value="true" />
                 <sourceId value="response"/>
                 <warningOnly value="false"/>
             </assert>

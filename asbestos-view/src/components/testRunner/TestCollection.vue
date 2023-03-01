@@ -1,6 +1,6 @@
 <template>
   <div>
-
+  <template v-if="testCollection !== '' && testCollection !== undefined && testCollection !== null">
     <test-collection-header
         :test-collection="testCollection"
         :session-id="sessionId"
@@ -9,6 +9,10 @@
         :test-collection="testCollection"
         :session-id="sessionId"
         :channel-name="channelName"> </test-collection-body>
+  </template>
+    <template v-else>
+      Please select a Test Collection.
+    </template>
   </div>
 </template>
 
@@ -46,23 +50,7 @@ export default {
         return null
       return this.$store.state.testRunner.testReports[testName]
     },
-      /*
-    load() {
-      console.log('tc loaded')
-      this.isLoading = true
-      this.loadTestCollection(this.testCollection).then(r => {
-        try {
-         if (r === null) {return;}
-        } catch(error) {
-          this.error(error)
-         this.isLoading = false
-        }
-      }).catch(error => {
-        this.error(error)
-       this.isLoading = false
-      })
-    },
-     */
+
   },
   computed: {
   },

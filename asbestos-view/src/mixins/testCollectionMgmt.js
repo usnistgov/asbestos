@@ -128,9 +128,13 @@ export default {
             // this.channelObj = await promise;
         // },
         async loadTestCollection(testCollection) {
-            // console.debug('In loadTestCollection')
+            console.debug('In loadTestCollection')
             this.tcLoading = true
             // this.$store.dispatch('loadChannel', this.fullChannelId).then(() => {
+            if (testCollection === undefined || this.$store.state.testRunner.currentTestCollectionName === undefined) {
+                console.debug('testCollection is undefined.')
+                return
+            }
             if (this.$store.state.testRunner.currentTestCollectionName !== testCollection) {
                 this.$store.commit('setTestCollectionName', testCollection)
             }

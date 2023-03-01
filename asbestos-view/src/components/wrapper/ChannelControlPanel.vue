@@ -84,6 +84,7 @@
                 // channel: null, // used only for adding a new channel
                 deleting: false,
                 editUserProps: ASBTS_USERPROPS,
+                unSub1: null,
             }
         },
         components: {
@@ -132,9 +133,11 @@
                             }
                         })
                     }
-                    this.msg('Deleted')
+                    this.msg('Deleted.')
                     // this.localDelete(channelId);
                     this.$store.commit('deleteChannel', this.channelId)
+                    this.$store.commit('setChannelName', undefined)
+                    this.$store.commit('setChannel', undefined)
                     await this.$store.dispatch('loadChannelIds')
                     // this.setChannelId();
                     this.$router.push('/session/' + this.sessionId + '/channels')
@@ -241,7 +244,14 @@
             },
 
             manage() {  // go edit channel definitions
-                this.$router.push(`/session/${this.$store.state.base.channel.testSession}/channels` + `/${this.$store.state.base.channel.channelName}`)
+                if (this.$store.state.base.channelName !== undefined && this.$store.state.base.channel !== undefined && this.$store.state.base.channel !== null) {
+                    const r = `/session/${this.$store.state.base.channel.testSession}/channels` + `/${this.$store.state.base.channel.channelName}`
+                    const currentRoutePath = this.$router.currentRoute.path
+                    if (currentRoutePath != r) {
+                        // console.debug(r)
+                        this.$router.push(r)
+                    }
+                }
             },
             channelValid(channelId) {
                 if (!channelId)
@@ -284,7 +294,7 @@
         created() {
         },
         mounted() {
-            this.$store.subscribe((mutation) => {
+            this.unSub1 = this.$store.subscribe((mutation) => {
                 if (mutation.type === 'ftkInitComplete') {
                     if (this.$store.state.base.ftkInitialized) {
                             // console.log('ChannelCP syncing on mutation.type: ' + mutation.type)
@@ -293,6 +303,10 @@
                 }
             })
 
+        },
+        beforeDestroy() {
+            if (this.unSub1 !== null && this.unSub1 !== undefined)
+                this.unSub1()
         },
         props: [
             'disabled'

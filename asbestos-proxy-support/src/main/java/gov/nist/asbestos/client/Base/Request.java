@@ -142,11 +142,11 @@ public class Request {
     }
 
     public void setStatus(int status) {
-        if (status == 200) {
-            log.log(Level.FINE, ()->String.format("Status %d: URI=%s", status, uri));
+        if (status < 400) {
+            log.log(Level.FINE, ()->String.format("Status %d: URI=%s.", status, uri));
         } else {
             String requestType = getRequestType();
-            log.severe(String.format("%s Error Status: %d, URI=%s", requestType, status, uri));
+            log.severe(String.format("%s Error Status: %d, URI=%s.", requestType, status, uri));
         }
         resp.setStatus(status);
     }

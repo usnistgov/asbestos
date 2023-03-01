@@ -86,10 +86,12 @@
 import testCollectionMgmt from "../../mixins/testCollectionMgmt";
 
 export default {
-  methods: {
-    load() {
-      // this.loadTestCollection(this.testCollection)
+  data() {
+        return {
+            unSub1: null
+        }
     },
+  methods: {
   },
   computed: {
     testCollectionDescription() {
@@ -101,19 +103,22 @@ export default {
     // this.setEvalCount()
   },
   mounted() {
-        this.$store.subscribe((mutation) => {
+       this.unSub1 = this.$store.subscribe((mutation) => {
             if (mutation.type === 'ftkChannelLoaded') {
                 if (this.$store.state.base.ftkChannelLoaded) {
                     // console.log('TestCollectionHeader syncing on mutation.type: ' + mutation.type)
-                    this.load(this.testCollection)
+                    // this.load(this.testCollection)
                     this.setEvalCount()
                 }
             }
         })
-    },
-    watch: {
+  },
+  beforeDestroy() {
+      if (this.unSub1 !== null && this.unSub1 !== undefined)
+        this.unSub1()
+  },
+  watch: {
     'evalCount': 'setEvalCount',
-    'testCollection': 'load',
   },
   mixins: [ testCollectionMgmt ],
   name: "TestCollectionHeader",

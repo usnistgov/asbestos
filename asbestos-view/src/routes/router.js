@@ -137,30 +137,35 @@ export const routes = [
                                 props: true,
                             },
                             {
-                                path: 'collection/:testCollection',
+                                path: 'collection',
                                 component: TestCollection,
                                 props: true,
-                                children: [
-                                    {
-                                        path: 'test/:testId',
-                                        component: TestOrEvalDetails,
-                                        props: true,
-                                        children: [
-                                            {
-                                                path: 'event/:eventId',
-                                                component: EvalDetails,
-                                                props: true,
-                                                children: [
-                                                    {
-                                                        path: 'assert/:assertIndex',
-                                                        component: EvalReportAssert,
-                                                        props: true,
-                                                    }
-                                                ]
-                                            },
-                                        ]
-                                    },
-                                ],
+                                children: [{
+                                    path: ':testCollection',
+                                    component: TestCollection,
+                                    props: true,
+                                    children: [
+                                        {
+                                            path: 'test/:testId',
+                                            component: TestOrEvalDetails,
+                                            props: true,
+                                            children: [
+                                                {
+                                                    path: 'event/:eventId',
+                                                    component: EvalDetails,
+                                                    props: true,
+                                                    children: [
+                                                        {
+                                                            path: 'assert/:assertIndex',
+                                                            component: EvalReportAssert,
+                                                            props: true,
+                                                        }
+                                                    ]
+                                                },
+                                            ]
+                                        },
+                                    ]
+                                }]
                             },
 
                         ]

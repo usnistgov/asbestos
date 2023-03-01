@@ -144,8 +144,14 @@ import DebugAssertionEvalModal from "./debugger/DebugAssertionEvalModal";
 import TestProgressBar from "./TestProgressBar";
 
 export default {
+    data() {
+        return {
+            unSub1: null
+        }
+    },
     methods: {
       load() {
+          console.debug('In TestCollectionBody load')
       /*
        All tests details will be collapsed when loaded.
        The following setCurrentTest to null will reset the expanded arrow indicator
@@ -241,11 +247,11 @@ export default {
           // this.channel = this.channelName
           this.setEvalCount()
       } else {
-          console.log('on Created, ftkChannelLoaded is false, so Loading is deferred.')
+          console.debug('on Created, ftkChannelLoaded is false, so Loading is deferred.')
       }
   },
   mounted() {
-        this.$store.subscribe((mutation) => {
+        this.unSub1 = this.$store.subscribe((mutation) => {
             if (mutation.type === 'ftkChannelLoaded') {
                 if (this.$store.state.base.ftkChannelLoaded) {
                     // console.log('TestCollectionBody syncing on mutation.type: ' + mutation.type)
@@ -254,6 +260,10 @@ export default {
                 }
             }
         })
+  },
+  beforeDestroy() {
+        if (this.unSub1 !== null && this.unSub1 !== undefined)
+            this.unSub1()
   },
   watch: {
     'evalCount': 'setEvalCount',

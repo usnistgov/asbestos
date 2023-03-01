@@ -30,7 +30,7 @@ This module should not be used or called by any of the MHDv3.x Test Collection T
 
     <variable>
         <name value="scriptMHDv4"/>
-        <defaultValue value="../../MHDv4_Internal/structure_definition_validation/IgValidation.xml"/>
+        <defaultValue value="../../MHDv4_Internal/structure_definition_validation/TestScript.xml"/>
     </variable>
     <variable>
         <name value="scriptMHDv410"/>

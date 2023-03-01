@@ -2,7 +2,19 @@
 
     <variable>
         <name value="expectedFailAssertionIdList"/>
-        <defaultValue value="('RM4_4'|'TR_1')"/>
+        <defaultValue value="('RM410_4'|'TR_1')"/>
+    </variable>
+    <variable>
+        <name value="internalPackageSpecificIgValidation"/>
+        <!-- FhirIgName uses the IG package validation -->
+        <expression value="'#{TestCollection.properties:FhirIgName}'"/>
+        <sourceId value="anonymous"/>
+    </variable>
+    <variable>
+        <name value="channelBasedIgValidation"/>
+        <!-- An empty string uses the TestCollection.properties configured channel for external or FTK HAPI FHIR server validation -->
+        <expression value="''"/>
+        <sourceId value="anonymous"/>
     </variable>
 
     <test>
@@ -31,6 +43,12 @@
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="expectedFailAssertionIdList"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'http://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.ProvideBundle'"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="internalPackageSpecificIgValidation"/>
                     </extension>
                 </modifierExtension>
             </operation>

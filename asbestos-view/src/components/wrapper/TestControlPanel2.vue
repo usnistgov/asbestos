@@ -4,7 +4,7 @@
     <div v-else>
       <div>
         <span class="control-panel-item-title" @click="openCollection()">Test Collections</span>
-        &nbsp;<img id="reload" class="selectable" @click="reload(true)" src="../../assets/reload.png"/>
+        &nbsp;<img id="reload" class="selectable" @click="reload(true)" src="../../assets/reload.png" title="Refresh Test Collections List"/>
         <br />
       </div>
 
@@ -49,7 +49,7 @@ export default {
   },
   methods: {
     reload(refreshRoute) {
-      this.$store.dispatch('loadTestCollectionNames')
+      this.$store.dispatch('loadTestCollectionNames').then(() => {
         if (refreshRoute === true) {
           // Also, check if URL is pointing to test collections
           // Add tooltip to the reset image: Reload Test Collection
@@ -57,10 +57,13 @@ export default {
           // Update route if needed
           const currentRoutePath = this.$router.currentRoute.path
           const parts = currentRoutePath.split("/");
-          if (!parts.includes('collection')) {
-            this.openTheCollection(this.$store.state.testRunner.currentTestCollectionName)
+          if (! parts.includes('collection')) {
+            const currentTcName = this.$store.state.testRunner.currentTestCollectionName
+            console.debug('calling openTheCollection: ' + currentTcName)
+            this.openTheCollection(currentTcName)
           }
         }
+      })
     },
       collectionUpdated() {
        if (this.collection !== this.$store.state.testRunner.currentTestCollectionName) {
@@ -71,6 +74,7 @@ export default {
       this.openCollection()
     },
     openTheCollection(collection) {
+      console.debug('In openTheCollection.')
       if (!this.selectable)
         return;
       if (this.$store.state.testRunner.currentTestCollectionName !== collection) {
@@ -89,6 +93,7 @@ export default {
       }
     },
     openCollection() {
+      console.debug('In openCollection, from watch?' + this.collection)
       if (!this.selectable)
         return;
       this.$store.commit('setTestCollectionName', this.collection)
@@ -155,6 +160,7 @@ export default {
   },
   created() {
     // this.collection
+      console.debug('In TestControlPanel2 created.')
     this.reload()
   },
   mounted() {
@@ -163,9 +169,7 @@ export default {
   props: [
     'disabled'
   ],
-
   watch: {
-    // '$store.state.testRunner.currentTestCollectionName': 'collectionUpdated',
     'collection': 'openCollection',
   },
   mixins: [ errorHandlerMixin ],

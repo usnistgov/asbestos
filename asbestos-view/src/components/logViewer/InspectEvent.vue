@@ -220,7 +220,8 @@
                 // defaultMhdVersion: 'MHDv3.x',
                 pdbValMhdAssertion: '',
                 igValAssertion: '',
-                currentEventSummary: []
+                currentEventSummary: [],
+                unSub1 : null,
             }
         },
         methods: {
@@ -544,13 +545,17 @@
             }
         },
         mounted() {
-            this.$store.subscribe((mutation) => {
+            this.unSub1 = this.$store.subscribe((mutation) => {
                 if (mutation.type === 'ftkChannelLoaded') {
                     if (this.$store.state.base.ftkChannelLoaded) {
                         this.setupMyComponent()
                     }
                 }
             })
+        },
+        beforeDestroy() {
+            if (this.unSub1 !== null && this.unSub1 !== undefined)
+                this.unSub1()
         },
         watch: {
             eventId() {
