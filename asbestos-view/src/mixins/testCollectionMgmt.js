@@ -56,7 +56,7 @@ export default {
             await this.$store.dispatch('runTest', testName)
                 .then(r=>
             {
-                if ('data' in r) {
+                if (r !== undefined && 'data' in r) {
                     this.$store.commit('setCurrentTest', testName)
                     const currentRoutePath = this.$router.currentRoute.path
                     const testRoutePathToBe = `${testRoutePath}/${testName}`

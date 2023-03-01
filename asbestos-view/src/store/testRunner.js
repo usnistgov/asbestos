@@ -237,6 +237,8 @@ export const testRunnerStore = {
         },
         setCombinedTestReports(state, reportData) {
           //  console.log(`setCombinedTestReports`)
+            if (reportData === undefined)
+                return
             for (let testName in reportData) {
                 const report = reportData[testName]
                 if (report && report.resourceType === 'TestReport') {
@@ -334,7 +336,7 @@ export const testRunnerStore = {
             return state.isUserSuppliedTestFixture
         },
         getUserSuppliedTestFixtureText (state,getters)  {
-            if (state.isUserSuppliedTestFixture) {
+            if (state.isUserSuppliedTestFixture && state.userSuppliedTestFixtureText !== undefined && state.userSuppliedTestFixtureText !== null) {
                 const key = getters.getUniqueUstfKey
                 if (key in state.userSuppliedTestFixtureText)
                     return state.userSuppliedTestFixtureText[key]
@@ -397,10 +399,10 @@ export const testRunnerStore = {
         currentTcName: (state) => {
             return state.currentTestCollectionName
         },
-        getUniqueUstfKey(getters)  {
+        getUniqueUstfKey: (state,getters) =>   {
             const channelId = getters.getChannelId
             const tc = getters.currentTcName
-            return  channelId + tc
+            return  channelId !== undefined && tc !== undefined ? channelId.concat( tc ) : 'tempUstfKey'
         },
 
     },
@@ -646,7 +648,7 @@ export const testRunnerStore = {
                     commit('setError', 'Check server log. ' + e.message)
                     throw e
                 }).then(result => {
-                    if ('data' in result) {
+                    if (result !== undefined && 'data' in result) {
                         // console.debug('data is in result')
                         const reports = result.data
                         commit('setCombinedTestReports', reports)

@@ -365,11 +365,11 @@ export default {
             this.$store.commit('setChannelIsNew', false);
             this.edit = false
             this.lockAckMode = ""
-            if (this.channelName === 'copy') { /* copy is a temp placeholder route, fix route once the real channel config is saved */
+            // if (this.channelName === 'copy') { /* copy is a temp placeholder route, fix route once the real channel config is saved */
               this.$router.push('/session/' + this.sessionId + '/channels/' + this.channel.channelName)
-            } else {
-              this.fetch(true)
-            }
+            // } else {
+            //   this.fetch(true)
+            // }
             await this.$store.dispatch('loadChannelIds')
             this.msg('Saved.')
           }

@@ -191,16 +191,21 @@
           },
             async loadEventSummariesAndReRun() {
                 // await this.$store.dispatch('loadEventSummaries', {session: this.sessionId, channel: this.channelName})
-                this.$store.commit('setRunning',true)
-                this.beginTestTime()
-                await this.$store.dispatch('runEval', this.testId)
-                .catch(e => {
-                    console.error(e.message)
-                })
-                .finally(()=> {
-                    this.$store.commit('setRunning',false)
-                    this.endTestTime()
-                })
+                try {
+                    this.$store.commit('setRunning', true)
+                    this.beginTestTime()
+                    await this.$store.dispatch('runEval', this.testId)
+                        .catch(e => {
+                            console.error(e.message)
+                        })
+                        .finally(() => {
+                            this.$store.commit('setRunning', false)
+                            this.endTestTime()
+                        })
+                } catch(e) {
+                    this.$store.commit('setRunning', false)
+                    console.error('loadEventSummariesAndReRun error ' + e)
+                }
             },
             async loadTestScript() {
                 if (this.$store.state.testRunner.testScripts[this.testId] === null)

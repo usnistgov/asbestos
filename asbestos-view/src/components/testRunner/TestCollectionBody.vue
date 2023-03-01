@@ -151,7 +151,7 @@ export default {
     },
     methods: {
       load() {
-          console.debug('In TestCollectionBody load')
+          console.debug('In TestCollectionBody load' + this.$store.state.testRunner.isUserSuppliedTestFixture + ' ustfKey: ' + this.$store.getters.getUniqueUstfKey )
       /*
        All tests details will be collapsed when loaded.
        The following setCurrentTest to null will reset the expanded arrow indicator
