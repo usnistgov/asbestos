@@ -137,11 +137,7 @@ export const routes = [
                                 props: true,
                             },
                             {
-                                path: 'collection',
-                                component: TestCollection,
-                                props: true,
-                                children: [{
-                                    path: ':testCollection',
+                                path: 'collection/:testCollection',
                                     component: TestCollection,
                                     props: true,
                                     children: [
@@ -164,8 +160,12 @@ export const routes = [
                                                 },
                                             ]
                                         },
-                                    ]
-                                }]
+                                ],
+                            },
+                            {
+                                path: 'collection',
+                                component: TestCollection,
+                                props: true,
                             },
 
                         ]

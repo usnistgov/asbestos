@@ -1,0 +1,7 @@
+Tests for MHD Document Recipient.
+<br /><br />
+Test Patients must be loaded onto server before these tests can be run.  See
+test collection Test Patients.
+<br /><br />
+A new masterIdentifier is allocated and assigned for each List (SS) and DocumentReference
+submitted.

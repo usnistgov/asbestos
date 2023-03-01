@@ -1,4 +1,6 @@
-**Submit** a Provide Document Bundle transaction [ITI-65] containing Comprehensive Metadata to a Document Recipient
+**Setup** Get the document responder base address from a prerequisite PDB test, and use the address to verify no updates.
+
+**Submit** a Provide Document Bundle transaction [ITI-65] containing Minimal Metadata to a Document Recipient
 actor.
 
 **Message contents**: Bundle resource containing a SubmissionSet Type List, a DocumentReference, and a Binary. The standard

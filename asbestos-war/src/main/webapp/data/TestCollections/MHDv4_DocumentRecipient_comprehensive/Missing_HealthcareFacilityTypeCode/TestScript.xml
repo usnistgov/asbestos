@@ -4,6 +4,18 @@
         <name value="expectedFailAssertionIdList"/>
         <defaultValue value="('CMPDR_4'|'TR_1')"/>
     </variable>
+    <variable>
+        <name value="internalPackageSpecificIgValidation"/>
+        <!-- FhirIgName uses the IG package validation -->
+        <expression value="'#{TestCollection.properties:FhirIgName}'"/>
+        <sourceId value="anonymous"/>
+    </variable>
+    <variable>
+        <name value="channelBasedIgValidation"/>
+        <!-- An empty string uses the TestCollection.properties configured channel for external or FTK HAPI FHIR server validation -->
+        <expression value="''"/>
+        <sourceId value="anonymous"/>
+    </variable>
 
     <test>
         <description value="Submit a request containing a PDB and evaluate response."/>
@@ -31,6 +43,12 @@
                     </extension>
                     <extension url="urn:variable-in">
                         <valueString value="expectedFailAssertionIdList"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="''"/> <!-- Use Bundle profile -->
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="internalPackageSpecificIgValidation"/>
                     </extension>
                 </modifierExtension>
             </operation>

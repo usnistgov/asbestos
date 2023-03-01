@@ -1,3 +1,5 @@
+**Setup** Get the document responder base address from a prerequisite PDB test, and use the address to verify no updates.
+
 **Submit** a Provide Document Bundle transaction [ITI-65] containing Comprehensive Metadata to a Document Recipient
 actor.
 

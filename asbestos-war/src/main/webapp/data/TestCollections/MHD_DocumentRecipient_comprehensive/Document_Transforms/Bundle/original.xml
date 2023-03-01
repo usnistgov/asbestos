@@ -9,6 +9,9 @@
         <fullUrl value="urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce01"/>
         <resource>
             <DocumentReference>
+                <meta>
+                    <!--@{DocumentReferenceMetaComprehensiveProfileElement}-->
+                </meta>
                 <contained>
                     <Patient xmlns="http://hl7.org/fhir">
                         <id value="sourcePatient"/>

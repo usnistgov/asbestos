@@ -2,7 +2,7 @@
 
     <variable>
         <name value="expectedFailAssertionIdList"/>
-        <defaultValue value="('RM410_4'|'TR_1')"/>
+        <defaultValue value="('RM4_4'|'TR_1')"/>
     </variable>
     <variable>
         <name value="internalPackageSpecificIgValidation"/>
