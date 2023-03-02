@@ -6,12 +6,12 @@
     <parent>
         <groupId>gov.nist.asbestos</groupId>
         <artifactId>asbestos</artifactId>
-        <version>4.2.0-SNAPSHOT</version><!-- asbts -->
+        <version>4.2.0</version><!-- asbts -->
     </parent>
 
     <artifactId>view</artifactId>
     <packaging>jar</packaging>
-    <version>4.2.0-SNAPSHOT</version><!-- asbts -->
+    <version>4.2.0</version><!-- asbts -->
     <name>view</name>
 
     <build>
