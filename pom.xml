@@ -20,7 +20,7 @@
         <jersey.version>2.33</jersey.version>   <!--     must align with xdstoolkit -->
         <!-- NOTE: Needs to match XDS Toolkit "jackson.version" maven property since introducing the SimulatorBuilder API into Asbestos. Otherwise, fasterxml errors will be thrown due to mismatch libraries. -->
 <!--        <jackson.version>2.11.3</jackson.version>   -->
-        <jackson.version>2.12.6.1</jackson.version>
+        <jackson.version>2.12.7.1</jackson.version>
 
     </properties>
 
