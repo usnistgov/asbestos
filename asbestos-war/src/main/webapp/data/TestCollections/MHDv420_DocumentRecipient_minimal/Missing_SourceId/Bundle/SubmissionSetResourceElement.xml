@@ -1,0 +1,36 @@
+<List>
+    <meta>
+        <profile value="https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.SubmissionSet"/>
+    </meta>
+    <text>
+        <status value="extensions"/>
+        <div xmlns="http://www.w3.org/1999/xhtml">List(SubmissionSet) missing SourceId</div>
+    </text>
+    <identifier>
+        <use value="official"/>
+        <system value="urn:ietf:rfc:3986"/>
+    </identifier>
+    <identifier>
+        <use value="usual"/>
+        <system value="urn:ietf:rfc:3986"/>
+        <value value="urn:oid:1.2.129.6.58.92.88337.4"/>
+    </identifier>
+    <status value="current"/>
+    <mode value="working"/>
+    <code>
+        <coding>
+            <system
+                    value="https://profiles.ihe.net/ITI/MHD/CodeSystem/MHDlistTypes"/>
+            <code value="submissionset"/>
+        </coding>
+    </code>
+    <subject>
+        <reference value="${patientResourceId}"/>
+    </subject>
+    <date value="2021-08-23T22:13:00-05:00"/>
+    <entry>
+        <item>
+            <reference value="urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce01"/>
+        </item>
+    </entry>
+</List>

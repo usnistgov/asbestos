@@ -1,0 +1,209 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <modifierExtension url="urn:module">
+        <extension url="urn:fixture-in">
+            <valueString value="request"/>
+        </extension>
+        <extension url="urn:fixture-in">
+            <valueString value="response"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="pdbBundleProfile"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="igName"/>
+        </extension>
+        <extension url="urn:variable-in">
+            <valueString value="responseResourceType"/>
+        </extension>
+    </modifierExtension>
+
+
+    <id value="MHDv420StructureDefinitionValidation"/>
+    <name value="MHDv420StructureDefinitionValidation"/>
+    <description value="Validation server is the channel Id, which is composed of testSession and channelName, joined by two underscore characters. For example, testSession__channelName. This channel Id will be resolved to a FHIR base address through an internal operation module call."/>
+
+    <variable>
+        <name value="pdbBundleProfile"/>
+        <expression value="''"/>
+        <sourceId value="anonymous"/>
+    </variable>
+    <variable>
+        <name value="igName"/>
+        <!-- FhirIgName uses the IG package validation -->
+        <expression value="'#{TestCollection.properties:FhirIgName}'"/>
+        <sourceId value="anonymous"/>
+    </variable>
+
+    <variable>
+        <name value="validationServerFhirBase"/>
+<!--        <expression value="'test'"/>-->
+        <expression value="Bundle.entry[0].resource.data.ftkDecode('base64')"/>
+        <sourceId value="validationParamsDataBundle"/>
+    </variable>
+    <variable>
+        <name value="requestResourceType"/>
+        <defaultValue value="Bundle"/>
+    </variable>
+    <variable>
+        <name value="responseResourceType"/>
+        <defaultValue value="Bundle"/>
+    </variable>
+    <variable>
+        <name value="theFtkFunctionCodeQueryParameters"/>
+        <expression value="'?' + iif('${igName}'.length()=0,'fn=getFtkChannelBase&amp;FhirValidationChannelId=#{TestCollection.properties:FhirValidationChannelId:DefaultToGlobalServiceProperty}','fn=getFtkValidationBase')"/>
+        <sourceId value="request"/>
+    </variable>
+
+
+    <setup>
+        <modifierExtension url="urn:noErrors"/>
+        <action>
+            <operation>
+                <description value="Gets a bundle with the validation data resources in the same order as the request query parameters."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/InternalFtkRequest.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'ftkFunctionCode'"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="theFtkFunctionCodeQueryParameters"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="'1'"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="validationParamsDataBundle"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+        <action>
+                <assert>
+                    <description value="Is resource type a Binary?"/>
+                    <expression value="Bundle.entry[0].resource.type().name = 'Binary'"/>
+                    <warningOnly value="false"/>
+                </assert>
+        </action>
+        <action>
+                <assert>
+                    <description value="Is content type correct?"/>
+                    <expression value="Bundle.entry[0].resource.contentType = 'text/plain'"/>
+                    <warningOnly value="false"/>
+                </assert>
+        </action>
+        <action>
+                <assert>
+                    <description value="Binary data element exists?"/>
+                    <expression value="Bundle.entry[0].resource.where($this is Binary).data.exists()"/>
+                    <warningOnly value="false"/>
+                </assert>
+        </action>
+    </setup>
+    <test>
+        <modifierExtension url="urn:noErrors"/>
+        <description value="Request resource validation."/>
+        <action>
+            <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+            <assert>
+                <description value="Is Request resource type correct?"/>
+                <resource value="Bundle"/>
+                <sourceId value="request"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <operation>
+                <description value="Test action operation is analyzed using assertions."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/StructureValidation2.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="request"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="validationServerFhirBase"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="requestResourceType"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="pdbBundleProfile"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="igName"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="requestValidationResponse"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+        <description value="Unusual features."/>
+        <action>
+            <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+            <assert>
+                <description value="Is validation OperationOutcome available?"/>
+                <resource value="OperationOutcome"/>
+                <sourceId value="requestValidationResponse"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    <action>
+            <assert id="mhdIgBug_drIdentifier1">
+                <description value="OperationOutcome does not contain the incorrect error on DocumentReference.identifier minimum required = 1. Specification text disagrees with MHD IG StructureDefinition. Assertion failure indicates presence of IG bug."/>
+                <compareToSourceId value="requestValidationResponse"/>
+                <compareToSourceExpression value="OperationOutcome.issue.select($this.severity='error' and $this.diagnostics.startsWith('DocumentReference.identifier: minimum required = 1, but only found 0')).allFalse()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+    <test>
+        <description value="Response resource validation."/>
+        <action>
+            <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
+            <assert>
+                <description value="Is response resource type as expected?"/>
+                <expression value="$this is ${responseResourceType}"/>
+                <operator value="equals"/>
+                <value value="true" />
+                <sourceId value="response"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <operation>
+                <description value="Test action operation is analyzed using assertions."/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/StructureValidation2.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="validationServerFhirBase"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="responseResourceType"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="''"/> <!-- no profile -->
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="igName"/>
+                    </extension>
+                    <extension url="urn:fixture-out">
+                        <valueString value="responseValidationResponse"/>
+                    </extension>
+
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+
+</TestScript>

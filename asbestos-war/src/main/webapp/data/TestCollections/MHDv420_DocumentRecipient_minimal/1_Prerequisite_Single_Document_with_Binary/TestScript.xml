@@ -1,0 +1,69 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <name value="TestScript"/>
+    <description value="TestScript with NIST FHIR Toolkit Extensions. Submit Provide Document Bundle to MHD Document Recipient."/>
+
+    <variable>
+        <name value ="isComprehensiveMetadataExpected"/>
+        <defaultValue value="false"/>
+    </variable>
+    <variable>
+        <name value="getFixtureRequestQueryParams"/>
+        <defaultValue value="?fixtureId=pdb&amp;baseTestCollection=MHD_DocumentRecipient_minimal"/>
+    </variable>
+    <variable>
+        <name value="expectedFixtureResponseBundleEntryCount"/>
+        <defaultValue value="3"/>
+    </variable>
+    <variable>
+        <name value="expectedFixtureResponseSsResourceCount"/>
+        <defaultValue value="1"/>
+    </variable>
+    <variable>
+        <name value="expectedFixtureResponseDocRefCount"/>
+        <defaultValue value="1"/>
+    </variable>
+    <variable>
+        <name value="internalPackageSpecificIgValidation"/>
+        <!-- FhirIgName uses the IG package validation -->
+        <expression value="'#{TestCollection.properties:FhirIgName}'"/>
+        <sourceId value="anonymous"/>
+    </variable>
+    <variable>
+        <name value="channelBasedIgValidation"/>
+        <!-- An empty string uses the TestCollection.properties configured channel for external or FTK HAPI FHIR server validation -->
+        <expression value="''"/>
+        <sourceId value="anonymous"/>
+    </variable>
+
+    <test>
+        <description value="Submit Provide Document Bundle to MHD Document Recipient."/>
+        <action>
+            <operation>
+                <description value="Module usage description"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/MHDPDBSuccess.xml"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="getFixtureRequestQueryParams"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="expectedFixtureResponseBundleEntryCount"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="expectedFixtureResponseSsResourceCount"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="expectedFixtureResponseDocRefCount"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="internalPackageSpecificIgValidation"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+</TestScript>

@@ -1,0 +1,37 @@
+<List>
+    <meta>
+        <profile value="https://profiles.ihe.net/ITI/MHD/StructureDefinition/IHE.MHD.Minimal.SubmissionSet"/>
+    </meta>
+    <text>
+        <status value="extensions"/>
+        <div xmlns="http://www.w3.org/1999/xhtml">List(SubmissionSet) with Patient</div>
+    </text>
+    <extension
+            url="https://profiles.ihe.net/ITI/MHD/StructureDefinition/ihe-sourceId">
+        <valueIdentifier>
+            <value value="urn:oid:1.3.6.1.4.1.21367.2009.1.2.1"/>
+        </valueIdentifier>
+    </extension>
+    <identifier>
+        <use value="official"/>
+        <system value="urn:ietf:rfc:3986"/>
+    </identifier>
+    <status value="current"/>
+    <mode value="working"/>
+    <code>
+        <coding>
+            <system
+                    value="https://profiles.ihe.net/ITI/MHD/CodeSystem/MHDlistTypes"/>
+            <code value="submissionset"/>
+        </coding>
+    </code>
+    <subject>
+        <reference value="${patientResourceId}"/>
+    </subject>
+    <date value="2021-08-23T22:13:00-05:00"/>
+    <entry>
+        <item>
+            <reference value="urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce01"/>
+        </item>
+    </entry>
+</List>
