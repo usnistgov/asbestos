@@ -33,10 +33,10 @@
                     <li>Only the most recent messages will be evaluated.
                         Adjust the count below *.
                         <template v-if="testCollection.endsWith('_DocumentSource_minimal')">
-                        If evaluating minimal metadata test collection run against an Asbestos self-test channel, use at least {{eventsForMinimalClientCollection}} recent events.
+                        If evaluating minimal metadata test collection run against a FHIR Toolkit self-test channel, use at least {{eventsForMinimalClientCollection}} recent events.
                         </template>
                         <template v-if="testCollection.endsWith('_DocumentSource_comprehensive')">
-                        If evaluating comprehensive metadata tests run against an Asbestos self-test channel, use at least {{eventsForComprehensiveClientCollection}} recent events.
+                        If evaluating comprehensive metadata tests run against a FHIR Toolkit self-test channel, use at least {{eventsForComprehensiveClientCollection}} recent events.
                         </template>
                         </li>
                     <li>A test passes if one or more message evaluates correctly.</li>

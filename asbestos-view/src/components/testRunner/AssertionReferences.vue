@@ -1,6 +1,6 @@
 <template>
 <div>
-    <p class="asbtsReferenceHeaderLabel" v-if="referenceMap.length > 0">Asbestos Assertion ID <span class="asbestosAssertionId">{{assertionId}}</span> has {{referenceMap.length}} reference(s):</p>
+    <p class="asbtsReferenceHeaderLabel" v-if="referenceMap.length > 0">FTK Assertion ID <span class="asbestosAssertionId">{{assertionId}}</span> has {{referenceMap.length}} reference(s):</p>
         <ol class="asbtsReferenceBackground">
         <li v-for="(refMap,rmKeyIndex ) in referenceMap" :key="rmKeyIndex" class="asbtsReferenceBackground" >
             <div class="system-error" v-if="Object.keys(referenceTable(refMap)).length===0" :key="rmKeyIndex">
