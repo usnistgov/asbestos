@@ -90,7 +90,7 @@
     </test>
 
     <test>
-    <description value="StructureDefinition based resource validation - server default IG profile."/>
+    <description value="StructureDefinition based resource validation - channel determined IG profile."/>
     <action>
         <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Conditional"/>
         <assert>

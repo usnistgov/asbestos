@@ -36,6 +36,10 @@ This module should not be used or called by any of the MHDv3.x Test Collection T
         <name value="scriptMHDv410"/>
         <defaultValue value="../../MHDv410_Internal/structure_definition_validation/TestScript.xml"/>
     </variable>
+    <variable>
+        <name value="scriptMHDv420"/>
+        <defaultValue value="../../MHDv420_Internal/structure_definition_validation/TestScript.xml"/>
+    </variable>
 
     <test>
         <description value="Structure definition based resource validation."/>
