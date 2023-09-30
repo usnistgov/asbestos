@@ -1,12 +1,7 @@
 package gov.nist.asbestos.mhd.channel;
 
 import gov.nist.asbestos.client.channel.IgNameConstants;
-import gov.nist.asbestos.mhd.transforms.MhdV3x;
-import gov.nist.asbestos.mhd.transforms.MhdV3xCanonicalUriCodes;
-import gov.nist.asbestos.mhd.transforms.MhdV4;
-import gov.nist.asbestos.mhd.transforms.MhdV410;
-import gov.nist.asbestos.mhd.transforms.MhdV410CanonicalUriCodes;
-import gov.nist.asbestos.mhd.transforms.MhdV4CanonicalUriCodes;
+import gov.nist.asbestos.mhd.transforms.*;
 
 import java.util.Objects;
 
@@ -17,7 +12,7 @@ public enum MhdIgImplEnum {
     MHDv3x(IgNameConstants.MHDV_3_X, MhdV3x.class, MhdV3xCanonicalUriCodes.class ),
     MHDv4(IgNameConstants.MHDV_4, MhdV4.class, MhdV4CanonicalUriCodes.class ),
     MHDv410(IgNameConstants.MHDV_410, MhdV410.class, MhdV410CanonicalUriCodes.class ),
-    MHDv420(IgNameConstants.MHDV_420, MhdV410.class, MhdV410CanonicalUriCodes.class );
+    MHDv420(IgNameConstants.MHDV_420, MhdV420.class, MhdV410CanonicalUriCodes.class /* MHD 420 uses same codes as MHD 410 */);
 
     private IgNameConstants igName;
     private Class<? extends MhdIgInterface> mhdImplClass;

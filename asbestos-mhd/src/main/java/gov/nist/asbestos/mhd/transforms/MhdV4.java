@@ -115,7 +115,7 @@ public class MhdV4 implements MhdIgInterface {
             create a  new method to buildRegistryPackageType
          */
 
-        return new MhdV4Common(this, mhdTransforms, canonicalUriCodeEnum).buildSubmissionSet( wrapper, val, vale, idBuilder, channelConfig, codeTranslator, assigningAuthorities);
+        return new MhdV410Common(this, mhdTransforms, canonicalUriCodeEnum).buildSubmissionSet( wrapper, val, vale, idBuilder, channelConfig, codeTranslator, assigningAuthorities);
     }
 
 
