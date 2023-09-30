@@ -1,0 +1,120 @@
+<Bundle xmlns="http://hl7.org/fhir">
+    <id value="xds"/>
+    <meta>
+        <lastUpdated value="2013-07-01T13:11:33Z"/>
+        <!--@{BundleMetaComprehensiveProfileElement}-->
+    </meta>
+    <type value="transaction"/>
+    <entry>
+        <fullUrl value="urn:uuid:1e404af3-077f-4bee-b7a6-a9be97e1ce01"/>
+        <resource>
+            <DocumentReference>
+                <meta>
+                    <!--@{DocumentReferenceMetaComprehensiveProfileElement}-->
+                </meta>
+                <text>
+                    <div xmlns="http://www.w3.org/1999/xhtml">Comment</div>
+                    <status value="empty"/>
+                </text>
+                <contained>
+                    <Patient xmlns="http://hl7.org/fhir">
+                        <id value="sourcePatient"/>
+                        <identifier>
+                            <use value="usual" />
+                            <system value="urn:oid:1.2.132.163" />
+                            <value value="myMRN" />
+                        </identifier>
+                    </Patient>
+                </contained>
+                <status value="current"/>
+                <type>
+                    <coding>
+                        <system value="http://loinc.org"/>
+                        <code value="34895-3"/>
+                        <display value="Education Note"/>
+                    </coding>
+                </type>
+                <category>
+                    <coding>
+                        <system value="urn:oid:1.3.6.1.4.1.19376.1.2.6.1"/>
+                        <code value="REPORTS"/>
+                        <display value="Reports"/>
+                    </coding>
+                </category>
+                <subject>
+                    <reference value="${patientResourceId}"/>
+                </subject>
+                <date value="2015-02-07T13:28:17.239+02:00"/>
+                <securityLabel>
+                    <coding>
+                        <system value="http://terminology.hl7.org/CodeSystem/v3-Confidentiality"/>
+                        <code value="N"/>
+                        <display value="normal"/>
+                    </coding>
+                </securityLabel>
+                <context>
+                    <sourcePatientInfo>
+                        <reference value="#sourcePatient"/>
+                    </sourcePatientInfo>
+                    <practiceSetting>
+                        <coding>
+                            <system value="http://snomed.info/sct"/>
+                            <code value="R-300E3"/>
+                            <display value="Accident and Emergency"/>
+                        </coding>
+                    </practiceSetting>
+                    <facilityType>
+                        <coding>
+                            <system value="http://snomed.info/sct"/>
+                            <code value="264372000"/>
+                            <display value="Pharmacy"/>
+                        </coding>
+                    </facilityType>
+                </context>
+                <content>
+                    <attachment>
+                        <contentType value="text/plain"/>
+                        <url value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e03"/>
+                        <language value="en-US"/>
+                        <creation value="2015-02-07T13:28:17.239+02:00"/>
+                    </attachment>
+                    <format>
+                        <system value="http://ihe.net/fhir/ihe.formatcode.fhir/CodeSystem/formatcode"/>
+                        <code value="urn:ihe:pcc:cm:2008"/>
+                        <display value="Care Management (CM)"/>
+                    </format>
+                </content>
+            </DocumentReference>
+        </resource>
+        <request>
+            <method value="POST"/>
+            <url value="DocumentReference"/>
+        </request>
+    </entry>
+    <entry>
+        <fullUrl value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e02"/>
+        <resource>
+            <!--@{SubmissionSetResourceElement}-->
+        </resource>
+        <request>
+            <method value="POST"/>
+             <!--@{SubmissionSetRequestUrlElement}-->
+        </request>
+    </entry>
+    <entry>
+        <fullUrl value="urn:uuid:3fdc72f4-a11d-4a9d-9260-a9f745779e03"/>
+        <resource>
+            <Binary>
+                <meta>
+                    <lastUpdated value="2013-07-01T13:11:33Z"/>
+                </meta>
+                <contentType value="text/plain"/>
+                <data value="Zm9vYmFy"/>
+            </Binary>
+        </resource>
+        <request>
+            <method value="POST"/>
+            <url value="Binary"/>
+        </request>
+    </entry>
+</Bundle>

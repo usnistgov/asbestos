@@ -6,10 +6,7 @@
         <status value="extensions"/>
         <div xmlns="http://www.w3.org/1999/xhtml">List(SubmissionSet) missing SourceId</div>
     </text>
-    <identifier>
-        <use value="official"/>
-        <system value="urn:ietf:rfc:3986"/>
-    </identifier>
+
     <identifier>
         <use value="usual"/>
         <system value="urn:ietf:rfc:3986"/>

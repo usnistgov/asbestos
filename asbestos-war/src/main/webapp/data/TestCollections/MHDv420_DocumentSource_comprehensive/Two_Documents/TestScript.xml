@@ -1,0 +1,96 @@
+<TestScript xmlns="http://hl7.org/fhir">
+    <id value="mhdv410twoDoc"/>
+    <name value="mhdv410twoDoc"/>
+    <description value="Send valid Provide Document Bundle transaction containing two DocumentReferences. Comprehensive metadata is required. (Irrelevant channel message events, such as GET requests or some internal requests, will be skipped for evaluation and the test status will be undefined.)"/>
+    
+    <variable>
+        <name value="isComprehensiveMetadataExpected"/>
+        <defaultValue value="true"/>
+    </variable>
+    <variable>
+        <name value="responseResourceType"/>
+        <defaultValue value="Bundle"/>
+    </variable>
+    <variable>
+        <name value="pdbBundleProfile"/>
+        <expression value="Bundle.meta.profile[0]"/>
+        <sourceId value="request"/>
+    </variable>
+    <variable>
+        <name value="internalPackageSpecificIgValidation"/>
+        <!-- FhirIgName uses the IG package validation -->
+        <expression value="'#{TestCollection.properties:FhirIgName}'"/>
+        <sourceId value="anonymous"/>
+    </variable>
+    <variable>
+        <name value="channelBasedIgValidation"/>
+        <!-- An empty string uses the TestCollection.properties configured channel for external or FTK HAPI FHIR server validation -->
+        <expression value="''"/>
+        <sourceId value="anonymous"/>
+    </variable>
+
+
+    <test>
+        <description value="FHIR IG based validation. (If a Question icon appears in the status, then this part of the test needs manual review.)"/>
+        <action>
+            <modifierExtension url="urn:asbestos:test:action:mayHaveBugsWhichRequireManualReview"/>
+            <operation>
+                <description value="Module usage description"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/StructureDefinitionValidation.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="request"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="pdbBundleProfile"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="internalPackageSpecificIgValidation"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="responseResourceType"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+        <description value="PDB Validations."/>
+        <action>
+            <operation>
+                <description value="Module usage description"/>
+                <modifierExtension url="https://github.com/usnistgov/asbestos/wiki/TestScript-Import">
+                    <extension url="component">
+                        <valueString value="../../Library/AggregateModule/MHDBundleEvalAggregateResult.xml"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="request"/>
+                    </extension>
+                    <extension url="urn:fixture-in">
+                        <valueString value="response"/>
+                    </extension>
+                    <extension url="urn:variable-in">
+                        <valueString value="isComprehensiveMetadataExpected"/>
+                    </extension>
+                </modifierExtension>
+            </operation>
+        </action>
+    </test>
+    <test>
+<!--        <name value="Evaluations"/> -->
+        <description value="Test specific evaluations."/>
+        <action>
+            <assert>
+                <description value="Request includes two DocumentReferences."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.where(resource.is(FHIR.DocumentReference)).count() = 2"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </test>
+</TestScript>

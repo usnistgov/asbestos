@@ -24,6 +24,10 @@
         <name value="scriptMHDv410"/>
         <defaultValue value="../CheckSubject4.xml"/>
     </variable>
+    <variable>
+        <name value="scriptMHDv420"/>
+        <defaultValue value="../CheckSubject4.xml"/>
+    </variable>
 
     <test>
         <description value="Subject assertions."/>

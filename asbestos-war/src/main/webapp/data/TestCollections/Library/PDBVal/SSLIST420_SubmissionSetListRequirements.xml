@@ -40,6 +40,21 @@
         </action>
 
         <!-- uniqueId is optional in MHD 420  -->
+        <!--
+        submission set uniqueId issue in 4.2.0 ??
+As per https://profiles.ihe.net/ITI/MHD/4.2.0/ITI-65.html#2365412-message-semantics
+The Document Source shall assure all FHIR resource elements are consistent with the Document Sharing metadata requirements as specified for attributes ITI TF-3: Table 4.3.1-3 “Sending Actor Metadata Attribute Optionality”. The Document Source that supports the Comprehensive Metadata or the XDS on FHIR Options shall assure consistency with column “XDS DS”; otherwise, the Document Source shall assure consistency with column “XDR MS”. Except that the Document Source does not need to provide any entryUUID values, as the entryUUID will be populated by the Document Recipient when necessary.
+
+ITI TF-3: Table 4.3.1-3 “Sending Actor Metadata Attribute Optionality” states submission set uniqueId is Required across all actor options. However, the structure definition https://profiles.ihe.net/ITI/MHD/4.2.0/StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html seems to be incorrectly setting cardinality to 0..1 (https://profiles.ihe.net/ITI/MHD/4.2.0/StructureDefinition-IHE.MHD.SubmissionSetUniqueIdIdentifier.html)
+        -->
+        <action>
+            <assert id="SSLIST_4">
+                <description value="uniqueId is required."/>
+                <compareToSourceId value="request"/>
+                <compareToSourceExpression value="Bundle.entry.resource.where($this is List and code.coding.code='submissionset').identifier.where(use='usual' and value.exists()).exists()"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
 
         <action>
             <assert id="SSLIST_5">

@@ -36,6 +36,10 @@
         <name value="scriptMHDv410"/>
         <defaultValue value="../MHDv4/PDBSuccessMain2.xml"/>
     </variable>
+    <variable>
+        <name value="scriptMHDv420"/>
+        <defaultValue value="../MHDv4/PDBSuccessMain2.xml"/>
+    </variable>
 
     <test>
         <description value="Bundle evaluation assertions."/>

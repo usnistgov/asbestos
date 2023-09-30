@@ -23,10 +23,6 @@
         </valueIdentifier>
     </extension>
     <identifier>
-        <use value="official"/>
-        <system value="urn:ietf:rfc:3986"/>
-    </identifier>
-    <identifier>
         <use value="usual"/>
         <system value="urn:ietf:rfc:3986"/>
         <value value="urn:oid:1.2.129.6.58.92.88337.4"/>
