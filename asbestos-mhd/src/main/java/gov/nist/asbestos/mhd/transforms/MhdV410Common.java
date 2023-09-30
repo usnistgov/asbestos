@@ -23,15 +23,16 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-public class MhdV4Common {
-    private final String SUBMISSION_SET_PROFILE_DOCREF_SUFFIX =  "StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html#profile";
+public class MhdV410Common {
+    public static final String SUBMISSION_SET_PROFILE_DOCREF_SUFFIX =  "StructureDefinition-IHE.MHD.Minimal.SubmissionSet.html#profile";
+    public static final String SUBMISSION_SET_XDS_OBJECT_TYPE = "urn:oasis:names:tc:ebxml-regrep:ObjectType:RegistryObject:RegistryPackage";
     private MhdIgInterface mhdImpl;
     private MhdTransforms mhdTransforms;
     private CanonicalUriCodeEnum canonicalUriCodeEnum;
-    private static Logger logger = Logger.getLogger(MhdV4Common.class.getName());
+    private static Logger logger = Logger.getLogger(MhdV410Common.class.getName());
 
 
-    public MhdV4Common(MhdIgInterface mhdImpl, MhdTransforms mhdTransforms, CanonicalUriCodeEnum canonicalUriCodeEnum) {
+    public MhdV410Common(MhdIgInterface mhdImpl, MhdTransforms mhdTransforms, CanonicalUriCodeEnum canonicalUriCodeEnum) {
         this.mhdImpl = mhdImpl;
         this.mhdTransforms = mhdTransforms;
         this.canonicalUriCodeEnum = canonicalUriCodeEnum;
