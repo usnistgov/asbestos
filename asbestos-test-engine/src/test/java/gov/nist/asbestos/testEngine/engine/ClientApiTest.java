@@ -39,6 +39,8 @@ class ClientApiTest {
         List<String> errors = new TestEngine(testDef, null)
                 .setVal(new Val())
                 .setTestSession("default")
+                .setTestCollection("default")
+                .setTestId("default")
                 .setExternalCache(ec.externalCache)
                 .runEval(requestWrapper, responseWrapper, false)
                 .getTestReportErrors();

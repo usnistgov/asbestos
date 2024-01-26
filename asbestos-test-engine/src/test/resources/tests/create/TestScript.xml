@@ -5,6 +5,8 @@
     <name value="test1"/>
     <status value="draft"/>
     <fixture id="example-patient">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
         <resource>
             <reference value="Patient/patient-example.xml"/>
         </resource>

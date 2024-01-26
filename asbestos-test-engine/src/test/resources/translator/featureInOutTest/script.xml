@@ -5,11 +5,15 @@
 
     <!-- Static Fixtures -->
     <fixture id="pdb-bundle">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
         <resource>
             <reference value="Bundle/pdb.xml"/>
         </resource>
     </fixture>
     <fixture id="patient">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
         <resource>
             <reference value="Patient/Alex_Alder.json"/>
         </resource>

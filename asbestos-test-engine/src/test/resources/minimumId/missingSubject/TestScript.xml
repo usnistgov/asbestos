@@ -1,10 +1,17 @@
 <TestScript xmlns="http://hl7.org/fhir">
+    <url value="http://emxample.org/fhir/TestScript/minimumId"/>
+    <name value="MinimumIdMissingSubject"/>
+    <status value="draft"/>
     <fixture id="minimumId">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
         <resource>
             <reference value="DocumentReference/DocRef2.xml"/>
         </resource>
     </fixture>
     <fixture id="docRef">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
         <resource>
             <reference value="DocumentReference/DocRef1.xml"/>
         </resource>

@@ -1,19 +1,26 @@
 <TestScript xmlns="http://hl7.org/fhir">
+    <url value="http://emxample.org/fhir/TestScript/minimumIdhasExtra"/>
+    <name value="MinimumIdHasExtra"/>
+    <status value="draft"/>
     <fixture id="minimumId">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
         <resource>
-            <reference value="DocumentReference/DocRef2.xml"/>
+            <reference value="DocumentReference/DocRef1.xml"/>
         </resource>
     </fixture>
     <fixture id="docRef">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
         <resource>
-            <reference value="DocumentReference/DocRef1.xml"/>
+            <reference value="DocumentReference/DocRef2.xml"/>
         </resource>
     </fixture>
     <test>
         <action>
             <assert>
-                <minimumId value="docRef"/>
-                <sourceId value="minimumId"/>
+                <minimumId value="minimumId"/>
+                <sourceId value="docRef"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

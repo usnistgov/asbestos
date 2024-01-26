@@ -48,8 +48,18 @@ class FixtureTest {
         Val val = new Val();
         File testDef = Paths.get(getClass().getResource("/fixtures/fixtureFromTestDefinition/TestScript.xml").toURI()).getParent().toFile();
         URI sut = new URI("http://localhost:7080/fhir");
-        TestEngine testEngine = new TestEngine(testDef, sut, null).setVal(val);
-        testEngine.runTest();
+
+
+
+        File externalCache = Paths.get(getClass().getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
+
+        File test1 = Paths.get(getClass().getResource("/setup/write/createPatient/TestScript.xml").toURI()).getParent().toFile();
+        TestEngine testEngine = new TestEngine(test1, sut, null)
+                .setTestSession(this.getClass().getSimpleName())
+                .setChannelId(this.getClass().getSimpleName()+"__default")
+                .setExternalCache(externalCache)
+                .setVal(val)
+                .runTest();
 
         if (val.hasErrors())
             fail(ValFactory.toJson(new ValErrors(val)));
@@ -68,7 +78,16 @@ class FixtureTest {
         Val val = new Val();
         File testDef = Paths.get(getClass().getResource("/fixtures/fixtureFromBadTestDefinition/TestScript.xml").toURI()).getParent().toFile();
         URI sut = new URI("http://localhost:7080/fhir");
-        TestEngine testEngine = new TestEngine(testDef, sut, null).setVal(val).runTest();
+        File externalCache = Paths.get(getClass().getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
+
+        File test1 = Paths.get(getClass().getResource("/setup/write/createPatient/TestScript.xml").toURI()).getParent().toFile();
+        TestEngine testEngine = new TestEngine(test1, sut, null)
+                .setTestSession(this.getClass().getSimpleName())
+                .setChannelId(this.getClass().getSimpleName()+"__default")
+                .setExternalCache(externalCache)
+                .setVal(val)
+                .runTest();
+
         System.out.println(testEngine.getTestReportAsJson());
         assertTrue(testEngine.hasError());
     }
