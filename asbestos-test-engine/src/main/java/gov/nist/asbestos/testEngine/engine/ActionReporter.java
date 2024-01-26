@@ -42,7 +42,7 @@ class ActionReporter implements TestDef {
                                    Reporter reporter, TestScript.SetupActionOperationComponent op) {
         String request = "";
         if (wrapper != null) {
-            String url = wrapper.getHttpBase().getUri().toString();
+            String url = (wrapper.getHttpBase().getUri() != null ? wrapper.getHttpBase().getUri().toString() : "");
             request = "### " + wrapper.getHttpBase().getVerb() + " [" + url + "](" + url + ")";
         }
 

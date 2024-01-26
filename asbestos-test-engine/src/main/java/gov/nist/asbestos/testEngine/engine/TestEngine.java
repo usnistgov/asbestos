@@ -286,6 +286,42 @@ public class TestEngine  implements TestDef {
         return errors;
     }
 
+    public List<String> getTestReportWarnings() {
+        List<String> errors = new ArrayList<>();
+        if (testReport.hasExtension()) {
+            for (Extension extension : testReport.getExtension()) {
+                if (extension.getUrl().equals(ExtensionDef.failure)) {
+                    errors.add(extension.getValue().toString());
+                }
+            }
+        }
+        TestReport.TestReportSetupComponent testComponent = testReport.getSetup();
+        for (TestReport.SetupActionComponent actionComponent : testComponent.getAction()) {
+            if (actionComponent.hasAssert()) {
+                TestReport.SetupActionAssertComponent assertComponent = actionComponent.getAssert();
+                if (assertComponent.hasResult()) {
+                    TestReport.TestReportActionResult actionResult = assertComponent.getResult();
+                    if (actionResult.equals(TestReport.TestReportActionResult.WARNING))
+                        errors.add(assertComponent.getMessage());
+                }
+            }
+        }
+
+        for (TestReport.TestReportTestComponent testComponent1 : testReport.getTest()) {
+            for (TestReport.TestActionComponent actionComponent : testComponent1.getAction()) {
+                if (actionComponent.hasAssert()) {
+                    TestReport.SetupActionAssertComponent assertComponent = actionComponent.getAssert();
+                    if (assertComponent.hasResult()) {
+                        TestReport.TestReportActionResult actionResult = assertComponent.getResult();
+                        if (actionResult.equals(TestReport.TestReportActionResult.WARNING))
+                            errors.add(assertComponent.getMessage());
+                    }
+                }
+            }
+        }
+        return errors;
+    }
+
     public TestReport returnExceptionAsTestReport(Throwable t) {
         testReport = new TestReport();
         addTerminalFailureToTestReport(t.toString());
@@ -459,7 +495,7 @@ public class TestEngine  implements TestDef {
                 testScript = loadTestScript(testDef, testScriptName);
                 String path = testScript.getName();
                 String name = "";
-                if (path.contains(File.separator)) {
+                if (path!=null && path.contains(File.separator)) {
                     String[] parts = path.split(Pattern.quote(File.separator));
                     name = parts[parts.length - 2];  // testId
                 } else
@@ -477,7 +513,6 @@ public class TestEngine  implements TestDef {
                 } else {
                     def = new File(testDef, testScriptName).toString();
                 }
-
                 testReport.setTestScript(new Reference(def));
             } else {
                 ModularScripts modularScripts =  modularEngine.getModularScripts();
@@ -1602,7 +1637,7 @@ public class TestEngine  implements TestDef {
         InputStream is = null;
         try {
             is = new FileInputStream(location);
-            IParser parser = (location.toString().endsWith("xml") ? ParserBase.getFhirContext().newXmlParser() : ParserBase.getFhirContext().newJsonParser());
+            IParser parser = (location.getName().endsWith("xml") ? ParserBase.getFhirContext().newXmlParser() : ParserBase.getFhirContext().newJsonParser());
             IBaseResource resource = parser.parseResource(is);
             assert resource instanceof TestScript;
             TestScript testScript = (TestScript) resource;

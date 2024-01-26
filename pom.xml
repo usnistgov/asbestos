@@ -43,7 +43,7 @@
             </activation>
             <properties>
                 <build.profile.id>Sunil</build.profile.id>
-                <toolkitApiVersion>7.8.0-SNAPSHOT</toolkitApiVersion>
+                <toolkitApiVersion>7.10.0</toolkitApiVersion>
                 <itTestsExternalCache>/C:/Users/skb1/ec/asbts-it-tests</itTestsExternalCache>
                 <!-- itTestsExternalCache:
                 Remember to copy the environment directory from the ec_shared directory, otherwise, some it-tests will fail due to missing codes.xml file.
@@ -123,7 +123,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <version>1.9.5</version>
+            <version>1.10.19</version>
             <scope>test</scope>
         </dependency>
         <dependency>

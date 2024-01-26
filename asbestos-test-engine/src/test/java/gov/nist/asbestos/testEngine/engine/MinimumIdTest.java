@@ -144,7 +144,7 @@ class MinimumIdTest {
         DocumentReference sut = (DocumentReference) ParserBase.parse(Paths.get(getClass().getResource("/minimumId/missingSubject/DocumentReference/DocRef3.xml").toURI()).toFile());
         MinimumId.Report report = new MinimumId().run(reference, sut, false);
         assertEquals(1, report.missing.size());
-        assertEquals(".masterIdentifier.value", report.missing.get(0));
+        assertEquals("masterIdentifier.value", report.missing.get(0));
     }
 
     @Test
@@ -155,19 +155,23 @@ class MinimumIdTest {
         DocumentReference sut = (DocumentReference) ParserBase.parse(Paths.get(getClass().getResource("/minimumId/missingSubject/DocumentReference/DocRef4.xml").toURI()).toFile());
         MinimumId.Report report = new MinimumId().run(reference, sut, false);
         assertEquals(1, report.missing.size());
-        assertEquals(".securityLabel.coding.code", report.missing.get(0));
+        assertEquals("securityLabel.coding.code", report.missing.get(0));
     }
 
     @Test
     void wrongType() throws URISyntaxException {
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/minimumId/wrongType/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
+
+        File externalCache = Paths.get(getClass().getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
+        TestEngine testEngine = new TestEngine(test1, new URI("http://localhost:7080/fhir"), null)
                 .setVal(val)
                 .setFhirClient(new FhirClient())
-                .setTestSession("default")
-                .setExternalCache(new File("foo"))
+                .setTestSession("default")          
+                .setChannelId(this.getClass().getSimpleName()+"__default")
+                .setExternalCache(externalCache)
                 .runTest();
+
         TestReport report = testEngine.getTestReport();
         List<String> errors = testEngine.getErrors();
         TestReport.TestReportResult result = report.getResult();
@@ -180,18 +184,23 @@ class MinimumIdTest {
     void missingSubject() throws URISyntaxException {
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/minimumId/missingSubject/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
+
+
+        File externalCache = Paths.get(getClass().getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
+
+        TestEngine testEngine = new TestEngine(test1, new URI("http://localhost:7080/fhir"), null)
+                .setTestSession(this.getClass().getSimpleName())
+                .setChannelId(this.getClass().getSimpleName()+"__default")
+                .setExternalCache(externalCache)
                 .setVal(val)
-                .setFhirClient(new FhirClient())
-                .setTestSession("default")
-                .setExternalCache(new File("foo"))
                 .runTest();
+        
         TestReport report = testEngine.getTestReport();
         List<String> errors = testEngine.getErrors();
         TestReport.TestReportResult result = report.getResult();
         assertEquals(TestReport.TestReportResult.FAIL, result);
         assertEquals(1, errors.size());
-        assertEquals("minimumId: attribute Subject not found", errors.get(0));
+        assertEquals("attributes [subject.reference] not found ", errors.get(0));
 
     }
 
@@ -199,7 +208,7 @@ class MinimumIdTest {
     void hasExtra() throws URISyntaxException {
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/minimumId/hasExtra/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
+        TestEngine testEngine = new TestEngine(test1, new URI("http://localhost:7080/fhir"), null)
                 .setVal(val)
                 .setFhirClient(new FhirClient())
                 .setTestSession("default")

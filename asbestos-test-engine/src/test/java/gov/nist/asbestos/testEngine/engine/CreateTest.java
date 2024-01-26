@@ -21,6 +21,8 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Matchers.any;
@@ -30,6 +32,8 @@ import static org.mockito.Mockito.when;
 
 class CreateTest {
 
+    private static Logger log = Logger.getLogger(CreateTest.class.getName());
+
     @Test
     void createPatient() throws URISyntaxException {
         FhirClient fhirClientMock = mock(FhirClient.class);
@@ -37,12 +41,22 @@ class CreateTest {
         HttpPost poster = new HttpPost();
         poster.setStatus(200);
         wrapper.setHttpBase(poster);
+        Patient patient = new Patient().addName(new HumanName().setFamily("Flintstone"));
+        wrapper.setResource(patient);
+        String url = "http://localhost:9999/fhir/Patient/45";
+        poster.setLocation(url);
+        wrapper.setRef(new Ref(url));
 
         when(fhirClientMock.writeResource(any(BaseResource.class), any(Ref.class), eq(Format.XML), any(Map.class))).thenReturn(wrapper);
 
         Val val = new Val();
+        File externalCache = Paths.get(getClass().getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
+
         File test1 = Paths.get(getClass().getResource("/setup/write/createPatient/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
+        TestEngine testEngine = new TestEngine(test1, new URI("http://localhost:9999/fhir"), null)
+                .setTestSession(this.getClass().getSimpleName())
+                .setChannelId(this.getClass().getSimpleName()+"__default")
+                .setExternalCache(externalCache)
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
                 .runTest();
@@ -78,7 +92,12 @@ class CreateTest {
 
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/setup/writeread/createPatient/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
+        File externalCache = Paths.get(getClass().getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
+
+        TestEngine testEngine = new TestEngine(test1, new URI("http://localhost:9999/fhir"), null)
+                .setTestSession(this.getClass().getSimpleName())
+                .setChannelId(this.getClass().getSimpleName()+"__default")
+                .setExternalCache(externalCache)
                 .setVal(val)
                 .setFhirClient(fhirClientMock);
 
@@ -96,6 +115,6 @@ class CreateTest {
     private void printErrors(List<String> errors) {
         if (errors.isEmpty())
             return;
-        System.out.println("Errors:\n" + errors);
+        log.log(Level.SEVERE, "" + errors);
     }
 }

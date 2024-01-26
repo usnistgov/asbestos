@@ -93,7 +93,7 @@ class FhirPathTest {
     @Test
     void manifestInBundle3() {
         Bundle bundle = loadBundle("/pdb/request.xml");
-        String match = FhirPathEngineBuilder.evalForString(bundle, "Bundle.entry.resource.where(status = 'current')");
+        String match = FhirPathEngineBuilder.evalForString(bundle, "Bundle.entry.resource.where(status = 'current').exists()");
         assertEquals("true", match);
     }
 

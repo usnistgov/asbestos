@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <TestScript xmlns="http://hl7.org/fhir">
+<url value="http://emxample.org/fhir/TestScript/createPatient"/>
     <name value="createPatient"/>
+<status value="draft"/>
     <fixture id="example-patient">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
         <resource>
             <reference value="Patient/patient-example.xml"/>
         </resource>
@@ -15,13 +19,14 @@
     <setup>
         <action>
             <operation>
-                <label value="create"/>
                 <type>
                     <code value="create"/>
                 </type>
+                <label value="create"/>
+                <encodeRequestUrl value="false" />
+                <responseId value="R1"/>
                 <sourceId value="example-patient"/>
                 <url value="http://localhost:9999/fhir/Patient"/>
-                <responseId value="R1"/>
             </operation>
         </action>
     </setup>
@@ -32,6 +37,7 @@
                     <code value="read"/>
                 </type>
                 <accept value="json"/>
+                <encodeRequestUrl value="false" />
                 <responseId value="R2"/>
                 <url value="${V1}"/>
             </operation>
@@ -44,8 +50,8 @@
         </action>
         <action>
             <assert>
-                <sourceId value="R7"/>
                 <response value="okay"/>
+                <sourceId value="R7"/>
                 <warningOnly value="false"/>
             </assert>
         </action>
