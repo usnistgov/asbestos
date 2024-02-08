@@ -1,5 +1,6 @@
 package gov.nist.asbestos.testEngine.engine;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ParserBase;
@@ -11,6 +12,8 @@ import gov.nist.asbestos.client.debug.TestScriptDebugState;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
@@ -65,6 +68,7 @@ public class TestEngine  implements TestDef {
     private final FixtureMgr fixtureMgr = new FixtureMgr();
     private Val val;
     private ValE engineVal;
+    private ValidationClient validationClient = null;
     private FhirClient fhirClient = null;
     private FhirClient fhirClientForFixtures;
     private List<String> errors;
@@ -128,6 +132,9 @@ public class TestEngine  implements TestDef {
         if (moduleIds != null) {
             this.moduleIds.addAll(moduleIds);
         }
+        ServicePropertiesEnum key = ServicePropertiesEnum.FHIR_VALIDATION_SERVER;
+        String fhirValidationServer = ServiceProperties.getInstance().getPropertyOrThrow(key);
+        validationClient = new ValidationClient(FhirContext.forR4Cached(), fhirValidationServer);
     }
 
     public TestEngine setFixtures(Map<String, FixtureComponent> fixtures) {
@@ -890,7 +897,7 @@ public class TestEngine  implements TestDef {
                             .setExternalVariables(externalVariables)
                             .setVal(vale)
                             .setOpReport(report))
-//                    .setTestReport(testReport)
+                    .setTestReport(testReport)
                     .setTestScript(testScript)
                     .setIsRequest(isRequest);
             runner
@@ -1802,6 +1809,15 @@ public class TestEngine  implements TestDef {
 
     public TestEngine setFhirClient(FhirClient fhirClient) {
         this.fhirClient = fhirClient;
+        return this;
+    }
+
+    public ValidationClient getValidationClient() {
+        return this.validationClient;
+    }
+
+    public TestEngine setValidationClient(ValidationClient validationClient) {
+        this.validationClient = validationClient;
         return this;
     }
 

@@ -9,6 +9,7 @@ import gov.nist.asbestos.testEngine.engine.fixture.UnregisteredFixtureComponent;
 import org.hl7.fhir.r4.model.*;
 
 import java.util.Objects;
+import java.util.logging.Logger;
 
 public class AssertionRunner implements AssertionContext {
     private String label;
@@ -22,6 +23,9 @@ public class AssertionRunner implements AssertionContext {
     private String testCollectionId = null;
     private String testId = null;
     private TestEngine testEngine = null;
+    private TestReport testReport = null;
+    private static final Logger log = Logger.getLogger(AssertionRunner.class.getName());
+
 
     AssertionRunner(FixtureMgr fixtureMgr) {
         Objects.requireNonNull(fixtureMgr);
@@ -245,9 +249,11 @@ public class AssertionRunner implements AssertionContext {
             if (as.hasExpression()) return ExpressionAssertion.run(this);
 
             if (as.hasRequestMethod()) return RequestMethodAssertion.run(this);
+            
+            if (as.hasValidateProfileId()) return ValidateProfileAssertion.run(this);
 
         } catch (Exception ex) {
-
+            log.severe("AssertionRunner: " + ex.toString());
         } finally {
             // add context to report
             testEngine.reportAssertion(new Reporter(val, assertReport, "", ""), as, source);
@@ -352,6 +358,11 @@ public class AssertionRunner implements AssertionContext {
         return this;
     }
 
+    public AssertionRunner setTestReport(TestReport testReport) {
+        this.testReport = testReport;
+        return this;
+    }
+
     public TestDef getTestDef() {
         return testEngine;
     }
@@ -411,4 +422,16 @@ public class AssertionRunner implements AssertionContext {
     public FixtureMgr getFixtureMgr() {
         return fixtureMgr;
     }
+
+    @Override
+    public String getProfile(String id) {
+        Reference profile = testScript.getProfile().stream().filter(p -> p.getId().equals(id)).findFirst().orElse(null);
+        return profile != null ? profile.getReference() : null;
+    }
+
+    @Override
+    public TestReport getTestReport() {
+        return this.testReport;
+    }
+
 }

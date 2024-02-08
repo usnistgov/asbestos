@@ -9,6 +9,9 @@
             <reference value="Patient/patient-example.xml"/>
         </resource>
     </fixture>
+    <profile id="patient-profile">
+        <reference value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+    </profile>
     <variable>
         <name value="V1"/>
         <headerField value="Location"/>
@@ -47,6 +50,12 @@
         <action>
             <assert>
                 <response value="okay"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+        <action>
+            <assert>
+                <validateProfileId value="patient-profile"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

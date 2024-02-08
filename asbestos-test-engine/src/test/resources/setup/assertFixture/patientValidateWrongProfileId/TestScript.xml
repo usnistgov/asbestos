@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<TestScript xmlns="http://hl7.org/fhir">
+    <id value="good"/>
+    <name value="good"/>
+    <fixture id="example-patient">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
+        <resource>
+            <reference value="Patient/patient-example.xml"/>
+        </resource>
+    </fixture>
+    <profile id="patient-profile">
+        <reference value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+    </profile>
+    <setup>
+        <action>
+            <assert>
+                <sourceId value="example-patient"/>
+                <validateProfileId value="patient-profile-wrong"/>
+                <warningOnly value="false"/>
+            </assert>
+        </action>
+    </setup>
+</TestScript>
