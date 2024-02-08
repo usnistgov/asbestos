@@ -6,6 +6,7 @@ import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
 import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.validation.Val;
+
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
@@ -33,6 +34,7 @@ class ReadTest {
         FhirClient fhirClientMock = mock(FhirClient.class);
         ResourceWrapper wrapper = new ResourceWrapper();
         HttpPost poster = new HttpPost();
+        poster.setUri(new URI("http://localhost:9999/fhir/Patient"));
         poster.setStatus(200);
         wrapper.setHttpBase(poster);
         Patient patient = new Patient().addName(new HumanName().setFamily("Fred"));
@@ -45,16 +47,23 @@ class ReadTest {
         when(fhirClientMock.writeResource(any(BaseResource.class), any(Ref.class), eq(Format.XML), any(Map.class))).thenReturn(wrapper);
         when(fhirClientMock.getFormat()).thenReturn(Format.XML);
         Map<String, String> headers = new HashMap<>();
+        headers.put("accept", "application/fhir+json; fhirVersion=4.0");
         headers.put("accept-charset", "utf-8");
-        headers.put("accept", "json");
         when(fhirClientMock.readResource(new Ref(url), headers)).thenReturn(wrapper);
+        File externalCache = Paths.get(getClass().getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
 
+        
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/variable/createread/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
+        TestEngine testEngine = new TestEngine(test1, new URI("http://localhost:9999/fhir"), null)
+                .setTestSession(this.getClass().getSimpleName())
+                .setChannelId(this.getClass().getSimpleName()+"__default")
+                .setExternalCache(externalCache)
                 .setVal(val)
-                .setFhirClient(fhirClientMock)
-                .runTest();
+                .setFhirClient(fhirClientMock);
+        
+        testEngine.runTest();
+        
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
         assertEquals(0, errors.size());

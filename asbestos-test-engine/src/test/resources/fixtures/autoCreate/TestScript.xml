@@ -6,6 +6,7 @@
     <status value="draft"/>
     <fixtureMgr id="example-patient">
         <autocreate value="true"/>
+        <autodelete value="true"/>
         <resource>
             <reference value="Patient/patient-example.xml"/>
         </resource>

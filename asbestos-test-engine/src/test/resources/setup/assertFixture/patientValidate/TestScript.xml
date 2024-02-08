@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <TestScript xmlns="http://hl7.org/fhir">
-    <name value="createPatient"/>
+    <id value="good"/>
+    <name value="good"/>
     <fixture id="example-patient">
         <autocreate value="false"/>
         <autodelete value="false"/>
@@ -9,20 +10,14 @@
             <reference value="Patient/patient-example.xml"/>
         </resource>
     </fixture>
+    <profile id="patient-profile">
+        <reference value="http://hl7.org/fhir/StructureDefinition/Patient"/>
+    </profile>
     <setup>
         <action>
-            <operation>
-                <label value="create"/>
-                <type>
-                    <code value="create"/>
-                </type>
-                <sourceId value="example-patient"/>
-                <url value="http://localhost:9999/fhir/Patient"/>
-            </operation>
-        </action>
-        <action>
             <assert>
-                <response value="okay"/>
+                <sourceId value="example-patient"/>
+                <validateProfileId value="patient-profile"/>
                 <warningOnly value="false"/>
             </assert>
         </action>

@@ -8,19 +8,25 @@ import gov.nist.asbestos.http.operations.HttpPost;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
 import gov.nist.asbestos.testEngine.engine.fixture.UnregisteredFixtureComponent;
+
+import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.TestReport;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Matchers.any;
@@ -30,22 +36,42 @@ import static org.mockito.Mockito.when;
 
 class CreateTest {
 
+    private static Logger log = Logger.getLogger(CreateTest.class.getName());
+
     @Test
-    void createPatient() throws URISyntaxException {
+    void createPatient() throws URISyntaxException, FHIRFormatError, IOException {
         FhirClient fhirClientMock = mock(FhirClient.class);
         ResourceWrapper wrapper = new ResourceWrapper();
         HttpPost poster = new HttpPost();
         poster.setStatus(200);
         wrapper.setHttpBase(poster);
+        Patient patient = new Patient().addName(new HumanName().setFamily("Flintstone"));
+        wrapper.setResource(patient);
+        String url = "http://localhost:9999/fhir/Patient/45";
+        poster.setLocation(url);
+        wrapper.setRef(new Ref(url));
 
         when(fhirClientMock.writeResource(any(BaseResource.class), any(Ref.class), eq(Format.XML), any(Map.class))).thenReturn(wrapper);
 
         Val val = new Val();
+        File externalCache = Paths.get(getClass().getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
+
+        ValidationClient validationClient = mock(ValidationClient.class);
+        String response = " { \"resourceType\": \"OperationOutcome\",  \"id\": \"cc25118e-e958-4a6c-a179-bc022cd46b78\", \"issue\": [ { \"severity\": \"information\", \"code\": \"informational\", \"diagnostics\": \"No fatal or error issues detected, the validation has passed\" } ] }";
+        OperationOutcome  oc = (OperationOutcome) new org.hl7.fhir.r4.formats.JsonParser().parse(response);
+        when(validationClient.validate(any(String.class), any(String.class))).thenReturn(oc);
+
+
         File test1 = Paths.get(getClass().getResource("/setup/write/createPatient/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
+        TestEngine testEngine = new TestEngine(test1, new URI("http://localhost:9999/fhir"), null)
+                .setTestSession(this.getClass().getSimpleName())
+                .setChannelId(this.getClass().getSimpleName()+"__default")
+                .setExternalCache(externalCache)
                 .setVal(val)
                 .setFhirClient(fhirClientMock)
+                .setValidationClient(validationClient)
                 .runTest();
+
         System.out.println(testEngine.getTestReportAsJson());
         List<String> errors = testEngine.getErrors();
         printErrors(errors);
@@ -78,7 +104,12 @@ class CreateTest {
 
         Val val = new Val();
         File test1 = Paths.get(getClass().getResource("/setup/writeread/createPatient/TestScript.xml").toURI()).getParent().toFile();
-        TestEngine testEngine = new TestEngine(test1, new URI(""), null)
+        File externalCache = Paths.get(getClass().getResource("/external_cache/findme.txt").toURI()).getParent().toFile();
+
+        TestEngine testEngine = new TestEngine(test1, new URI("http://localhost:9999/fhir"), null)
+                .setTestSession(this.getClass().getSimpleName())
+                .setChannelId(this.getClass().getSimpleName()+"__default")
+                .setExternalCache(externalCache)
                 .setVal(val)
                 .setFhirClient(fhirClientMock);
 
@@ -96,6 +127,6 @@ class CreateTest {
     private void printErrors(List<String> errors) {
         if (errors.isEmpty())
             return;
-        System.out.println("Errors:\n" + errors);
+        log.log(Level.SEVERE, "" + errors);
     }
 }

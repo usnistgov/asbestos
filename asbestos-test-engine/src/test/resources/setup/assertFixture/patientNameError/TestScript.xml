@@ -3,6 +3,8 @@
 <TestScript xmlns="http://hl7.org/fhir">
     <name value="patientNameError"/>
     <fixture id="example-patient">
+        <autocreate value="false"/>
+        <autodelete value="false"/>
         <resource>
             <reference value="Patient/patient-example.xml"/>
         </resource>

@@ -1,5 +1,6 @@
 package gov.nist.asbestos.testEngine.engine;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import gov.nist.asbestos.client.Base.EC;
 import gov.nist.asbestos.client.Base.ParserBase;
@@ -11,6 +12,8 @@ import gov.nist.asbestos.client.debug.TestScriptDebugState;
 import gov.nist.asbestos.client.resolver.Ref;
 import gov.nist.asbestos.client.resolver.ResourceCacheMgr;
 import gov.nist.asbestos.client.resolver.ResourceWrapper;
+import gov.nist.asbestos.serviceproperties.ServiceProperties;
+import gov.nist.asbestos.serviceproperties.ServicePropertiesEnum;
 import gov.nist.asbestos.simapi.validation.Val;
 import gov.nist.asbestos.simapi.validation.ValE;
 import gov.nist.asbestos.testEngine.engine.fixture.FixtureComponent;
@@ -65,6 +68,7 @@ public class TestEngine  implements TestDef {
     private final FixtureMgr fixtureMgr = new FixtureMgr();
     private Val val;
     private ValE engineVal;
+    private ValidationClient validationClient = null;
     private FhirClient fhirClient = null;
     private FhirClient fhirClientForFixtures;
     private List<String> errors;
@@ -128,6 +132,9 @@ public class TestEngine  implements TestDef {
         if (moduleIds != null) {
             this.moduleIds.addAll(moduleIds);
         }
+        ServicePropertiesEnum key = ServicePropertiesEnum.FHIR_VALIDATION_SERVER;
+        String fhirValidationServer = ServiceProperties.getInstance().getPropertyOrThrow(key);
+        validationClient = new ValidationClient(FhirContext.forR4Cached(), fhirValidationServer);
     }
 
     public TestEngine setFixtures(Map<String, FixtureComponent> fixtures) {
@@ -278,6 +285,42 @@ public class TestEngine  implements TestDef {
                         TestReport.TestReportActionResult actionResult = assertComponent.getResult();
                         if (actionResult.equals(TestReport.TestReportActionResult.ERROR) ||
                                 actionResult.equals(TestReport.TestReportActionResult.FAIL))
+                            errors.add(assertComponent.getMessage());
+                    }
+                }
+            }
+        }
+        return errors;
+    }
+
+    public List<String> getTestReportWarnings() {
+        List<String> errors = new ArrayList<>();
+        if (testReport.hasExtension()) {
+            for (Extension extension : testReport.getExtension()) {
+                if (extension.getUrl().equals(ExtensionDef.failure)) {
+                    errors.add(extension.getValue().toString());
+                }
+            }
+        }
+        TestReport.TestReportSetupComponent testComponent = testReport.getSetup();
+        for (TestReport.SetupActionComponent actionComponent : testComponent.getAction()) {
+            if (actionComponent.hasAssert()) {
+                TestReport.SetupActionAssertComponent assertComponent = actionComponent.getAssert();
+                if (assertComponent.hasResult()) {
+                    TestReport.TestReportActionResult actionResult = assertComponent.getResult();
+                    if (actionResult.equals(TestReport.TestReportActionResult.WARNING))
+                        errors.add(assertComponent.getMessage());
+                }
+            }
+        }
+
+        for (TestReport.TestReportTestComponent testComponent1 : testReport.getTest()) {
+            for (TestReport.TestActionComponent actionComponent : testComponent1.getAction()) {
+                if (actionComponent.hasAssert()) {
+                    TestReport.SetupActionAssertComponent assertComponent = actionComponent.getAssert();
+                    if (assertComponent.hasResult()) {
+                        TestReport.TestReportActionResult actionResult = assertComponent.getResult();
+                        if (actionResult.equals(TestReport.TestReportActionResult.WARNING))
                             errors.add(assertComponent.getMessage());
                     }
                 }
@@ -459,7 +502,7 @@ public class TestEngine  implements TestDef {
                 testScript = loadTestScript(testDef, testScriptName);
                 String path = testScript.getName();
                 String name = "";
-                if (path.contains(File.separator)) {
+                if (path!=null && path.contains(File.separator)) {
                     String[] parts = path.split(Pattern.quote(File.separator));
                     name = parts[parts.length - 2];  // testId
                 } else
@@ -477,7 +520,6 @@ public class TestEngine  implements TestDef {
                 } else {
                     def = new File(testDef, testScriptName).toString();
                 }
-
                 testReport.setTestScript(new Reference(def));
             } else {
                 ModularScripts modularScripts =  modularEngine.getModularScripts();
@@ -855,7 +897,7 @@ public class TestEngine  implements TestDef {
                             .setExternalVariables(externalVariables)
                             .setVal(vale)
                             .setOpReport(report))
-//                    .setTestReport(testReport)
+                    .setTestReport(testReport)
                     .setTestScript(testScript)
                     .setIsRequest(isRequest);
             runner
@@ -1602,7 +1644,7 @@ public class TestEngine  implements TestDef {
         InputStream is = null;
         try {
             is = new FileInputStream(location);
-            IParser parser = (location.toString().endsWith("xml") ? ParserBase.getFhirContext().newXmlParser() : ParserBase.getFhirContext().newJsonParser());
+            IParser parser = (location.getName().endsWith("xml") ? ParserBase.getFhirContext().newXmlParser() : ParserBase.getFhirContext().newJsonParser());
             IBaseResource resource = parser.parseResource(is);
             assert resource instanceof TestScript;
             TestScript testScript = (TestScript) resource;
@@ -1767,6 +1809,15 @@ public class TestEngine  implements TestDef {
 
     public TestEngine setFhirClient(FhirClient fhirClient) {
         this.fhirClient = fhirClient;
+        return this;
+    }
+
+    public ValidationClient getValidationClient() {
+        return this.validationClient;
+    }
+
+    public TestEngine setValidationClient(ValidationClient validationClient) {
+        this.validationClient = validationClient;
         return this;
     }
 

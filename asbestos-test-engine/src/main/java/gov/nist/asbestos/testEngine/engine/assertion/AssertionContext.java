@@ -16,9 +16,11 @@ public interface AssertionContext {
     boolean getWarningOnly();
     TestScript.SetupActionAssertComponent getCurrentAssert();
     TestReport.SetupActionAssertComponent getCurrentAssertReport();
+    TestReport getTestReport();
     ValE getVal();
     String getType();
     String getLabel();
+    String getProfile(String id);
     FixtureLabels getFixtureLabels();
     FixtureLabels getCompareToFixtureLabels();
     VariableMgr getVariableMgr();
@@ -26,4 +28,5 @@ public interface AssertionContext {
     boolean isRequest();
 
     boolean validate();
+    
 }
