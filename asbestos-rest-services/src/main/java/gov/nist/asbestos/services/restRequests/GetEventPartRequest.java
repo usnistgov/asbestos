@@ -67,7 +67,7 @@ public class GetEventPartRequest {
         // /Missing_DocumentManifest?module=SendPDB&testIndex=0&actionIndex=0&eventPartLocation=operation.detail&targetTaskIndex=0&return=responseBody
         TestReport theReport = reportsMap.get(testName);
         if (theReport == null) {
-            unexpectedMessage(String.format("TestReport was not found for %s. Check Test ID. If Test ID is correct, then test was probably not yet run.", testName));
+            unexpectedMessage(String.format("TestReport was not found for %s. Check Test Collection ID and Test ID. If both IDs are correct, then test was probably not yet run.", testName));
             return;
         }
         if (TestReport.TestReportResult.PASS.equals(theReport.getResult())) {
