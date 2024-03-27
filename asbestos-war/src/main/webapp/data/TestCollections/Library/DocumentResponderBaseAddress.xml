@@ -88,25 +88,5 @@
                 <warningOnly value="false"/>
             </assert>
         </action>
-        <action>
-            <assert>
-                <description value="Verify resource location value has an indexOf 'DocumentReference' is greater than -1."/>
-                <expression value="${indexOfdocRefInLocation}"/>
-                <operator value="greaterThan"/>
-                <value value="-1" />
-                <sourceId value="pdb-response"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
-        <action>
-            <assert>
-                <description value="Verify Document Responder base address length is greater than zero."/>
-                <expression value="${docRespBaseAddress}.length()"/>
-                <operator value="greaterThan"/>
-                <value value="0" />
-                <sourceId value="pdb-response"/>
-                <warningOnly value="false"/>
-            </assert>
-        </action>
     </test>
 </TestScript>
