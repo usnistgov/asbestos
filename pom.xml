@@ -11,16 +11,20 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <jdk.version>1.8</jdk.version>
-        <mavenCompilerPluginVersion>3.3</mavenCompilerPluginVersion>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <jdk.version>11</jdk.version>
+        <mavenCompilerPluginVersion>3.8.1</mavenCompilerPluginVersion>
         <mavenWarPluginVersion>3.2.2</mavenWarPluginVersion>
         <hapi.version>5.7.6</hapi.version>   <!--   4.1.0  -->
         <jersey.version>2.33</jersey.version>   <!--     must align with xdstoolkit -->
         <!-- NOTE: Needs to match XDS Toolkit "jackson.version" maven property since introducing the SimulatorBuilder API into Asbestos. Otherwise, fasterxml errors will be thrown due to mismatch libraries. -->
 <!--        <jackson.version>2.11.3</jackson.version>   -->
         <jackson.version>2.12.6.1</jackson.version>
+        <jaxb-api-version>2.3.1</jaxb-api-version>
+        <jaxb-core-version>2.3.0.1</jaxb-core-version>
+        <jaxb-impl-version>2.3.8</jaxb-impl-version>
+
 
     </properties>
 
@@ -43,7 +47,7 @@
             </activation>
             <properties>
                 <build.profile.id>Sunil</build.profile.id>
-                <toolkitApiVersion>7.10.0-SNAPSHOT</toolkitApiVersion>
+                <toolkitApiVersion>7.12.0-SNAPSHOT</toolkitApiVersion>
                 <itTestsExternalCache>/C:/Users/skb1/ec/asbts-it-tests</itTestsExternalCache>
                 <!-- itTestsExternalCache:
                 Remember to copy the environment directory from the ec_shared directory, otherwise, some it-tests will fail due to missing codes.xml file.
@@ -57,7 +61,7 @@
             <id>Sunil_Ubuntu</id>
             <properties>
                 <build.profile.id>Sunil_Ubuntu</build.profile.id>
-                <toolkitApiVersion>7.9.0</toolkitApiVersion>
+                <toolkitApiVersion>7.12.0</toolkitApiVersion>
                 <itTestsExternalCache>/home/sunil/ec/asbts-it-tests</itTestsExternalCache>
             </properties>
         </profile>
@@ -68,7 +72,7 @@
             <id>cat</id>
             <properties>
                 <build.profile.id>cat</build.profile.id>
-                <toolkitApiVersion>7.9.0</toolkitApiVersion>
+                <toolkitApiVersion>7.12.0</toolkitApiVersion>
                 <itTestsExternalCache>/C:/Users/skb1/ec/asbts-it-tests</itTestsExternalCache>
             </properties>
         </profile>
