@@ -9,7 +9,7 @@ import java.nio.file.Paths;
 public class TestResource {
 
     public static String get(String path) throws URISyntaxException, IOException {
-        File file =  Paths.get(TestResource.class.getClass().getResource("/validation/patient.xml").toURI()).toFile();
+        File file =  Paths.get(TestResource.class.getClassLoader().getResource("./validation/patient.xml").toURI()).toFile();
         return new String(Files.readAllBytes(Paths.get(file.toString())));
     }
 }
