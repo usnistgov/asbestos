@@ -65,8 +65,8 @@
                     <practiceSetting>
                         <coding>
                             <system value="http://snomed.info/sct"/>
-                            <code value="R-300E3"/>
-                            <display value="Accident and Emergency"/>
+                            <code value="225728007"/>
+                            <code value="Accident and Emergency department (environment)"/>
                         </coding>
                     </practiceSetting>
                     <facilityType>
