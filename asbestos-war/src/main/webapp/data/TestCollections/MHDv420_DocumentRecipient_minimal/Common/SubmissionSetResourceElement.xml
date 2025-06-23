@@ -15,7 +15,7 @@
     <identifier>
         <use value="official"/>
         <system value="urn:ietf:rfc:3986"/>
-        <value value="urn:uuid:1e404af0-0770-4be0-b7a0-a9be97e10000"/>
+        <value value="urn:uuid:@{RandomUUID}"/>
     </identifier>
     <identifier>
         <use value="usual"/>
